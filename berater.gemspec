@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.files       = Dir.glob('lib/**/*')
   s.test_files  = Dir.glob('test/**/test_*')
 
-  s.add_runtime_dependency 'redis', '~> 3'
-  s.add_development_dependency 'clockwork', '~> 2'
-  s.add_development_dependency 'rake', '~> 10'
-  s.add_development_dependency 'minitest', '~> 5'
+  s.add_runtime_dependency 'redis'
+  s.add_development_dependency 'clockwork'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'minitest'
 end
