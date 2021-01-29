@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Daniel Pepper']
   s.summary     = package.to_s
   s.description = 'rate limiter'
-  s.homepage    = "https://github.com/dpep/#{package_name}"
+  s.homepage    = "https://github.com/dpep/#{package_name}_rb"
   s.license     = 'MIT'
 
   s.files       = Dir.glob('lib/**/*')
