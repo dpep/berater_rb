@@ -8,7 +8,7 @@ A simple rate limiter, backed by Redis
 
 
 #### Usage
-```
+```ruby
 require 'berater'
 require 'redis'
 
