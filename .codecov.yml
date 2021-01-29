@@ -1,0 +1,6 @@
+# https://docs.codecov.io/docs/codecov-yaml
+
+comment: false
+
+coverage:
+  precision: 2

@@ -1,24 +1,18 @@
-# $LOAD_PATH.unshift 'lib'
-
-require 'berater'
 require 'byebug'
 require 'redis'
+require 'simplecov'
 require 'timecop'
 
-class Numeric
-  def seconds; self; end
-  alias :second :seconds
-
-  def minutes; self * 60; end
-  alias :minute :minutes
-
-  def hours; self * 3600; end
-  alias :hour :hours
-
-  def days; self * 86400; end
-  alias :day :days
+SimpleCov.start do
+  add_filter '/spec/'
 end
 
+if ENV['CI'] == 'true' || ENV['CODECOV_TOKEN']
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
+require 'berater'
 
 RSpec.configure do |config|
   config.before do
@@ -39,4 +33,3 @@ RSpec.configure do |config|
     end
   end
 end
-
