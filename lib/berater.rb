@@ -8,8 +8,8 @@ module Berater
 
   attr_accessor :redis
 
-  def configure redis
-    self.redis = redis
+  def configure
+    yield self
   end
 
   def incr key, limit, seconds

@@ -16,7 +16,10 @@ require 'berater'
 
 RSpec.configure do |config|
   config.before do
-    Berater.configure Redis.new
+    Berater.configure do |c|
+      c.redis = Redis.new
+    end
+
     Berater.redis.flushall
   end
 

@@ -1,10 +1,4 @@
 describe Berater do
-  it { is_expected.to respond_to :configure }
-
-  it 'connects to Redis' do
-    expect(Berater.redis.ping).to eq 'PONG'
-  end
-
   def incr
     Berater.incr 'key', 5, 1
   end
