@@ -1,0 +1,27 @@
+# install dependencies and run tests
+# https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+
+on:
+  push:
+    branches: [ master ]
+    paths-ignore:
+    - '**.md'
+  pull_request:
+    types: [ opened, edited, synchronize ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.5.5
+        bundler-cache: true
+    - run: bundle install
+    - name: start Redis
+      uses: supercharge/redis-github-action@1.2.0
+      with:
+        redis-version: 6.0
+    - run: bundle exec rake test
