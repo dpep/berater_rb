@@ -24,4 +24,4 @@ rescue Berater::LimitExceeded; end
 
 ----
 ![Gem](https://img.shields.io/gem/dt/berater?style=plastic)
-[![codecov](https://codecov.io/gh/dpep/rb_berater/branch/master/graph/badge.svg?token=1L7OD80182)](https://codecov.io/gh/dpep/rb_berater)
+[![codecov](https://codecov.io/gh/dpep/berater_rb/branch/master/graph/badge.svg?token=1L7OD80182)](https://codecov.io/gh/dpep/berater_rb)
