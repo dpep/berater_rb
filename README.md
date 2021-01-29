@@ -12,7 +12,7 @@ A simple rate limiter, backed by Redis
 require 'berater'
 require 'redis'
 
-Berater.init Redis.new
+Berater.configure Redis.new
 
 begin
   5.times do
@@ -21,3 +21,7 @@ begin
 rescue Berater::LimitExceeded; end
 
 ```
+
+----
+![Gem](https://img.shields.io/gem/dt/berater?style=plastic)
+[![codecov](https://codecov.io/gh/dpep/rb_berater/branch/master/graph/badge.svg?token=1L7OD80182)](https://codecov.io/gh/dpep/rb_berater)
