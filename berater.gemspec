@@ -1,7 +1,7 @@
-$LOAD_PATH.unshift 'lib'
-package_name = 'berater'
-require "#{package_name}"
-package = Object.const_get package_name.capitalize
+package_name = Dir.glob('*.gemspec')[0].split('.')[0]
+require_relative "lib/#{package_name}/version"
+
+package = Berater
 
 
 Gem::Specification.new do |s|
@@ -14,10 +14,12 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.files       = Dir.glob('lib/**/*')
-  s.test_files  = Dir.glob('test/**/test_*')
+  s.test_files  = Dir.glob('spec/**/*_spec.rb')
 
   s.add_runtime_dependency 'redis'
-  s.add_development_dependency 'clockwork'
+
+  s.add_development_dependency 'byebug'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'minitest'
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'timecop'
 end
