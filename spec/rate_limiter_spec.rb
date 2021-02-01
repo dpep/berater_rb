@@ -94,6 +94,9 @@ describe Berater::RateLimiter do
     it 'limits excessive calls' do
       3.times { limiter.limit }
 
+      expect { limiter.limit }.to raise_error(Berater::RateLimiter::Overrated)
+
+      # same same
       expect { limiter.limit }.to raise_error(Berater::LimitExceeded)
     end
   end
@@ -123,6 +126,11 @@ describe Berater::RateLimiter do
     it 'limits excessive calls' do
       expect(Berater.limit(:key, 1, :second)).to eq 1
 
+      expect {
+        Berater.limit(:key, 1, :second)
+      }.to raise_error(Berater::RateLimiter::Overrated)
+
+      # same same
       expect {
         Berater.limit(:key, 1, :second)
       }.to raise_error(Berater::LimitExceeded)

@@ -1,6 +1,8 @@
 module Berater
   class RateLimiter < BaseLimiter
 
+    class Overrated < LimitExceeded; end
+
     attr_accessor :count, :interval
 
     def initialize(key, count, interval, **opts)
@@ -60,7 +62,7 @@ module Berater
         redis.expire rkey, @interval * 2
       end
 
-      raise LimitExceeded if count > @count
+      raise Overrated if count > @count
 
       count
     end
