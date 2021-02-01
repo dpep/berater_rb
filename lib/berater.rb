@@ -1,30 +1,54 @@
+require 'berater/base_limiter'
 require 'berater/version'
 
 
 module Berater
   extend self
 
+  autoload 'RateLimiter', 'berater/rate_limiter'
+  autoload 'ConcurrencyLimiter', 'berater/concurrency_limiter'
+  autoload 'Unlimiter', 'berater/unlimiter'
+
   class LimitExceeded < RuntimeError; end
 
-  attr_accessor :redis
+  MODES = [ :rate, :concurrency, :unlimited ]
+
+  attr_accessor :redis, :mode
 
   def configure
+    self.mode = :unlimited # default
+
     yield self
   end
 
-  def incr key, limit, seconds
-    ts = Time.now.to_i
-
-    # bucket into time slot
-    rkey = "%s:%s:%d" % [ self.to_s, key, ts - ts % seconds ]
-
-    count, _ = redis.multi do
-      redis.incr rkey
-      redis.expire rkey, seconds * 2
+  def mode=(mode)
+    unless MODES.include? mode.to_sym
+      raise ArgumentError, "invalide #{name} mode: #{mode}"
     end
 
-    raise LimitExceeded if count > limit
-
-    count
+    @mode = mode.to_sym
   end
+
+  def limiter(*args, **opts)
+    opts[:redis] ||= redis
+    mode = opts.delete(:mode) { self.mode }
+
+    klass = case mode
+      when :rate
+        RateLimiter
+      when :concurrency
+        ConcurrencyLimiter
+      when :unlimited
+        Unlimiter
+      else
+        raise
+    end
+
+    klass.new(*args, **opts)
+  end
+
+  def limit(*args, **opts)
+    limiter(*args, **opts).limit
+  end
+
 end
