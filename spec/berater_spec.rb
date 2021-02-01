@@ -40,7 +40,7 @@ describe Berater do
       end
     end
 
-    context 'with some options' do
+    context 'with options' do
       it 'accepts a new redis connection' do
         fake_redis = :redis
         limiter = Berater.limiter(redis: fake_redis)

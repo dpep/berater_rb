@@ -64,7 +64,11 @@ module Berater
 
       raise Overrated if count > @count
 
-      count
+      if block_given?
+        yield
+      else
+        count
+      end
     end
 
   end

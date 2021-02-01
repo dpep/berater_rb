@@ -16,6 +16,10 @@ describe Berater::Unlimiter do
       expect(described_class.new.limit).to be_nil
     end
 
+    it 'yields' do
+      expect {|b| described_class.new.limit(&b) }.to yield_control
+    end
+
     it 'works no matter what' do
       expect(described_class.new(:key, 1, :second).limit).to be_nil
     end
@@ -43,8 +47,12 @@ describe Berater::Unlimiter do
       expect(Berater.limit).to be_nil
     end
 
-    it 'never limits calls' do
-      10.times { expect(Berater.limit).to be_nil }
+    it 'yields' do
+      expect {|b| Berater.limit(&b) }.to yield_control
+    end
+
+    it 'never limits' do
+      10.times { expect(Berater.limit { 123 } ).to eq 123 }
     end
   end
 

@@ -91,13 +91,18 @@ describe Berater::RateLimiter do
       expect(limiter.limit).to eq 3
     end
 
+    it 'yields' do
+      expect {|b| limiter.limit(&b) }.to yield_control
+      expect(limiter.limit { 123 }).to eq 123
+    end
+
     it 'limits excessive calls' do
       3.times { limiter.limit }
 
       expect { limiter.limit }.to raise_error(Berater::RateLimiter::Overrated)
 
       # same same
-      expect { limiter.limit }.to raise_error(Berater::LimitExceeded)
+      expect {|b| limiter.limit(&b) }.to raise_error(Berater::LimitExceeded)
     end
   end
 
@@ -121,6 +126,11 @@ describe Berater::RateLimiter do
   describe 'Berater.limit' do
     it 'works' do
       expect(Berater.limit(:key, 1, :second)).to eq 1
+    end
+
+    it 'yields' do
+      expect {|b| Berater.limit(:key, 2, :second, &b) }.to yield_control
+      expect(Berater.limit(:key, 2, :second) { 123 }).to eq 123
     end
 
     it 'limits excessive calls' do

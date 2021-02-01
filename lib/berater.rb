@@ -47,8 +47,8 @@ module Berater
     klass.new(*args, **opts)
   end
 
-  def limit(*args, **opts)
-    limiter(*args, **opts).limit
+  def limit(*args, **opts, &block)
+    limiter(*args, **opts).limit(&block)
   end
 
 end

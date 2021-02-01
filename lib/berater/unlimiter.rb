@@ -7,7 +7,7 @@ module Berater
     end
 
     def limit
-      nil
+      yield if block_given?
     end
 
   end
