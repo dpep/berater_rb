@@ -32,22 +32,42 @@ module Berater
       @timeout = timeout
     end
 
+    class Token
+      attr_reader :limiter, :token
+
+      def initialize(limiter, token)
+        @limiter = limiter
+        @token = token
+      end
+
+      def release
+        @limiter.release(@token)
+      end
+    end
+
     LUA_SCRIPT = <<~LUA.gsub(/^\s*(--.*\n)?/, '')
       local key = KEYS[1]
       local capacity = tonumber(ARGV[1])
-      local ttl = ARGV[2]
-      -- TODO: support ttl of 0
+      local ttl = tonumber(ARGV[2])
 
+      local exists
       local count
       local token
       local ts = unpack(redis.call('TIME'))
 
-      -- refresh TTL and check existance of key
-      local exists = redis.call('EXPIRE', key, ttl * 2)
+      -- check to see if key already exists
+      if ttl == 0 then
+        exists = redis.call('EXISTS', key)
+      else
+        -- and refresh TTL while we're at it
+        exists = redis.call('EXPIRE', key, ttl * 2)
+      end
 
       if exists == 1 then
         -- purge stale hosts
-        redis.call('ZREMRANGEBYSCORE', key, '-inf', ts - ttl)
+        if ttl > 0 then
+          redis.call('ZREMRANGEBYSCORE', key, '-inf', ts - ttl)
+        end
 
         -- check capacity (subtract one for next token entry)
         count = redis.call('ZCARD', key) - 1
@@ -67,7 +87,10 @@ module Berater
 
         -- create structure to track tokens and next id
         redis.call('ZADD', key, 'inf', token + 1)
-        redis.call('EXPIRE', key, ttl * 2)
+
+        if ttl > 0 then
+          redis.call('EXPIRE', key, ttl * 2)
+        end
       end
 
       if token then
@@ -90,11 +113,16 @@ module Berater
           release(token)
         end
       else
-        token
+        Token.new(self, token)
       end
     end
 
     def release(token)
+      if token.is_a? Token
+        # unwrap
+        token = token.token
+      end
+
       redis.zrem(key, token)
     end
 
