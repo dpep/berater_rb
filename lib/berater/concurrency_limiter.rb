@@ -62,11 +62,11 @@ module Berater
           count = count + 1
         end
       else
-        -- create structure to track tokens and next id
-        redis.call('ZADD', key, 'inf', 2)
         count = 1
         token = "1"
 
+        -- create structure to track tokens and next id
+        redis.call('ZADD', key, 'inf', token + 1)
         redis.call('EXPIRE', key, ttl * 2)
       end
 
