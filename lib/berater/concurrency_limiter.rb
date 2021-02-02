@@ -1,7 +1,7 @@
 module Berater
   class ConcurrencyLimiter < BaseLimiter
 
-    class Incapacitated < LimitExceeded; end
+    class Incapacitated < Overloaded; end
 
     attr_accessor :capacity, :timeout
 

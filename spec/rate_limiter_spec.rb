@@ -102,7 +102,7 @@ describe Berater::RateLimiter do
       expect { limiter.limit }.to raise_error(Berater::RateLimiter::Overrated)
 
       # same same
-      expect {|b| limiter.limit(&b) }.to raise_error(Berater::LimitExceeded)
+      expect {|b| limiter.limit(&b) }.to raise_error(Berater::Overloaded)
     end
   end
 
@@ -114,11 +114,11 @@ describe Berater::RateLimiter do
       expect(limiter_one.limit).to eq 1
       expect(limiter_two.limit).to eq 1
 
-      expect { limiter_one.limit }.to raise_error(Berater::LimitExceeded)
+      expect { limiter_one.limit }.to raise_error(Berater::Overloaded)
       expect(limiter_two.limit).to eq 2
 
-      expect { limiter_one.limit }.to raise_error(Berater::LimitExceeded)
-      expect { limiter_two.limit }.to raise_error(Berater::LimitExceeded)
+      expect { limiter_one.limit }.to raise_error(Berater::Overloaded)
+      expect { limiter_two.limit }.to raise_error(Berater::Overloaded)
     end
   end
 

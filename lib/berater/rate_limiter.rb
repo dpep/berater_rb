@@ -1,7 +1,7 @@
 module Berater
   class RateLimiter < BaseLimiter
 
-    class Overrated < LimitExceeded; end
+    class Overrated < Overloaded; end
 
     attr_accessor :count, :interval
 

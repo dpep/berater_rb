@@ -9,7 +9,7 @@ module Berater
   autoload 'ConcurrencyLimiter', 'berater/concurrency_limiter'
   autoload 'Unlimiter', 'berater/unlimiter'
 
-  class LimitExceeded < RuntimeError; end
+  class Overloaded < RuntimeError; end
 
   MODES = [ :rate, :concurrency, :unlimited ]
 

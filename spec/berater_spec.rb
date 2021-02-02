@@ -105,7 +105,7 @@ describe Berater do
         # same same
         expect {
           Berater.limit(:key, 1, :second)
-        }.to raise_error(Berater::LimitExceeded)
+        }.to raise_error(Berater::Overloaded)
       end
 
       it 'accepts options' do

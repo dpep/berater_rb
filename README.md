@@ -18,7 +18,7 @@ begin
   5.times do
     puts Berater.incr 'hi', 2, 10
   end
-rescue Berater::LimitExceeded; end
+rescue Berater::Overloaded; end
 
 ```
 

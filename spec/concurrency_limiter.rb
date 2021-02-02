@@ -10,7 +10,7 @@ describe Berater::ConcurrencyLimiter do
       # pause so workers are guarenteed to run simultaneously if at all
       Fiber.yield
     end
-  rescue Berater::LimitExceeded
+  rescue Berater::Overloaded
     nil
   end
 
@@ -113,7 +113,7 @@ describe Berater::ConcurrencyLimiter do
       expect { limiter.limit }.to raise_error(Berater::ConcurrencyLimiter::Incapacitated)
 
       # same same
-      expect { limiter.limit }.to raise_error(Berater::LimitExceeded)
+      expect { limiter.limit }.to raise_error(Berater::Overloaded)
     end
   end
 
@@ -125,11 +125,11 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter_one.limit).to be_a Berater::ConcurrencyLimiter::Token
       expect(limiter_two.limit).to be_a Berater::ConcurrencyLimiter::Token
 
-      expect { limiter_one.limit }.to raise_error(Berater::LimitExceeded)
+      expect { limiter_one.limit }.to raise_error(Berater::Overloaded)
       expect(limiter_two.limit).to be_a Berater::ConcurrencyLimiter::Token
 
-      expect { limiter_one.limit }.to raise_error(Berater::LimitExceeded)
-      expect { limiter_two.limit }.to raise_error(Berater::LimitExceeded)
+      expect { limiter_one.limit }.to raise_error(Berater::Overloaded)
+      expect { limiter_two.limit }.to raise_error(Berater::Overloaded)
     end
   end
 
