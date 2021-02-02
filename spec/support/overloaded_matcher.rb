@@ -12,15 +12,16 @@ module OverratedMatchers
       begin
         case obj
         when Proc
-          if obj.call.is_a? Berater::BaseLimiter
-            raise <<~MSG
-              Usage error, block should not return a limiter. Please use:
-                expect(Berater.limiter)
-                expect { Berater.limit }
-            MSG
+          # eg. expect { ... }.to be_overrated
+          res = obj.call
+
+          if res.is_a? Berater::BaseLimiter
+            # eg. expect { Berater.limiter(...) }.to be_overrated
+            res.limit {}
           end
         when Berater::BaseLimiter
-          obj.limit
+          # eg. expect(Berater.limiter(...)).to be_overrated
+          obj.limit {}
         end
 
         false
