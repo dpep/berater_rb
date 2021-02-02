@@ -106,4 +106,20 @@ describe Berater::RateLimiter do
     end
   end
 
+  context 'with multiple limiters' do
+    let(:limiter_one) { described_class.new(:one, 1, :second, redis: redis) }
+    let(:limiter_two) { described_class.new(:two, 2, :second, redis: redis) }
+
+    it 'works as expected' do
+      expect(limiter_one.limit).to eq 1
+      expect(limiter_two.limit).to eq 1
+
+      expect { limiter_one.limit }.to raise_error(Berater::LimitExceeded)
+      expect(limiter_two.limit).to eq 2
+
+      expect { limiter_one.limit }.to raise_error(Berater::LimitExceeded)
+      expect { limiter_two.limit }.to raise_error(Berater::LimitExceeded)
+    end
+  end
+
 end
