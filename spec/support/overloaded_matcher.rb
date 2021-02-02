@@ -8,9 +8,21 @@ module OverratedMatchers
       true
     end
 
-    def matches?(block)
+    def matches?(obj)
       begin
-        block.call
+        case obj
+        when Proc
+          if obj.call.is_a? Berater::BaseLimiter
+            raise <<~MSG
+              Usage error, block should not return a limiter. Please use:
+                expect(Berater.limiter)
+                expect { Berater.limit }
+            MSG
+          end
+        when Berater::BaseLimiter
+          obj.limit
+        end
+
         false
       rescue @type
         true
