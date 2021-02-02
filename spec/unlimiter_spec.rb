@@ -12,16 +12,20 @@ describe Berater::Unlimiter do
   end
 
   describe '.limit' do
+    let(:limiter) { described_class.new }
+
     it 'works' do
-      expect(described_class.new.limit).to be_nil
+      expect(limiter.limit).to be_nil
     end
 
     it 'yields' do
-      expect {|b| described_class.new.limit(&b) }.to yield_control
+      expect {|b| limiter.limit(&b) }.to yield_control
     end
 
-    it 'works no matter what' do
-      expect(described_class.new(:key, 1, :second).limit).to be_nil
+    it 'is never overloaded' do
+      10.times do
+        expect { limiter.limit }.not_to be_overloaded
+      end
     end
   end
 

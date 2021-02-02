@@ -14,6 +14,8 @@ end
 
 require 'berater'
 
+Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
+
 RSpec.configure do |config|
   config.before do
     Berater.configure do |c|

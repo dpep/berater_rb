@@ -97,15 +97,7 @@ describe Berater do
 
       it 'limits excessive calls' do
         expect(Berater.limit(:key, 1, :second)).to eq 1
-
-        expect {
-          Berater.limit(:key, 1, :second)
-        }.to raise_error(Berater::RateLimiter::Overrated)
-
-        # same same
-        expect {
-          Berater.limit(:key, 1, :second)
-        }.to raise_error(Berater::Overloaded)
+        expect { Berater.limit(:key, 1, :second) }.to be_overrated
       end
 
       it 'accepts options' do
@@ -138,14 +130,19 @@ describe Berater do
     end
 
     describe '.limit' do
-      it 'works' do
-        expect {|b| Berater.limit(:key, 1, &b) }.to yield_control
-      end
-
-      it 'works without blocks by using tokens' do
+      it 'works (without blocks by returning a token)' do
         token = Berater.limit(:key, 1)
         expect(token).to be_a Berater::ConcurrencyLimiter::Token
         expect(token.release).to be true
+      end
+
+      it 'yields' do
+        expect {|b| Berater.limit(:key, 1, &b) }.to yield_control
+      end
+
+      it 'limits excessive calls' do
+        Berater.limit(:key, 1)
+        expect { Berater.limit(:key, 1) }.to be_incapacitated
       end
 
       it 'accepts options' do

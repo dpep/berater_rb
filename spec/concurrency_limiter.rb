@@ -110,10 +110,7 @@ describe Berater::ConcurrencyLimiter do
       expect(workers.count(&:alive?)).to eq 3
 
       # all tokens are held by paused workers
-      expect { limiter.limit }.to raise_error(Berater::ConcurrencyLimiter::Incapacitated)
-
-      # same same
-      expect { limiter.limit }.to raise_error(Berater::Overloaded)
+      expect { limiter.limit }.to be_incapacitated
     end
   end
 
@@ -125,11 +122,11 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter_one.limit).to be_a Berater::ConcurrencyLimiter::Token
       expect(limiter_two.limit).to be_a Berater::ConcurrencyLimiter::Token
 
-      expect { limiter_one.limit }.to raise_error(Berater::Overloaded)
+      expect { limiter_one.limit }.to be_incapacitated
       expect(limiter_two.limit).to be_a Berater::ConcurrencyLimiter::Token
 
-      expect { limiter_one.limit }.to raise_error(Berater::Overloaded)
-      expect { limiter_two.limit }.to raise_error(Berater::Overloaded)
+      expect { limiter_one.limit }.to be_incapacitated
+      expect { limiter_two.limit }.to be_incapacitated
     end
   end
 
