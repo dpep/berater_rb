@@ -4,7 +4,7 @@ module Berater
     attr_accessor :key, :redis
 
     def initialize(key, redis:, **opts)
-      @key = key.to_s
+      @key = "#{self.class}:#{key}"
       @redis = redis
     end
 

@@ -20,7 +20,7 @@ RSpec.configure do |config|
       c.redis = Redis.new
     end
 
-    Berater.redis.flushall
+    Berater.expunge
   end
 
   # allow 'fit' examples

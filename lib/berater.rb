@@ -51,4 +51,10 @@ module Berater
     limiter(*args, **opts).limit(&block)
   end
 
+  def self.expunge
+    redis.scan_each(match: "#{self.name}*") do |key|
+      redis.del key
+    end
+  end
+
 end
