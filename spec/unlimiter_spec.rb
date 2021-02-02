@@ -25,35 +25,4 @@ describe Berater::Unlimiter do
     end
   end
 
-  describe 'Berater.limiter' do
-    subject { Berater.limiter }
-
-    it 'type is derived from the mode' do
-      is_expected.to be_a described_class
-    end
-
-    it 'inherits redis' do
-      expect(subject.redis).to be Berater.redis
-    end
-
-    it 'allows a new redis connection to be specified' do
-      limiter = Berater.limiter(redis: :fake)
-      expect(limiter.redis).not_to be Berater.redis
-    end
-  end
-
-  describe 'Berater.limit' do
-    it 'works' do
-      expect(Berater.limit).to be_nil
-    end
-
-    it 'yields' do
-      expect {|b| Berater.limit(&b) }.to yield_control
-    end
-
-    it 'never limits' do
-      10.times { expect(Berater.limit { 123 } ).to eq 123 }
-    end
-  end
-
 end

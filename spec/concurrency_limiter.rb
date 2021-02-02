@@ -117,33 +117,4 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
-  describe 'Berater.limiter' do
-    subject { Berater.limiter(:key, 1) }
-
-    it 'type is derived from the mode' do
-      is_expected.to be_a described_class
-    end
-
-    it 'inherits redis' do
-      expect(subject.redis).to be Berater.redis
-    end
-
-    it 'allows a new redis connection to be specified' do
-      limiter = Berater.limiter(:key, 1, redis: :fake)
-      expect(limiter.redis).not_to be Berater.redis
-    end
-  end
-
-  describe 'Berater.limit' do
-    it 'works' do
-      expect {|b| Berater.limit(:key, 1, &b) }.to yield_control
-    end
-
-    it 'allows a new redis connection to be specified' do
-      expect do
-        Berater.limit(:key, 1, redis: :fake)
-      end.to raise_error(NoMethodError)
-    end
-  end
-
 end
