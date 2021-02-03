@@ -13,22 +13,22 @@ describe Berater::ConcurrencyLimiter::Lock do
     it { expect(subject.expired?).to be false }
 
     it 'can not be released again' do
-      expect { subject.release }.to raise_error(RuntimeError)
+      expect { subject.release }.to raise_error(RuntimeError, /already/)
     end
   end
 
   context 'when enough time passes' do
-    before { Timecop.freeze(1) }
+    before { subject; Timecop.freeze(2) }
 
     it 'expires' do
       expect(subject.expired?).to be true
     end
 
     it 'fails to release' do
-      expect { subject.release }.to raise_error(RuntimeError)
+      expect { subject.release }.to raise_error(RuntimeError, /expired/)
     end
 
-    it { expect(subject.release?).to be false }
+    it { expect(subject.released?).to be false }
   end
 
 end
