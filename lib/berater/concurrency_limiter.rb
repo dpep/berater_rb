@@ -33,16 +33,28 @@ module Berater
     end
 
     class Lock
-      attr_reader :limiter, :key, :id
+      attr_reader :limiter, :id
 
-      def initialize(limiter, key, id)
+      def initialize(limiter, id)
         @limiter = limiter
-        @key = key
         @id = id
+        @released = false
+        @locked_at = Time.now
       end
 
       def release
-        @limiter.release(@id)
+        raise 'lock already released' if released?
+        raise 'lock expired' if expired?
+
+        @released = limiter.release(self)
+      end
+
+      def released?
+        @released
+      end
+
+      def expired?
+        @locked_at + limiter.timeout < Time.now
       end
     end
 
@@ -111,9 +123,11 @@ module Berater
         ).limit(&block)
       end
 
-      count, lock = redis.eval(LUA_SCRIPT, [ key ], [ capacity, timeout ])
+      count, lock_id = redis.eval(LUA_SCRIPT, [ key ], [ capacity, timeout ])
 
-      raise Incapacitated unless lock
+      raise Incapacitated unless lock_id
+
+      lock = Lock.new(self, lock_id)
 
       if block_given?
         begin
@@ -122,17 +136,13 @@ module Berater
           release(lock)
         end
       else
-        Lock.new(self, key, lock)
+        lock
       end
     end
 
     def release(lock)
-      if lock.is_a? Lock
-        # unwrap
-        lock = lock.id
-      end
-
-      redis.zrem(key, lock)
+      res = redis.zrem(key, lock.id)
+      res == true || res == 1
     end
 
   end
