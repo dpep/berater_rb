@@ -16,7 +16,7 @@ describe 'be_overloaded' do
   end
 
   context 'Berater::RateLimiter' do
-    let(:limiter) { Berater::limiter(:key, 1, :second, mode: :rate) }
+    let(:limiter) { Berater::limiter(1, :second, mode: :rate) }
 
     it { expect(limiter).not_to be_overloaded }
     it { expect(limiter).not_to be_overrated }
@@ -48,7 +48,7 @@ describe 'be_overloaded' do
   end
 
   context 'Berater::ConcurrencyLimiter' do
-    let(:limiter) { Berater::limiter(:key, 1, mode: :concurrency) }
+    let(:limiter) { Berater::limiter(1, mode: :concurrency) }
 
     it { expect(limiter).not_to be_overloaded }
     it { expect(limiter).not_to be_overrated }

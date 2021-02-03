@@ -3,13 +3,13 @@ module Berater
 
     class Incapacitated < Overloaded; end
 
-    attr_accessor :capacity, :timeout
+    attr_reader :capacity, :timeout
 
-    def initialize(key, capacity, **opts)
-      super(key, **opts)
+    def initialize(capacity, **opts)
+      super(**opts)
 
       self.capacity = capacity
-      self.timeout = opts.fetch(:timeout, 0)
+      self.timeout = opts[:timeout] || 0
     end
 
     def capacity=(capacity)
@@ -33,10 +33,11 @@ module Berater
     end
 
     class Token
-      attr_reader :limiter, :token
+      attr_reader :limiter, :key, :token
 
-      def initialize(limiter, token)
+      def initialize(limiter, key, token)
         @limiter = limiter
+        @key = key
         @token = token
       end
 
@@ -101,7 +102,15 @@ module Berater
       return { count, token }
     LUA
 
-    def limit
+    def limit(**opts, &block)
+      unless opts.empty?
+        return self.class.new(
+          capacity,
+          **options.merge(opts)
+          # **options.merge(timeout: timeout).merge(opts)
+        ).limit(&block)
+      end
+
       count, token = redis.eval(LUA_SCRIPT, [ key ], [ capacity, timeout ])
 
       raise Incapacitated unless token
@@ -113,7 +122,7 @@ module Berater
           release(token)
         end
       else
-        Token.new(self, token)
+        Token.new(self, key, token)
       end
     end
 

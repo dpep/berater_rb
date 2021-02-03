@@ -30,7 +30,6 @@ module Berater
   end
 
   def limiter(*args, **opts)
-    opts[:redis] ||= redis
     mode = opts.delete(:mode) { self.mode }
 
     klass = case mode

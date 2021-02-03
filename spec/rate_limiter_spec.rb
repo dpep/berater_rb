@@ -1,18 +1,23 @@
 describe Berater::RateLimiter do
   before { Berater.mode = :rate }
 
-  let(:redis) { Berater.redis }
-
   describe '.new' do
+    let(:limiter) { described_class.new(1, :second) }
+
     it 'initializes' do
-      limiter = described_class.new(:key, 1, :second, redis: redis)
-      expect(limiter.redis).to be redis
+      expect(limiter.count).to eq 1
+      expect(limiter.interval).to eq 1
+    end
+
+    it 'has default values' do
+      expect(limiter.key).to eq described_class.to_s
+      expect(limiter.redis).to be Berater.redis
     end
   end
 
-  describe 'count' do
+  describe '#count' do
     def expect_count(count)
-      limiter = described_class.new(:key, count, :second, redis: redis)
+      limiter = described_class.new(count, :second)
       expect(limiter.count).to eq count
     end
 
@@ -23,7 +28,7 @@ describe Berater::RateLimiter do
     context 'with erroneous values' do
       def expect_bad_count(count)
         expect do
-          described_class.new(:key, count, :second, redis: redis)
+          described_class.new(count, :second)
         end.to raise_error ArgumentError
       end
 
@@ -34,9 +39,9 @@ describe Berater::RateLimiter do
     end
   end
 
-  describe 'interval' do
+  describe '#interval' do
     def expect_interval(interval, expected)
-      limiter = described_class.new(:key, 1, interval, redis: redis)
+      limiter = described_class.new(1, interval)
       expect(limiter.interval).to eq expected
     end
 
@@ -68,7 +73,7 @@ describe Berater::RateLimiter do
     context 'with erroneous values' do
       def expect_bad_interval(interval)
         expect do
-          described_class.new(:key, 1, interval, redis: redis)
+          described_class.new(1, interval)
         end.to raise_error(ArgumentError)
       end
 
@@ -78,8 +83,8 @@ describe Berater::RateLimiter do
     end
   end
 
-  describe '.limit' do
-    let(:limiter) { described_class.new(:key, 3, :second, redis: redis) }
+  describe '#limit' do
+    let(:limiter) { described_class.new(3, :second) }
 
     it 'works' do
       expect(limiter.limit).to eq 1
@@ -103,9 +108,33 @@ describe Berater::RateLimiter do
     end
   end
 
-  context 'with multiple limiters' do
-    let(:limiter_one) { described_class.new(:one, 1, :second, redis: redis) }
-    let(:limiter_two) { described_class.new(:two, 2, :second, redis: redis) }
+  context 'with same key, different limiters' do
+    let(:limiter_one) { described_class.new(1, :second) }
+    let(:limiter_two) { described_class.new(1, :second) }
+
+    it 'works as expected' do
+      expect(limiter_one.limit).to eq 1
+
+      expect { limiter_one.limit }.to be_overrated
+      expect { limiter_two.limit }.to be_overrated
+    end
+  end
+
+  context 'with different keys, same limiter' do
+    let(:limiter) { described_class.new(1, :second) }
+
+    it 'works as expected' do
+      expect { limiter.limit(key: :one) }.not_to be_overrated
+      expect { limiter.limit(key: :one) }.to be_overrated
+
+      expect { limiter.limit(key: :two) }.not_to be_overrated
+      expect { limiter.limit(key: :two) }.to be_overrated
+    end
+  end
+
+  context 'with different keys, different limiters' do
+    let(:limiter_one) { described_class.new(1, :second, key: :one) }
+    let(:limiter_two) { described_class.new(2, :second, key: :two) }
 
     it 'works as expected' do
       expect(limiter_one.limit).to eq 1

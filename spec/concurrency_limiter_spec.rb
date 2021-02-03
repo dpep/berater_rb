@@ -1,29 +1,22 @@
-require 'fiber'
-
 describe Berater::ConcurrencyLimiter do
   before { Berater.mode = :concurrency }
 
-  let(:redis) { Berater.redis }
-
-  def do_work
-    limiter.limit do
-      # pause so workers are guarenteed to run simultaneously if at all
-      Fiber.yield
-    end
-  rescue Berater::Overloaded
-    nil
-  end
-
   describe '.new' do
+    let(:limiter) { described_class.new(1) }
+
     it 'initializes' do
-      limiter = described_class.new(:key, 1, redis: redis)
-      expect(limiter.redis).to be redis
+      expect(limiter.capacity).to be 1
+    end
+
+    it 'has default values' do
+      expect(limiter.key).to eq described_class.to_s
+      expect(limiter.redis).to be Berater.redis
     end
   end
 
-  describe 'capacity' do
+  describe '#capacity' do
     def expect_capacity(capacity)
-      limiter = described_class.new(:key, capacity, redis: redis)
+      limiter = described_class.new(capacity)
       expect(limiter.capacity).to eq capacity
     end
 
@@ -34,7 +27,7 @@ describe Berater::ConcurrencyLimiter do
     context 'with erroneous values' do
       def expect_bad_capacity(capacity)
         expect do
-          described_class.new(:key, capacity, redis: redis)
+          described_class.new(capacity)
         end.to raise_error ArgumentError
       end
 
@@ -45,9 +38,9 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
-  describe 'timeout' do
+  describe '#timeout' do
     def expect_timeout(timeout)
-      limiter = described_class.new(:key, 1, timeout: timeout, redis: redis)
+      limiter = described_class.new(1, timeout: timeout)
       expect(limiter.timeout).to eq timeout
     end
 
@@ -58,7 +51,7 @@ describe Berater::ConcurrencyLimiter do
     context 'with erroneous values' do
       def expect_bad_timeout(timeout)
         expect do
-          described_class.new(:key, 1, timeout: timeout, redis: redis)
+          described_class.new(1, timeout: timeout)
         end.to raise_error ArgumentError
       end
 
@@ -69,8 +62,8 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
-  describe '.limit' do
-    let(:limiter) { described_class.new(:key, 3, timeout: 30, redis: redis) }
+  describe '#limit' do
+    let(:limiter) { described_class.new(3, timeout: 30) }
 
     it 'works' do
       expect {|b| limiter.limit(&b) }.to yield_control
@@ -82,51 +75,104 @@ describe Berater::ConcurrencyLimiter do
       end
     end
 
-    it 'works concurrently within capacity' do
-      workers = 3.times.map do
-        Fiber.new { do_work }
-      end
-
-      expect(workers.count(&:alive?)).to eq 3
-
-      # start work and pause
-      workers.each(&:resume)
-      expect(workers.count(&:alive?)).to eq 3
-
-      # complete work
-      workers.each(&:resume)
-      expect(workers.count(&:alive?)).to eq 0
-    end
-
     it 'limits excessive calls' do
-      workers = 5.times.map do
-        Fiber.new { do_work }
-      end
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Token
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Token
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Token
 
-      expect(workers.count(&:alive?)).to eq 5
-
-      # start work and pause
-      workers.each(&:resume)
-      expect(workers.count(&:alive?)).to eq 3
-
-      # all tokens are held by paused workers
+      expect { limiter.limit }.to be_incapacitated
       expect { limiter.limit }.to be_incapacitated
     end
   end
 
-  context 'with multiple limiters' do
-    let(:limiter_one) { described_class.new(:one, 1, redis: redis) }
-    let(:limiter_two) { described_class.new(:two, 2, redis: redis) }
+  context 'with same key, different limiters' do
+    let(:limiter_one) { described_class.new(1) }
+    let(:limiter_two) { described_class.new(1) }
+
+    it { expect(limiter_one.key).to eq limiter_two.key }
 
     it 'works as expected' do
       expect(limiter_one.limit).to be_a Berater::ConcurrencyLimiter::Token
-      expect(limiter_two.limit).to be_a Berater::ConcurrencyLimiter::Token
 
-      expect { limiter_one.limit }.to be_incapacitated
-      expect(limiter_two.limit).to be_a Berater::ConcurrencyLimiter::Token
+      expect { limiter_one }.to be_incapacitated
+      expect { limiter_two }.to be_incapacitated
+    end
+  end
 
-      expect { limiter_one.limit }.to be_incapacitated
-      expect { limiter_two.limit }.to be_incapacitated
+  context 'with different keys, same limiter' do
+    let(:limiter) { described_class.new(1) }
+
+    it 'works as expected' do
+      one_token = limiter.limit(key: :one)
+      expect(one_token).to be_a Berater::ConcurrencyLimiter::Token
+
+      expect { limiter.limit(key: :one) {} }.to be_incapacitated
+      expect { limiter.limit(key: :two) {} }.not_to be_incapacitated
+
+      two_token = limiter.limit(key: :two)
+      expect(two_token).to be_a Berater::ConcurrencyLimiter::Token
+
+      expect { limiter.limit(key: :one) {} }.to be_incapacitated
+      expect { limiter.limit(key: :two) {} }.to be_incapacitated
+
+      one_token.release
+      expect { limiter.limit(key: :one) {} }.not_to be_incapacitated
+      expect { limiter.limit(key: :two) {} }.to be_incapacitated
+
+      two_token.release
+      expect { limiter.limit(key: :one) {} }.not_to be_incapacitated
+      expect { limiter.limit(key: :two) {} }.not_to be_incapacitated
+    end
+  end
+
+  context 'with same key, different capacities' do
+    let(:limiter_one) { described_class.new(1) }
+    let(:limiter_two) { described_class.new(2) }
+
+    it { expect(limiter_one.capacity).not_to eq limiter_two.capacity }
+
+    it 'works as expected' do
+      one_token = limiter_one.limit
+      expect(one_token).to be_a Berater::ConcurrencyLimiter::Token
+
+      expect { limiter_one }.to be_incapacitated
+      expect { limiter_two }.not_to be_incapacitated
+
+      two_token = limiter_two.limit
+      expect(two_token).to be_a Berater::ConcurrencyLimiter::Token
+
+      expect { limiter_one }.to be_incapacitated
+      expect { limiter_two }.to be_incapacitated
+
+      one_token.release
+      expect { limiter_one }.to be_incapacitated
+      expect { limiter_two }.not_to be_incapacitated
+
+      two_token.release
+      expect { limiter_one }.not_to be_incapacitated
+      expect { limiter_two }.not_to be_incapacitated
+    end
+  end
+
+  context 'with different keys, different limiters' do
+    let(:limiter_one) { described_class.new(1, key: :one) }
+    let(:limiter_two) { described_class.new(1, key: :two) }
+
+    it 'works as expected' do
+      expect { limiter_one }.not_to be_incapacitated
+      expect { limiter_two }.not_to be_incapacitated
+
+      one_token = limiter_one.limit
+      expect(one_token).to be_a Berater::ConcurrencyLimiter::Token
+
+      expect { limiter_one }.to be_incapacitated
+      expect { limiter_two }.not_to be_incapacitated
+
+      two_token = limiter_two.limit
+      expect(two_token).to be_a Berater::ConcurrencyLimiter::Token
+
+      expect { limiter_one }.to be_incapacitated
+      expect { limiter_two }.to be_incapacitated
     end
   end
 

@@ -2,11 +2,16 @@ module Berater
   class Unlimiter < BaseLimiter
 
     def initialize(*args, **opts)
-      opts[:redis] ||= nil # fake this required arg if need be
-      super(self.class.name, **opts)
+      super(**opts)
     end
 
-    def limit
+    def limit(**opts, &block)
+      unless opts.empty?
+        return self.class.new(
+          **options.merge(opts)
+        ).limit(&block)
+      end
+
       yield if block_given?
     end
 
