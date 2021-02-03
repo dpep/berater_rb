@@ -63,7 +63,7 @@ describe Berater::ConcurrencyLimiter do
   end
 
   describe '#limit' do
-    let(:limiter) { described_class.new(3, timeout: 30) }
+    let(:limiter) { described_class.new(2, timeout: 1) }
 
     it 'works' do
       expect {|b| limiter.limit(&b) }.to yield_control
@@ -78,10 +78,20 @@ describe Berater::ConcurrencyLimiter do
     it 'limits excessive calls' do
       expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
       expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
-      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
 
-      expect { limiter.limit }.to be_incapacitated
-      expect { limiter.limit }.to be_incapacitated
+      expect { limiter }.to be_incapacitated
+    end
+
+    it 'times out locks' do
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
+      expect { limiter }.to be_incapacitated
+
+      sleep(1)
+
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
+      expect { limiter }.to be_incapacitated
     end
   end
 

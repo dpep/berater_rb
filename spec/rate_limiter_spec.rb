@@ -106,6 +106,21 @@ describe Berater::RateLimiter do
 
       expect { limiter.limit }.to be_overrated
     end
+
+    it 'limit resets over time' do
+      expect(limiter.limit).to eq 1
+      expect(limiter.limit).to eq 2
+      expect(limiter.limit).to eq 3
+      expect(limiter).to be_overrated
+
+      # travel forward a second
+      Timecop.freeze(1)
+
+      expect(limiter.limit).to eq 1
+      expect(limiter.limit).to eq 2
+      expect(limiter.limit).to eq 3
+      expect(limiter).to be_overrated
+    end
   end
 
   context 'with same key, different limiters' do
