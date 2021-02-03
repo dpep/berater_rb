@@ -130,8 +130,8 @@ describe Berater::RateLimiter do
     it 'works as expected' do
       expect(limiter_one.limit).to eq 1
 
-      expect { limiter_one.limit }.to be_overrated
-      expect { limiter_two.limit }.to be_overrated
+      expect { limiter_one }.to be_overrated
+      expect { limiter_two }.to be_overrated
     end
   end
 
