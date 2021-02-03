@@ -136,10 +136,10 @@ describe Berater do
     end
 
     describe '.limit' do
-      it 'works (without blocks by returning a token)' do
-        token = Berater.limit(1)
-        expect(token).to be_a Berater::ConcurrencyLimiter::Token
-        expect(token.release).to be true
+      it 'works (without blocks by returning a lock)' do
+        lock = Berater.limit(1)
+        expect(lock).to be_a Berater::ConcurrencyLimiter::Lock
+        expect(lock.release).to be true
       end
 
       it 'yields' do

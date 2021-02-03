@@ -69,16 +69,16 @@ describe Berater::ConcurrencyLimiter do
       expect {|b| limiter.limit(&b) }.to yield_control
     end
 
-    it 'works many times if workers complete and return tokens' do
+    it 'works many times if workers complete and return locks' do
       30.times do
         expect {|b| limiter.limit(&b) }.to yield_control
       end
     end
 
     it 'limits excessive calls' do
-      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Token
-      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Token
-      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Token
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
+      expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter.limit }.to be_incapacitated
       expect { limiter.limit }.to be_incapacitated
@@ -92,7 +92,7 @@ describe Berater::ConcurrencyLimiter do
     it { expect(limiter_one.key).to eq limiter_two.key }
 
     it 'works as expected' do
-      expect(limiter_one.limit).to be_a Berater::ConcurrencyLimiter::Token
+      expect(limiter_one.limit).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter_one }.to be_incapacitated
       expect { limiter_two }.to be_incapacitated
@@ -103,23 +103,23 @@ describe Berater::ConcurrencyLimiter do
     let(:limiter) { described_class.new(1) }
 
     it 'works as expected' do
-      one_token = limiter.limit(key: :one)
-      expect(one_token).to be_a Berater::ConcurrencyLimiter::Token
+      one_lock = limiter.limit(key: :one)
+      expect(one_lock).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter.limit(key: :one) {} }.to be_incapacitated
       expect { limiter.limit(key: :two) {} }.not_to be_incapacitated
 
-      two_token = limiter.limit(key: :two)
-      expect(two_token).to be_a Berater::ConcurrencyLimiter::Token
+      two_lock = limiter.limit(key: :two)
+      expect(two_lock).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter.limit(key: :one) {} }.to be_incapacitated
       expect { limiter.limit(key: :two) {} }.to be_incapacitated
 
-      one_token.release
+      one_lock.release
       expect { limiter.limit(key: :one) {} }.not_to be_incapacitated
       expect { limiter.limit(key: :two) {} }.to be_incapacitated
 
-      two_token.release
+      two_lock.release
       expect { limiter.limit(key: :one) {} }.not_to be_incapacitated
       expect { limiter.limit(key: :two) {} }.not_to be_incapacitated
     end
@@ -132,23 +132,23 @@ describe Berater::ConcurrencyLimiter do
     it { expect(limiter_one.capacity).not_to eq limiter_two.capacity }
 
     it 'works as expected' do
-      one_token = limiter_one.limit
-      expect(one_token).to be_a Berater::ConcurrencyLimiter::Token
+      one_lock = limiter_one.limit
+      expect(one_lock).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter_one }.to be_incapacitated
       expect { limiter_two }.not_to be_incapacitated
 
-      two_token = limiter_two.limit
-      expect(two_token).to be_a Berater::ConcurrencyLimiter::Token
+      two_lock = limiter_two.limit
+      expect(two_lock).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter_one }.to be_incapacitated
       expect { limiter_two }.to be_incapacitated
 
-      one_token.release
+      one_lock.release
       expect { limiter_one }.to be_incapacitated
       expect { limiter_two }.not_to be_incapacitated
 
-      two_token.release
+      two_lock.release
       expect { limiter_one }.not_to be_incapacitated
       expect { limiter_two }.not_to be_incapacitated
     end
@@ -162,14 +162,14 @@ describe Berater::ConcurrencyLimiter do
       expect { limiter_one }.not_to be_incapacitated
       expect { limiter_two }.not_to be_incapacitated
 
-      one_token = limiter_one.limit
-      expect(one_token).to be_a Berater::ConcurrencyLimiter::Token
+      one_lock = limiter_one.limit
+      expect(one_lock).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter_one }.to be_incapacitated
       expect { limiter_two }.not_to be_incapacitated
 
-      two_token = limiter_two.limit
-      expect(two_token).to be_a Berater::ConcurrencyLimiter::Token
+      two_lock = limiter_two.limit
+      expect(two_lock).to be_a Berater::ConcurrencyLimiter::Lock
 
       expect { limiter_one }.to be_incapacitated
       expect { limiter_two }.to be_incapacitated

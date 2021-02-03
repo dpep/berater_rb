@@ -32,17 +32,17 @@ module Berater
       @timeout = timeout
     end
 
-    class Token
-      attr_reader :limiter, :key, :token
+    class Lock
+      attr_reader :limiter, :key, :id
 
-      def initialize(limiter, key, token)
+      def initialize(limiter, key, id)
         @limiter = limiter
         @key = key
-        @token = token
+        @id = id
       end
 
       def release
-        @limiter.release(@token)
+        @limiter.release(@id)
       end
     end
 
@@ -53,7 +53,7 @@ module Berater
 
       local exists
       local count
-      local token
+      local lock
       local ts = unpack(redis.call('TIME'))
 
       -- check to see if key already exists
@@ -70,36 +70,36 @@ module Berater
           redis.call('ZREMRANGEBYSCORE', key, '-inf', ts - ttl)
         end
 
-        -- check capacity (subtract one for next token entry)
+        -- check capacity (subtract one for next lock entry)
         count = redis.call('ZCARD', key) - 1
 
         if count < capacity then
-          -- yay, grab a token
+          -- yay, grab a lock
 
-          -- regenerate next token entry, which has score inf
-          token = unpack(redis.call('ZPOPMAX', key))
-          redis.call('ZADD', key, 'inf', (token + 1) % 2^52)
+          -- regenerate next lock entry, which has score inf
+          lock = unpack(redis.call('ZPOPMAX', key))
+          redis.call('ZADD', key, 'inf', (lock + 1) % 2^52)
 
           count = count + 1
         end
       else
         count = 1
-        token = "1"
+        lock = "1"
 
-        -- create structure to track tokens and next id
-        redis.call('ZADD', key, 'inf', token + 1)
+        -- create structure to track locks and next id
+        redis.call('ZADD', key, 'inf', lock + 1)
 
         if ttl > 0 then
           redis.call('EXPIRE', key, ttl * 2)
         end
       end
 
-      if token then
-        -- store token and timestamp
-        redis.call('ZADD', key, ts, token)
+      if lock then
+        -- store lock and timestamp
+        redis.call('ZADD', key, ts, lock)
       end
 
-      return { count, token }
+      return { count, lock }
     LUA
 
     def limit(**opts, &block)
@@ -111,28 +111,28 @@ module Berater
         ).limit(&block)
       end
 
-      count, token = redis.eval(LUA_SCRIPT, [ key ], [ capacity, timeout ])
+      count, lock = redis.eval(LUA_SCRIPT, [ key ], [ capacity, timeout ])
 
-      raise Incapacitated unless token
+      raise Incapacitated unless lock
 
       if block_given?
         begin
           yield
         ensure
-          release(token)
+          release(lock)
         end
       else
-        Token.new(self, key, token)
+        Lock.new(self, key, lock)
       end
     end
 
-    def release(token)
-      if token.is_a? Token
+    def release(lock)
+      if lock.is_a? Lock
         # unwrap
-        token = token.token
+        lock = lock.id
       end
 
-      redis.zrem(key, token)
+      redis.zrem(key, lock)
     end
 
   end

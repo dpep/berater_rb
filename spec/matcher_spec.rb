@@ -62,7 +62,7 @@ describe 'be_overloaded' do
     it { expect { limiter.limit }.not_to be_overrated }
     it { expect { limiter.limit }.not_to be_incapacitated }
 
-    context 'when token is released' do
+    context 'when lock is released' do
       it 'should be_incapacitated' do
         3.times do
           expect(limiter).not_to be_incapacitated
@@ -82,7 +82,7 @@ describe 'be_overloaded' do
       end
     end
 
-    context 'when token is *not* released' do
+    context 'when lock is *not* released' do
       it 'should be_incapacitated' do
         expect { limiter.limit }.not_to be_incapacitated
         expect { limiter.limit }.to be_incapacitated
