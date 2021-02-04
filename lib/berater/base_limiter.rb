@@ -1,7 +1,7 @@
 module Berater
   class BaseLimiter
 
-    class Overloaded < RuntimeError; end
+    class Overloaded < StandardError; end
 
     attr_reader :options
 
