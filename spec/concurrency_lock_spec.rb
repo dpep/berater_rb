@@ -31,4 +31,20 @@ describe Berater::ConcurrencyLimiter::Lock do
     it { expect(subject.released?).to be false }
   end
 
+  describe '#contention' do
+    let(:limiter) { Berater.new(:concurrency, 3) }
+
+    it 'tracks contention' do
+      lock_1 = limiter.limit
+      expect(lock_1.contention).to eq 1
+
+      lock_2 = limiter.limit
+      expect(lock_2.contention).to eq 2
+
+      limiter.limit do |lock_3|
+        expect(lock_3.contention).to eq 3
+      end
+    end
+  end
+
 end

@@ -33,11 +33,12 @@ module Berater
     end
 
     class Lock
-      attr_reader :limiter, :id
+      attr_reader :limiter, :id, :contention
 
-      def initialize(limiter, id)
+      def initialize(limiter, id, contention)
         @limiter = limiter
         @id = id
+        @contention = contention
         @released = false
         @locked_at = Time.now
       end
@@ -127,11 +128,11 @@ module Berater
 
       raise Incapacitated unless lock_id
 
-      lock = Lock.new(self, lock_id)
+      lock = Lock.new(self, lock_id, count)
 
       if block_given?
         begin
-          yield
+          yield lock
         ensure
           release(lock)
         end
