@@ -1,17 +1,16 @@
 require 'berater/base_limiter'
+require 'berater/concurrency_limiter'
+require 'berater/rate_limiter'
+require 'berater/unlimiter'
 require 'berater/version'
 
 
 module Berater
   extend self
 
-  autoload 'RateLimiter', 'berater/rate_limiter'
-  autoload 'ConcurrencyLimiter', 'berater/concurrency_limiter'
-  autoload 'Unlimiter', 'berater/unlimiter'
+  Overloaded = BaseLimiter::Overloaded
 
-  class Overloaded < RuntimeError; end
-
-  MODES = [ :rate, :concurrency, :unlimited ]
+  MODES = {}
 
   attr_accessor :redis, :mode
 
@@ -21,27 +20,26 @@ module Berater
     yield self
   end
 
-  def mode=(mode)
-    unless MODES.include? mode.to_sym
-      raise ArgumentError, "invalide #{name} mode: #{mode}"
-    end
-
-    @mode = mode.to_sym
-  end
-
   def new(mode, *args, **opts)
-    klass = case mode
-      when :rate
-        RateLimiter
-      when :concurrency
-        ConcurrencyLimiter
-      when :unlimited
-        Unlimiter
-      else
-        raise
+    klass = MODES[mode.to_sym]
+
+    unless klass
+      raise ArgumentError, "invalid mode: #{mode}"
     end
 
     klass.new(*args, **opts)
+  end
+
+  def register(mode, klass)
+    MODES[mode.to_sym] = klass
+  end
+
+  def mode=(mode)
+    unless MODES.include? mode.to_sym
+      raise ArgumentError, "invalid mode: #{mode}"
+    end
+
+    @mode = mode.to_sym
   end
 
   def limit(*args, **opts, &block)
@@ -49,10 +47,14 @@ module Berater
     new(mode, *args, **opts).limit(&block)
   end
 
-  def self.expunge
+  def expunge
     redis.scan_each(match: "#{self.name}*") do |key|
       redis.del key
     end
   end
 
 end
+
+Berater.register(:concurrency, Berater::ConcurrencyLimiter)
+Berater.register(:rate, Berater::RateLimiter)
+Berater.register(:unlimited, Berater::Unlimiter)
