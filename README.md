@@ -18,7 +18,7 @@ end
 
 
 # RateLimiter
-limiter = Berater::RateLimiter.new(2, :second)
+limiter = Berater.new(:rate, 2, :second)
 
 limiter.limit do
   # do the thing
@@ -36,7 +36,7 @@ end
 
 
 # Concurrency
-limiter = Berater::ConcurrencyLimiter.new(1)
+limiter = Berater.new(:concurrency, 1)
 
 3.times do
   limiter.limit { puts 'do work serially' }

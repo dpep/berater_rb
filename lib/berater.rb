@@ -29,9 +29,7 @@ module Berater
     @mode = mode.to_sym
   end
 
-  def limiter(*args, **opts)
-    mode = opts.delete(:mode) { self.mode }
-
+  def new(mode, *args, **opts)
     klass = case mode
       when :rate
         RateLimiter
@@ -47,7 +45,8 @@ module Berater
   end
 
   def limit(*args, **opts, &block)
-    limiter(*args, **opts).limit(&block)
+    mode = opts.delete(:mode) { self.mode }
+    new(mode, *args, **opts).limit(&block)
   end
 
   def self.expunge
