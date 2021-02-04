@@ -1,15 +1,10 @@
-require 'berater/base_limiter'
-require 'berater/concurrency_limiter'
-require 'berater/inhibitor'
-require 'berater/rate_limiter'
-require 'berater/unlimiter'
 require 'berater/version'
 
 
 module Berater
   extend self
 
-  Overloaded = BaseLimiter::Overloaded
+  class Overloaded < StandardError; end
 
   MODES = {}
 
@@ -55,6 +50,13 @@ module Berater
   end
 
 end
+
+# load a register limiters
+require 'berater/base_limiter'
+require 'berater/concurrency_limiter'
+require 'berater/inhibitor'
+require 'berater/rate_limiter'
+require 'berater/unlimiter'
 
 Berater.register(:concurrency, Berater::ConcurrencyLimiter)
 Berater.register(:inhibited, Berater::Inhibitor)

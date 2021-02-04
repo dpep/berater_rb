@@ -1,8 +1,6 @@
 module Berater
   class BaseLimiter
 
-    class Overloaded < StandardError; end
-
     attr_reader :options
 
     def initialize(**opts)
