@@ -1,3 +1,6 @@
+###  v0.1.1  (2021-02-04)
+- add lock contention stat and yield to limited block
+
 ###  v0.1.0  (2021-02-03)
 - add Inhibitor / :inhibited mode for testing purposes
 - change limiter loading to make more flexible
