@@ -23,8 +23,6 @@ describe 'be_overloaded' do
 
     it { expect(limiter).to be_overloaded }
     it { expect(limiter).to be_inhibited }
-    # it { expect(limiter).not_to be_overrated }
-    # it { expect(limiter).not_to be_incapacitated }
 
     it { expect { limiter }.to be_overloaded }
     it { expect { limiter }.to be_inhibited }

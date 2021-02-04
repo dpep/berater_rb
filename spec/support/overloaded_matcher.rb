@@ -31,6 +31,7 @@ module OverratedMatchers
     end
 
     # def description
+    # it { expect { Berater.new(:inhibitor) }.not_to be_overrated }
 
     def failure_message
       "expected #{@type} to be raised"
