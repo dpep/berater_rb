@@ -142,7 +142,7 @@ module Berater
 
     def release(lock)
       res = redis.zrem(key, lock.id)
-      res == true || res == 1
+      res == true || res == 1 # depending on which version of Redis
     end
 
   end
