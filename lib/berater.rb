@@ -51,7 +51,7 @@ module Berater
 
 end
 
-# load a register limiters
+# load and register limiters
 require 'berater/base_limiter'
 require 'berater/concurrency_limiter'
 require 'berater/inhibitor'
