@@ -1,5 +1,6 @@
 require 'berater/base_limiter'
 require 'berater/concurrency_limiter'
+require 'berater/inhibitor'
 require 'berater/rate_limiter'
 require 'berater/unlimiter'
 require 'berater/version'
@@ -56,5 +57,6 @@ module Berater
 end
 
 Berater.register(:concurrency, Berater::ConcurrencyLimiter)
+Berater.register(:inhibited, Berater::Inhibitor)
 Berater.register(:rate, Berater::RateLimiter)
 Berater.register(:unlimited, Berater::Unlimiter)

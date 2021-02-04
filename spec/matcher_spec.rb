@@ -3,30 +3,51 @@ describe 'be_overloaded' do
     let(:limiter) { Berater.new(:unlimited) }
 
     it { expect(limiter).not_to be_overloaded }
+    it { expect(limiter).not_to be_inhibited }
     it { expect(limiter).not_to be_overrated }
     it { expect(limiter).not_to be_incapacitated }
 
     it { expect { limiter }.not_to be_overloaded }
+    it { expect { limiter }.not_to be_inhibited }
     it { expect { limiter }.not_to be_overrated }
     it { expect { limiter }.not_to be_incapacitated }
 
     it { expect { limiter.limit }.not_to be_overloaded }
+    it { expect { limiter.limit }.not_to be_inhibited }
     it { expect { limiter.limit }.not_to be_overrated }
     it { expect { limiter.limit }.not_to be_incapacitated }
+  end
+
+  context 'Berater::Inhibitor' do
+    let(:limiter) { Berater.new(:inhibited) }
+
+    it { expect(limiter).to be_overloaded }
+    it { expect(limiter).to be_inhibited }
+    # it { expect(limiter).not_to be_overrated }
+    # it { expect(limiter).not_to be_incapacitated }
+
+    it { expect { limiter }.to be_overloaded }
+    it { expect { limiter }.to be_inhibited }
+
+    it { expect { limiter.limit }.to be_overloaded }
+    it { expect { limiter.limit }.to be_inhibited }
   end
 
   context 'Berater::RateLimiter' do
     let(:limiter) { Berater.new(:rate, 1, :second) }
 
     it { expect(limiter).not_to be_overloaded }
+    it { expect(limiter).not_to be_inhibited }
     it { expect(limiter).not_to be_overrated }
     it { expect(limiter).not_to be_incapacitated }
 
     it { expect { limiter }.not_to be_overloaded }
+    it { expect { limiter }.not_to be_inhibited }
     it { expect { limiter }.not_to be_overrated }
     it { expect { limiter }.not_to be_incapacitated }
 
     it { expect { limiter.limit }.not_to be_overloaded }
+    it { expect { limiter.limit }.not_to be_inhibited }
     it { expect { limiter.limit }.not_to be_overrated }
     it { expect { limiter.limit }.not_to be_incapacitated }
 
@@ -51,14 +72,17 @@ describe 'be_overloaded' do
     let(:limiter) { Berater.new(:concurrency, 1) }
 
     it { expect(limiter).not_to be_overloaded }
+    it { expect(limiter).not_to be_inhibited }
     it { expect(limiter).not_to be_overrated }
     it { expect(limiter).not_to be_incapacitated }
 
     it { expect { limiter }.not_to be_overloaded }
+    it { expect { limiter }.not_to be_inhibited }
     it { expect { limiter }.not_to be_overrated }
     it { expect { limiter }.not_to be_incapacitated }
 
     it { expect { limiter.limit }.not_to be_overloaded }
+    it { expect { limiter.limit }.not_to be_inhibited }
     it { expect { limiter.limit }.not_to be_overrated }
     it { expect { limiter.limit }.not_to be_incapacitated }
 

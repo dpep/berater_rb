@@ -67,6 +67,35 @@ describe Berater do
     end
   end
 
+  context 'inhibited mode' do
+    before { Berater.mode = :inhibited }
+
+    describe '.new' do
+      let(:limiter) { Berater.new(:inhibited) }
+
+      it 'instantiates an Inhibitor' do
+        expect(limiter).to be_a Berater::Inhibitor
+      end
+
+      it 'inherits redis' do
+        expect(limiter.redis).to be Berater.redis
+      end
+
+      it 'accepts options' do
+        redis = double('Redis')
+        limiter = Berater.new(:inhibited, key: 'key', redis: redis)
+        expect(limiter.key).to match(/key/)
+        expect(limiter.redis).to be redis
+      end
+    end
+
+    describe '.limit' do
+      it 'always limits' do
+        expect { Berater.limit }.to be_inhibited
+      end
+    end
+  end
+
   context 'rate mode' do
     before { Berater.mode = :rate }
 

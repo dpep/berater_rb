@@ -52,6 +52,10 @@ module OverratedMatchers
   def be_incapacitated
     BeOverrated.new(Berater::ConcurrencyLimiter::Incapacitated)
   end
+
+  def be_inhibited
+    BeOverrated.new(Berater::Inhibitor::Inhibited)
+  end
 end
 
 RSpec::configure do |config|
