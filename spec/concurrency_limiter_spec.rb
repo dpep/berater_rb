@@ -87,7 +87,7 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
       expect { limiter }.to be_incapacitated
 
-      sleep(1)
+      Timecop.travel(1)
 
       expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
       expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock

@@ -68,7 +68,6 @@ module Berater
       local exists
       local count
       local lock
-      local ts = unpack(redis.call('TIME'))
 
       -- check to see if key already exists
       if ttl == 0 then
