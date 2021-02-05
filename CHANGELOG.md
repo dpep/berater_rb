@@ -1,3 +1,8 @@
+###  v0.1.2  (2021-02-04)
+- redis determinism
+- EditorConfig ftw
+- move Overloaded exception into base class to clean up naming etc
+
 ###  v0.1.1  (2021-02-04)
 - add lock contention stat and yield to limited block
 
