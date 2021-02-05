@@ -62,7 +62,8 @@ module Berater
     LUA_SCRIPT = <<~LUA.gsub(/^\s*(--.*\n)?/, '')
       local key = KEYS[1]
       local capacity = tonumber(ARGV[1])
-      local ttl = tonumber(ARGV[2])
+      local ts = tonumber(ARGV[2])
+      local ttl = tonumber(ARGV[3])
 
       local exists
       local count
@@ -124,7 +125,11 @@ module Berater
         ).limit(&block)
       end
 
-      count, lock_id = redis.eval(LUA_SCRIPT, [ key ], [ capacity, timeout ])
+      count, lock_id = redis.eval(
+        LUA_SCRIPT,
+        [ key ],
+        [ capacity, Time.now.to_i, timeout ]
+      )
 
       raise Incapacitated unless lock_id
 
