@@ -1,3 +1,6 @@
+###  v0.1.3  (2021-02-05)
+- bug fix.  sleep no longer needed
+
 ###  v0.1.2  (2021-02-04)
 - redis determinism
 - EditorConfig ftw
