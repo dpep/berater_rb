@@ -69,9 +69,14 @@ describe Berater::ConcurrencyLimiter do
       expect {|b| limiter.limit(&b) }.to yield_control
     end
 
-    it 'works many times if workers complete and return locks' do
+    it 'works many times if workers release locks' do
       30.times do
         expect {|b| limiter.limit(&b) }.to yield_control
+      end
+
+      30.times do
+        lock = limiter.limit
+        lock.release
       end
     end
 
