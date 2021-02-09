@@ -98,6 +98,14 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter.limit).to be_a Berater::ConcurrencyLimiter::Lock
       expect(limiter).to be_incapacitated
     end
+
+    context 'with capacity 0' do
+      let(:limiter) { described_class.new(0) }
+
+      it 'always fails' do
+        expect(limiter).to be_incapacitated
+      end
+    end
   end
 
   context 'with same key, different limiters' do

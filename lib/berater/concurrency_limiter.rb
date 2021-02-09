@@ -95,7 +95,7 @@ module Berater
 
           count = count + 1
         end
-      else
+      elseif capacity > 0 then
         count = 1
         lock = "1"
 
