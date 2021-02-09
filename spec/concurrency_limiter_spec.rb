@@ -1,6 +1,4 @@
 describe Berater::ConcurrencyLimiter do
-  before { Berater.mode = :concurrency }
-
   describe '.new' do
     let(:limiter) { described_class.new(1) }
 

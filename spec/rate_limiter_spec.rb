@@ -1,6 +1,4 @@
 describe Berater::RateLimiter do
-  before { Berater.mode = :rate }
-
   describe '.new' do
     let(:limiter) { described_class.new(1, :second) }
 
@@ -104,7 +102,7 @@ describe Berater::RateLimiter do
     it 'limits excessive calls' do
       3.times { limiter.limit }
 
-      expect { limiter.limit }.to be_overrated
+      expect(limiter).to be_overrated
     end
 
     it 'limit resets over time' do
@@ -130,8 +128,8 @@ describe Berater::RateLimiter do
     it 'works as expected' do
       expect(limiter_one.limit).to eq 1
 
-      expect { limiter_one }.to be_overrated
-      expect { limiter_two }.to be_overrated
+      expect(limiter_one).to be_overrated
+      expect(limiter_two).to be_overrated
     end
   end
 
@@ -155,11 +153,11 @@ describe Berater::RateLimiter do
       expect(limiter_one.limit).to eq 1
       expect(limiter_two.limit).to eq 1
 
-      expect { limiter_one.limit }.to be_overrated
+      expect(limiter_one).to be_overrated
       expect(limiter_two.limit).to eq 2
 
-      expect { limiter_one.limit }.to be_overrated
-      expect { limiter_two.limit }.to be_overrated
+      expect(limiter_one).to be_overrated
+      expect(limiter_two).to be_overrated
     end
   end
 
