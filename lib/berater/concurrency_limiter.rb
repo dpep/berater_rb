@@ -55,7 +55,7 @@ module Berater
       end
 
       def expired?
-        @locked_at + limiter.timeout < Time.now
+        limiter.timeout > 0 && @locked_at + limiter.timeout < Time.now
       end
     end
 
@@ -138,7 +138,7 @@ module Berater
         begin
           yield lock
         ensure
-          release(lock)
+          lock.release
         end
       else
         lock
