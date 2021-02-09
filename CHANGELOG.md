@@ -1,3 +1,8 @@
+###  v0.1.4  (2021-02-08)
+- handle capacity 0 properly
+- cleanup tests
+- refine concurrency lock
+
 ###  v0.1.3  (2021-02-05)
 - bug fix.  sleep no longer needed
 
