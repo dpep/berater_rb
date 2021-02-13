@@ -8,11 +8,9 @@ module Berater
 
   MODES = {}
 
-  attr_accessor :redis, :mode
+  attr_accessor :redis
 
   def configure
-    self.mode = :unlimited # default
-
     yield self
   end
 
@@ -28,19 +26,6 @@ module Berater
 
   def register(mode, klass)
     MODES[mode.to_sym] = klass
-  end
-
-  def mode=(mode)
-    unless MODES.include? mode.to_sym
-      raise ArgumentError, "invalid mode: #{mode}"
-    end
-
-    @mode = mode.to_sym
-  end
-
-  def limit(*args, **opts, &block)
-    mode = opts.delete(:mode) { self.mode }
-    new(mode, *args, **opts).limit(&block)
   end
 
   def expunge

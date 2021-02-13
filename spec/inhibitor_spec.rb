@@ -1,6 +1,4 @@
 describe Berater::Inhibitor do
-  before { Berater.mode = :inhibited }
-
   describe '.new' do
     it 'initializes without any arguments or options' do
       expect(described_class.new).to be_a described_class

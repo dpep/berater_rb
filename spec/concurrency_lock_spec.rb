@@ -1,6 +1,4 @@
 describe Berater::ConcurrencyLimiter::Lock do
-  before { Berater.mode = :concurrency }
-
   let(:limiter) { Berater.new(:concurrency, 3) }
 
   describe '#contention' do
