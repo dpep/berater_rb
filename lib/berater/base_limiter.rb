@@ -24,9 +24,5 @@ module Berater
       raise NotImplementedError
     end
 
-    def self.limit(*args, **opts, &block)
-      self.new(*args, **opts).limit(&block)
-    end
-
   end
 end

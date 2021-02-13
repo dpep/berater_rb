@@ -14,21 +14,15 @@ describe Berater::Inhibitor do
     end
   end
 
-  describe '.limit' do
-    it 'always limits' do
-      expect { described_class.limit }.to be_inhibited
-    end
-
-    it 'works with any arguments or options' do
-      expect { described_class.limit(:abc, x: 123) }.to be_inhibited
-    end
-  end
-
   describe '#limit' do
     let(:limiter) { described_class.new }
 
     it 'always limits' do
-      expect { described_class.limit }.to be_inhibited
+      expect { limiter }.to be_inhibited
+    end
+
+    it 'works with any options' do
+      expect { limiter.limit(x: 123) }.to be_inhibited
     end
   end
 

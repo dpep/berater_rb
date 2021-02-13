@@ -14,26 +14,6 @@ describe Berater::Unlimiter do
     end
   end
 
-  describe '.limit' do
-    it 'works' do
-      expect(described_class.limit).to be_nil
-    end
-
-    it 'yields' do
-      expect {|b| described_class.limit(&b) }.to yield_control
-    end
-
-    it 'is never overloaded' do
-      10.times do
-        expect { described_class.limit }.not_to be_overloaded
-      end
-    end
-
-    it 'works with any arguments or options' do
-      expect(described_class.limit(:abc, x: 123)).to be_nil
-    end
-  end
-
   describe '#limit' do
     let(:limiter) { described_class.new }
 
@@ -51,7 +31,7 @@ describe Berater::Unlimiter do
       end
     end
 
-    it 'works with any arguments or options' do
+    it 'works with any options' do
       expect(limiter.limit(x: 123)).to be_nil
     end
   end
