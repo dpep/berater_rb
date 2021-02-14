@@ -12,7 +12,7 @@ module Berater
       self.timeout = opts[:timeout] || 0
     end
 
-    def capacity=(capacity)
+    private def capacity=(capacity)
       unless capacity.is_a? Integer
         raise ArgumentError, "expected Integer, found #{capacity.class}"
       end
@@ -22,7 +22,7 @@ module Berater
       @capacity = capacity
     end
 
-    def timeout=(timeout)
+    private def timeout=(timeout)
       unless timeout.is_a? Integer
         raise ArgumentError, "expected Integer, found #{timeout.class}"
       end
@@ -120,7 +120,6 @@ module Berater
         return self.class.new(
           capacity,
           **options.merge(opts)
-          # **options.merge(timeout: timeout).merge(opts)
         ).limit(&block)
       end
 

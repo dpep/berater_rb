@@ -3,7 +3,7 @@ module Berater
 
     attr_reader :options
 
-    def initialize(**opts)
+    protected def initialize(**opts)
       @options = opts
     end
 

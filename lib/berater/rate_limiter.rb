@@ -12,7 +12,7 @@ module Berater
       self.interval = interval
     end
 
-    def count=(count)
+    private def count=(count)
       unless count.is_a? Integer
         raise ArgumentError, "expected Integer, found #{count.class}"
       end
@@ -22,7 +22,7 @@ module Berater
       @count = count
     end
 
-    def interval=(interval)
+    private def interval=(interval)
       @interval = interval.dup
 
       case @interval
