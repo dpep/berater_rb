@@ -61,55 +61,26 @@ module Berater
 
     LUA_SCRIPT = <<~LUA.gsub(/^\s*(--.*\n)?/, '')
       local key = KEYS[1]
+      local lock_key = KEYS[2]
       local capacity = tonumber(ARGV[1])
       local ts = tonumber(ARGV[2])
       local ttl = tonumber(ARGV[3])
 
-      local exists
-      local count
       local lock
 
-      -- check to see if key already exists
-      if ttl == 0 then
-        exists = redis.call('EXISTS', key)
-      else
-        -- and refresh TTL while we're at it
-        exists = redis.call('EXPIRE', key, ttl * 2)
+      -- purge stale hosts
+      if ttl > 0 then
+        redis.call('ZREMRANGEBYSCORE', key, '-inf', ts - ttl)
       end
 
-      if exists == 1 then
-        -- purge stale hosts
-        if ttl > 0 then
-          redis.call('ZREMRANGEBYSCORE', key, '-inf', ts - ttl)
-        end
+      -- check capacity
+      local count = redis.call('ZCARD', key)
 
-        -- check capacity (subtract one for next lock entry)
-        count = redis.call('ZCARD', key) - 1
-
-        if count < capacity then
-          -- yay, grab a lock
-
-          -- regenerate next lock entry, which has score inf
-          lock = unpack(redis.call('ZPOPMAX', key))
-          redis.call('ZADD', key, 'inf', (lock + 1) % 2^52)
-
-          count = count + 1
-        end
-      elseif capacity > 0 then
-        count = 1
-        lock = "1"
-
-        -- create structure to track locks and next id
-        redis.call('ZADD', key, 'inf', lock + 1)
-
-        if ttl > 0 then
-          redis.call('EXPIRE', key, ttl * 2)
-        end
-      end
-
-      if lock then
-        -- store lock and timestamp
+      if count < capacity then
+        -- grab a lock
+        lock = redis.call('INCR', lock_key)
         redis.call('ZADD', key, ts, lock)
+        count = count + 1
       end
 
       return { count, lock }
@@ -125,7 +96,7 @@ module Berater
 
       count, lock_id = redis.eval(
         LUA_SCRIPT,
-        [ key ],
+        [ key, "#{self.class}:lock_id" ],
         [ capacity, Time.now.to_i, timeout ]
       )
 
