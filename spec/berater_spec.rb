@@ -42,6 +42,11 @@ describe Berater do
         limiter = Berater.new(:key, :unlimited, redis: redis)
         expect(limiter.redis).to be redis
       end
+
+      it 'works with convinience' do
+        expect(Berater).to receive(:new).and_return(limiter)
+        expect {|b| Berater(:key, :unlimited, &b) }.to yield_control
+      end
     end
 
     context 'inhibited mode' do
@@ -60,6 +65,11 @@ describe Berater do
         redis = double('Redis')
         limiter = Berater.new(:key, :inhibited, redis: redis)
         expect(limiter.redis).to be redis
+      end
+
+      it 'works with convinience' do
+        expect(Berater).to receive(:new).and_return(limiter)
+        expect { Berater(:key, :inhibited) }.to be_inhibited
       end
     end
 
@@ -80,6 +90,11 @@ describe Berater do
         limiter = Berater.new(:key, :rate, 1, :second, redis: redis)
         expect(limiter.redis).to be redis
       end
+
+      it 'works with convinience' do
+        expect(Berater).to receive(:new).and_return(limiter)
+        expect {|b| Berater(:key, :rate, 1, :second, &b) }.to yield_control
+      end
     end
 
     context 'concurrency mode' do
@@ -98,6 +113,11 @@ describe Berater do
         redis = double('Redis')
         limiter = Berater.new(:key, :concurrency, 1, redis: redis)
         expect(limiter.redis).to be redis
+      end
+
+      it 'works with convinience' do
+        expect(Berater).to receive(:new).and_return(limiter)
+        expect {|b| Berater(:key, :concurrency, 1, &b) }.to yield_control
       end
     end
   end
