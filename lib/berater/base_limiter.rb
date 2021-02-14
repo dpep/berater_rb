@@ -1,27 +1,25 @@
 module Berater
   class BaseLimiter
 
-    attr_reader :options
-
-    protected def initialize(**opts)
-      @options = opts
-    end
-
-    def key
-      if options[:key]
-        "#{self.class}:#{options[:key]}"
-      else
-        # default value
-        self.class.to_s
-      end
-    end
+    attr_reader :key, :options
 
     def redis
       options[:redis] || Berater.redis
     end
 
-    def limit(**opts)
+    def limit
       raise NotImplementedError
+    end
+
+    protected
+
+    def initialize(key, **opts)
+      @key = key
+      @options = opts
+    end
+
+    def cache_key(key)
+      "#{self.class}:#{key}"
     end
 
   end

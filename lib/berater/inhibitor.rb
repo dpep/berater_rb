@@ -3,17 +3,11 @@ module Berater
 
     class Inhibited < Overloaded; end
 
-    def initialize(*args, **opts)
-      super(**opts)
+    def initialize(key = :inhibitor, *args, **opts)
+      super(key, **opts)
     end
 
-    def limit(**opts, &block)
-      unless opts.empty?
-        return self.class.new(
-          **options.merge(opts)
-        ).limit(&block)
-      end
-
+    def limit
       raise Inhibited
     end
 

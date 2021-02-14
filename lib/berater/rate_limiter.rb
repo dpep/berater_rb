@@ -5,8 +5,8 @@ module Berater
 
     attr_accessor :count, :interval
 
-    def initialize(count, interval, **opts)
-      super(**opts)
+    def initialize(key, count, interval, **opts)
+      super(key, **opts)
 
       self.count = count
       self.interval = interval
@@ -51,19 +51,11 @@ module Berater
       @interval
     end
 
-    def limit(**opts, &block)
-      unless opts.empty?
-        return self.class.new(
-          count,
-          interval,
-          options.merge(opts)
-        ).limit(&block)
-      end
-
+    def limit
       ts = Time.now.to_i
 
       # bucket into time slot
-      rkey = "%s:%d" % [ key, ts - ts % @interval ]
+      rkey = "%s:%d" % [ cache_key(key), ts - ts % @interval ]
 
       count, _ = redis.multi do
         redis.incr rkey

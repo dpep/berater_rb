@@ -1,5 +1,5 @@
 describe Berater::ConcurrencyLimiter::Lock do
-  let(:limiter) { Berater.new(:concurrency, 3) }
+  let(:limiter) { Berater.new(:key, :concurrency, 3) }
 
   describe '#contention' do
     it 'tracks contention' do
@@ -74,7 +74,7 @@ describe Berater::ConcurrencyLimiter::Lock do
     context 'when timeout is set and exceeded' do
       before { Timecop.travel(1) }
 
-      let(:limiter) { Berater.new(:concurrency, 3, timeout: 1) }
+      let(:limiter) { Berater.new(:key, :concurrency, 3, timeout: 1) }
 
       it 'expires' do
         expect(lock.expired?).to be true

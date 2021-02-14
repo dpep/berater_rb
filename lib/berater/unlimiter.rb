@@ -1,17 +1,11 @@
 module Berater
   class Unlimiter < BaseLimiter
 
-    def initialize(*args, **opts)
-      super(**opts)
+    def initialize(key = :unlimiter, *args, **opts)
+      super(key, **opts)
     end
 
-    def limit(**opts, &block)
-      unless opts.empty?
-        return self.class.new(
-          **options.merge(opts)
-        ).limit(&block)
-      end
-
+    def limit
       yield if block_given?
     end
 

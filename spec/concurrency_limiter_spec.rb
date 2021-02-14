@@ -1,20 +1,20 @@
 describe Berater::ConcurrencyLimiter do
   describe '.new' do
-    let(:limiter) { described_class.new(1) }
+    let(:limiter) { described_class.new(:key, 1) }
 
     it 'initializes' do
+      expect(limiter.key).to be :key
       expect(limiter.capacity).to be 1
     end
 
     it 'has default values' do
-      expect(limiter.key).to eq described_class.to_s
       expect(limiter.redis).to be Berater.redis
     end
   end
 
   describe '#capacity' do
     def expect_capacity(capacity)
-      limiter = described_class.new(capacity)
+      limiter = described_class.new(:key, capacity)
       expect(limiter.capacity).to eq capacity
     end
 
@@ -25,7 +25,7 @@ describe Berater::ConcurrencyLimiter do
     context 'with erroneous values' do
       def expect_bad_capacity(capacity)
         expect do
-          described_class.new(capacity)
+          described_class.new(:key, capacity)
         end.to raise_error ArgumentError
       end
 
@@ -38,7 +38,7 @@ describe Berater::ConcurrencyLimiter do
 
   describe '#timeout' do
     def expect_timeout(timeout)
-      limiter = described_class.new(1, timeout: timeout)
+      limiter = described_class.new(:key, 1, timeout: timeout)
       expect(limiter.timeout).to eq timeout
     end
 
@@ -49,7 +49,7 @@ describe Berater::ConcurrencyLimiter do
     context 'with erroneous values' do
       def expect_bad_timeout(timeout)
         expect do
-          described_class.new(1, timeout: timeout)
+          described_class.new(:key, 1, timeout: timeout)
         end.to raise_error ArgumentError
       end
 
@@ -61,7 +61,7 @@ describe Berater::ConcurrencyLimiter do
   end
 
   describe '#limit' do
-    let(:limiter) { described_class.new(2, timeout: 1) }
+    let(:limiter) { described_class.new(:key, 2, timeout: 1) }
 
     it 'works' do
       expect {|b| limiter.limit(&b) }.to yield_control
@@ -98,7 +98,7 @@ describe Berater::ConcurrencyLimiter do
     end
 
     context 'with capacity 0' do
-      let(:limiter) { described_class.new(0) }
+      let(:limiter) { described_class.new(:key, 0) }
 
       it 'always fails' do
         expect(limiter).to be_incapacitated
@@ -107,8 +107,8 @@ describe Berater::ConcurrencyLimiter do
   end
 
   context 'with same key, different limiters' do
-    let(:limiter_one) { described_class.new(1) }
-    let(:limiter_two) { described_class.new(1) }
+    let(:limiter_one) { described_class.new(:key, 1) }
+    let(:limiter_two) { described_class.new(:key, 1) }
 
     it { expect(limiter_one.key).to eq limiter_two.key }
 
@@ -120,35 +120,9 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
-  context 'with different keys, same limiter' do
-    let(:limiter) { described_class.new(1) }
-
-    it 'works as expected' do
-      one_lock = limiter.limit(key: :one)
-      expect(one_lock).to be_a Berater::ConcurrencyLimiter::Lock
-
-      expect { limiter.limit(key: :one) {} }.to be_incapacitated
-      expect { limiter.limit(key: :two) {} }.not_to be_incapacitated
-
-      two_lock = limiter.limit(key: :two)
-      expect(two_lock).to be_a Berater::ConcurrencyLimiter::Lock
-
-      expect { limiter.limit(key: :one) {} }.to be_incapacitated
-      expect { limiter.limit(key: :two) {} }.to be_incapacitated
-
-      one_lock.release
-      expect { limiter.limit(key: :one) {} }.not_to be_incapacitated
-      expect { limiter.limit(key: :two) {} }.to be_incapacitated
-
-      two_lock.release
-      expect { limiter.limit(key: :one) {} }.not_to be_incapacitated
-      expect { limiter.limit(key: :two) {} }.not_to be_incapacitated
-    end
-  end
-
   context 'with same key, different capacities' do
-    let(:limiter_one) { described_class.new(1) }
-    let(:limiter_two) { described_class.new(2) }
+    let(:limiter_one) { described_class.new(:key, 1) }
+    let(:limiter_two) { described_class.new(:key, 2) }
 
     it { expect(limiter_one.capacity).not_to eq limiter_two.capacity }
 
@@ -176,8 +150,8 @@ describe Berater::ConcurrencyLimiter do
   end
 
   context 'with different keys, different limiters' do
-    let(:limiter_one) { described_class.new(1, key: :one) }
-    let(:limiter_two) { described_class.new(1, key: :two) }
+    let(:limiter_one) { described_class.new(:one, 1) }
+    let(:limiter_two) { described_class.new(:two, 1) }
 
     it 'works as expected' do
       expect(limiter_one).not_to be_incapacitated

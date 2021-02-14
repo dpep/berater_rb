@@ -14,14 +14,14 @@ module Berater
     yield self
   end
 
-  def new(mode, *args, **opts)
+  def new(key, mode, *args, **opts)
     klass = MODES[mode.to_sym]
 
     unless klass
       raise ArgumentError, "invalid mode: #{mode}"
     end
 
-    klass.new(*args, **opts)
+    klass.new(key, *args, **opts)
   end
 
   def register(mode, klass)

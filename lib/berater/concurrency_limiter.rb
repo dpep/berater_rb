@@ -5,8 +5,8 @@ module Berater
 
     attr_reader :capacity, :timeout
 
-    def initialize(capacity, **opts)
-      super(**opts)
+    def initialize(key, capacity, **opts)
+      super(key, **opts)
 
       self.capacity = capacity
       self.timeout = opts[:timeout] || 0
@@ -86,17 +86,10 @@ module Berater
       return { count, lock }
     LUA
 
-    def limit(**opts, &block)
-      unless opts.empty?
-        return self.class.new(
-          capacity,
-          **options.merge(opts)
-        ).limit(&block)
-      end
-
+    def limit
       count, lock_id = redis.eval(
         LUA_SCRIPT,
-        [ key, "#{self.class}:lock_id" ],
+        [ cache_key(key), cache_key('lock_id') ],
         [ capacity, Time.now.to_i, timeout ]
       )
 
@@ -116,7 +109,7 @@ module Berater
     end
 
     def release(lock)
-      res = redis.zrem(key, lock.id)
+      res = redis.zrem(cache_key(key), lock.id)
       res == true || res == 1 # depending on which version of Redis
     end
 

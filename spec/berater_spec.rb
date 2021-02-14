@@ -26,10 +26,11 @@ describe Berater do
 
   describe '.new' do
     context 'unlimited mode' do
-      let(:limiter) { Berater.new(:unlimited) }
+      let(:limiter) { Berater.new(:key, :unlimited) }
 
       it 'instantiates an Unlimiter' do
         expect(limiter).to be_a Berater::Unlimiter
+        expect(limiter.key).to be :key
       end
 
       it 'inherits redis' do
@@ -38,17 +39,17 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:unlimited, key: 'key', redis: redis)
-        expect(limiter.key).to match(/key/)
+        limiter = Berater.new(:key, :unlimited, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
 
     context 'inhibited mode' do
-      let(:limiter) { Berater.new(:inhibited) }
+      let(:limiter) { Berater.new(:key, :inhibited) }
 
       it 'instantiates an Inhibitor' do
         expect(limiter).to be_a Berater::Inhibitor
+        expect(limiter.key).to be :key
       end
 
       it 'inherits redis' do
@@ -57,17 +58,17 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:inhibited, key: 'key', redis: redis)
-        expect(limiter.key).to match(/key/)
+        limiter = Berater.new(:key, :inhibited, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
 
     context 'rate mode' do
-      let(:limiter) { Berater.new(:rate, 1, :second) }
+      let(:limiter) { Berater.new(:key, :rate, 1, :second) }
 
       it 'instantiates a RateLimiter' do
         expect(limiter).to be_a Berater::RateLimiter
+        expect(limiter.key).to be :key
       end
 
       it 'inherits redis' do
@@ -76,17 +77,17 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:rate, 1, :second, key: 'key', redis: redis)
-        expect(limiter.key).to match(/key/)
+        limiter = Berater.new(:key, :rate, 1, :second, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
 
     context 'concurrency mode' do
-      let(:limiter) { Berater.new(:concurrency, 1) }
+      let(:limiter) { Berater.new(:key, :concurrency, 1) }
 
       it 'instantiates a ConcurrencyLimiter' do
         expect(limiter).to be_a Berater::ConcurrencyLimiter
+        expect(limiter.key).to be :key
       end
 
       it 'inherits redis' do
@@ -95,8 +96,7 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:concurrency, 1, key: 'key', redis: redis)
-        expect(limiter.key).to match(/key/)
+        limiter = Berater.new(:key, :concurrency, 1, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
