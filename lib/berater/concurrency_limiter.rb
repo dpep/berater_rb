@@ -65,7 +65,6 @@ module Berater
       local capacity = tonumber(ARGV[1])
       local ts = tonumber(ARGV[2])
       local ttl = tonumber(ARGV[3])
-
       local lock
 
       -- purge stale hosts
