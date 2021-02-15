@@ -40,18 +40,18 @@ describe Berater::ConcurrencyLimiter::Lock do
     end
   end
 
-  describe '#released?' do
+  describe '#locked?' do
     it 'works' do
       lock = limiter.limit
-      expect(lock.released?).to be false
+      expect(lock.locked?).to be true
 
       lock.release
-      expect(lock.released?).to be true
+      expect(lock.locked?).to be false
     end
 
     it 'works in block mode' do
       limiter.limit do |lock|
-        expect(lock.released?).to be false
+        expect(lock.locked?).to be true
       end
     end
   end
@@ -78,10 +78,10 @@ describe Berater::ConcurrencyLimiter::Lock do
 
       it 'expires' do
         expect(lock.expired?).to be true
+        expect(lock.locked?).to be false
       end
 
       it 'fails to release' do
-        expect(lock.released?).to be false
         expect { lock.release }.to raise_error(RuntimeError, /expired/)
       end
     end

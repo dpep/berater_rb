@@ -39,23 +39,24 @@ module Berater
         @limiter = limiter
         @id = id
         @contention = contention
-        @released = false
         @locked_at = Time.now
+        @released_at = nil
       end
 
-      def release
-        raise 'lock already released' if released?
-        raise 'lock expired' if expired?
-
-        @released = limiter.release(self)
-      end
-
-      def released?
-        @released
+      def locked?
+        @released_at.nil? && !expired?
       end
 
       def expired?
         limiter.timeout > 0 && @locked_at + limiter.timeout < Time.now
+      end
+
+      def release
+        raise 'lock expired' if expired?
+        raise 'lock already released' unless locked?
+
+        @released_at = Time.now
+        limiter.release(self)
       end
     end
 
