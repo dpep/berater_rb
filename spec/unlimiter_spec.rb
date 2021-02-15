@@ -18,11 +18,11 @@ describe Berater::Unlimiter do
     let(:limiter) { described_class.new }
 
     it 'works' do
-      expect(limiter.limit).to be_nil
+      expect {|b| limiter.limit(&b) }.to yield_control
     end
 
-    it 'yields' do
-      expect {|b| limiter.limit(&b) }.to yield_control
+    it 'works without a block' do
+      expect(limiter.limit).to be_a Berater::Lock
     end
 
     it 'is never overloaded' do
@@ -31,5 +31,7 @@ describe Berater::Unlimiter do
       end
     end
   end
+
+  it_behaves_like 'a lock', described_class.new
 
 end

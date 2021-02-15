@@ -1,4 +1,5 @@
 require 'berater/version'
+require 'berater/lock'
 
 
 module Berater

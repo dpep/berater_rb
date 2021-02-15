@@ -64,10 +64,16 @@ module Berater
 
       raise Overrated if count > @count
 
+      lock = Lock.new(self, count, count)
+
       if block_given?
-        yield
+        begin
+          yield lock
+        ensure
+          lock.release
+        end
       else
-        count
+        lock
       end
     end
 

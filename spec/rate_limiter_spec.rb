@@ -1,4 +1,5 @@
 describe Berater::RateLimiter do
+
   describe '.new' do
     let(:limiter) { described_class.new(:key, 1, :second) }
 
@@ -85,18 +86,12 @@ describe Berater::RateLimiter do
     let(:limiter) { described_class.new(:key, 3, :second) }
 
     it 'works' do
-      expect(limiter.limit).to eq 1
-    end
-
-    it 'counts' do
-      expect(limiter.limit).to eq 1
-      expect(limiter.limit).to eq 2
-      expect(limiter.limit).to eq 3
-    end
-
-    it 'yields' do
       expect {|b| limiter.limit(&b) }.to yield_control
       expect(limiter.limit { 123 }).to eq 123
+    end
+
+    it 'works without a block' do
+      expect(limiter.limit).to be_a Berater::Lock
     end
 
     it 'limits excessive calls' do
@@ -106,17 +101,13 @@ describe Berater::RateLimiter do
     end
 
     it 'limit resets over time' do
-      expect(limiter.limit).to eq 1
-      expect(limiter.limit).to eq 2
-      expect(limiter.limit).to eq 3
+      3.times { limiter.limit }
       expect(limiter).to be_overrated
 
       # travel forward a second
       Timecop.freeze(1)
 
-      expect(limiter.limit).to eq 1
-      expect(limiter.limit).to eq 2
-      expect(limiter.limit).to eq 3
+      3.times { limiter.limit }
       expect(limiter).to be_overrated
     end
   end
@@ -126,7 +117,7 @@ describe Berater::RateLimiter do
     let(:limiter_two) { described_class.new(:key, 1, :second) }
 
     it 'works as expected' do
-      expect(limiter_one.limit).to eq 1
+      expect(limiter_one.limit).not_to be_overrated
 
       expect(limiter_one).to be_overrated
       expect(limiter_two).to be_overrated
@@ -138,11 +129,11 @@ describe Berater::RateLimiter do
     let(:limiter_two) { described_class.new(:two, 2, :second) }
 
     it 'works as expected' do
-      expect(limiter_one.limit).to eq 1
-      expect(limiter_two.limit).to eq 1
+      expect(limiter_one.limit).not_to be_overrated
+      expect(limiter_two.limit).not_to be_overrated
 
       expect(limiter_one).to be_overrated
-      expect(limiter_two.limit).to eq 2
+      expect(limiter_two.limit).not_to be_overrated
 
       expect(limiter_one).to be_overrated
       expect(limiter_two).to be_overrated

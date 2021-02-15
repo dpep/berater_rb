@@ -32,34 +32,6 @@ module Berater
       @timeout = timeout
     end
 
-    class Lock
-      attr_reader :limiter, :id, :contention
-
-      def initialize(limiter, id, contention)
-        @limiter = limiter
-        @id = id
-        @contention = contention
-        @locked_at = Time.now
-        @released_at = nil
-      end
-
-      def locked?
-        @released_at.nil? && !expired?
-      end
-
-      def expired?
-        limiter.timeout > 0 && @locked_at + limiter.timeout < Time.now
-      end
-
-      def release
-        raise 'lock expired' if expired?
-        raise 'lock already released' unless locked?
-
-        @released_at = Time.now
-        limiter.release(self)
-      end
-    end
-
     LUA_SCRIPT = <<~LUA.gsub(/^\s*(--.*\n)?/, '')
       local key = KEYS[1]
       local lock_key = KEYS[2]
@@ -95,7 +67,7 @@ module Berater
 
       raise Incapacitated unless lock_id
 
-      lock = Lock.new(self, lock_id, count)
+      lock = Lock.new(self, lock_id, count, -> { release(lock_id) })
 
       if block_given?
         begin
@@ -108,8 +80,8 @@ module Berater
       end
     end
 
-    def release(lock)
-      res = redis.zrem(cache_key(key), lock.id)
+    private def release(lock_id)
+      res = redis.zrem(cache_key(key), lock_id)
       res == true || res == 1 # depending on which version of Redis
     end
 
