@@ -1,3 +1,13 @@
+###  v0.2.0  (2021-02-15)
+- locks for all limiters
+- clean up lock
+- convenience method for limiting
+- simplify!  remove all .limit options in favor of initializing with everything
+- simplify concurrency script
+- reduce method accessibility
+- remove .limit class method to simplify
+- remove Berater.mode in favor of explicit instantiation
+
 ###  v0.1.4  (2021-02-08)
 - handle capacity 0 properly
 - cleanup tests
