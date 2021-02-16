@@ -1,6 +1,6 @@
 Berater
 ======
-A simple rate limiter, backed by Redis
+A framework for limiting resource utilization, with build in rate and capacity limiters.  Backed by [Redis](https://redis.io/).
 
 
 #### Install
@@ -18,9 +18,16 @@ end
 
 
 # RateLimiter
-limiter = Berater.new(:rate, 2, :second)
 
-limiter.limit do
+Berater(:key, :rate, 2, :second) do |lock|
+  # do work while holding a lock
+end
+
+
+## instantiation mode
+limiter = Berater.new(:key, :rate, 2, :second)
+
+limiter.limit do |lock|
   # do the thing
 end
 
@@ -36,14 +43,22 @@ end
 
 
 # Concurrency
-limiter = Berater.new(:concurrency, 1)
+
+Berater(:key, :concurrency, 1) do |lock|
+  # do work while holding a lock
+end
+
+
+## instantiation mode
+
+limiter = Berater.new(:key, :concurrency, 1)
 
 3.times do
   limiter.limit { puts 'do work serially' }
 end
 
 lock = limiter.limit
-# do work while holding the lock
+# hold lock without a block
 
 # if more work is attempted...
 begin
@@ -56,6 +71,19 @@ end
 lock.release
 
 ```
+
+----
+## Contributing
+
+Yes please  :)
+
+1. Fork it
+1. Create your feature branch (`git checkout -b my-feature`)
+1. Ensure the tests pass (`rspec`)
+1. Commit your changes (`git commit -am 'awesome new feature'`)
+1. Push to the branch (`git push origin my-feature`)
+1. Create new Pull Request
+
 
 ----
 ![Gem](https://img.shields.io/gem/dt/berater?style=plastic)
