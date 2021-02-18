@@ -11,6 +11,10 @@ module Berater
       raise NotImplementedError
     end
 
+    def to_s
+      "#<#{self.class}>"
+    end
+
     protected
 
     def initialize(key, **opts)

@@ -85,5 +85,9 @@ module Berater
       res == true || res == 1 # depending on which version of Redis
     end
 
+    def to_s
+      "#<#{self.class}(#{key}: #{capacity} at a time)>"
+    end
+
   end
 end

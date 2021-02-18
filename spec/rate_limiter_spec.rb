@@ -140,4 +140,40 @@ describe Berater::RateLimiter do
     end
   end
 
+  describe '#to_s' do
+    def check(count, interval, expected)
+      expect(
+        described_class.new(:key, count, interval).to_s
+      ).to match(expected)
+    end
+
+    it 'works with symbols' do
+      check(1, :second, /1 per second/)
+      check(1, :minute, /1 per minute/)
+      check(1, :hour, /1 per hour/)
+    end
+
+    it 'works with strings' do
+      check(1, 'second', /1 per second/)
+      check(1, 'minute', /1 per minute/)
+      check(1, 'hour', /1 per hour/)
+    end
+
+    it 'normalizes' do
+      check(1, :sec, /1 per second/)
+      check(1, :seconds, /1 per second/)
+
+      check(1, :min, /1 per minute/)
+      check(1, :minutes, /1 per minute/)
+
+      check(1, :hours, /1 per hour/)
+    end
+
+    it 'works with Integers' do
+      check(1, 1, /1 every second/)
+      check(1, 2, /1 every 2 seconds/)
+      check(2, 3, /2 every 3 seconds/)
+    end
+  end
+
 end

@@ -39,10 +39,13 @@ module Berater
         case @interval
         when :sec, :second, :seconds
           @interval = 1
+          @interval_str = :second
         when :min, :minute, :minutes
           @interval = 60
+          @interval_str = :minute
         when :hour, :hours
           @interval = 60 * 60
+          @interval_str = :hour
         else
           raise ArgumentError, "unexpected interval value: #{interval}"
         end
@@ -75,6 +78,20 @@ module Berater
       else
         lock
       end
+    end
+
+    def to_s
+      msg = if @interval_str
+        "per #{@interval_str}"
+      else
+        if @interval == 1
+          "every second"
+        else
+          "every #{@interval} seconds"
+        end
+      end
+
+      "#<#{self.class}(#{key}: #{count} #{msg})>"
     end
 
   end

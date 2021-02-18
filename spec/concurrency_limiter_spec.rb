@@ -171,4 +171,17 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
+  describe '#to_s' do
+    def check(capacity, expected)
+      expect(
+        described_class.new(:key, capacity).to_s
+      ).to match(expected)
+    end
+
+    it 'works' do
+      check(1, /1 at a time/)
+      check(3, /3 at a time/)
+    end
+  end
+
 end
