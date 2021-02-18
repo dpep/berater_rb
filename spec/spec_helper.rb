@@ -37,4 +37,7 @@ RSpec.configure do |config|
       example.run
     end
   end
+
+  # reduce noise in backtraces
+  config.filter_gems_from_backtrace('timecop')
 end
