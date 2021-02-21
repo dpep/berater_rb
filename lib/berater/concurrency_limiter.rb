@@ -1,5 +1,5 @@
 module Berater
-  class ConcurrencyLimiter < BaseLimiter
+  class ConcurrencyLimiter < Limiter
 
     class Incapacitated < Overloaded; end
 

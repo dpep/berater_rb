@@ -1,5 +1,5 @@
 module Berater
-  class BaseLimiter
+  class Limiter
 
     attr_reader :key, :options
 

@@ -1,5 +1,5 @@
 module Berater
-  class RateLimiter < BaseLimiter
+  class RateLimiter < Limiter
 
     class Overrated < Overloaded; end
 

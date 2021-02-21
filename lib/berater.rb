@@ -58,8 +58,8 @@ def Berater(key, mode, *args, **opts, &block)
   Berater.new(key, mode, *args, **opts).limit(&block)
 end
 
-# load and register limiters
-require 'berater/base_limiter'
+# load limiters
+require 'berater/limiter'
 require 'berater/concurrency_limiter'
 require 'berater/inhibitor'
 require 'berater/rate_limiter'

@@ -31,7 +31,7 @@
 - upgrade concurrency lock
 - test timeouts
 - s/token/lock/
-- can now provide "key" while calling .limit, better support for passing in options anywhere and everywhere, default key and redis values, BaseLimiter.limit class method, more test coverage
+- can now provide "key" while calling .limit, better support for passing in options anywhere and everywhere, default key and redis values, Limiter.limit class method, more test coverage
 - rename spec file so it runs properly
 - improve rspec matchers to use blocks and hence release tokens
 - rspec matcher handles blocks and limiters

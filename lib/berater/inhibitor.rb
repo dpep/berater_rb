@@ -1,5 +1,5 @@
 module Berater
-  class Inhibitor < BaseLimiter
+  class Inhibitor < Limiter
 
     class Inhibited < Overloaded; end
 

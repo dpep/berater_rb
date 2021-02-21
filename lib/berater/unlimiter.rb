@@ -1,5 +1,5 @@
 module Berater
-  class Unlimiter < BaseLimiter
+  class Unlimiter < Limiter
 
     def initialize(key = :unlimiter, *args, **opts)
       super(key, **opts)

@@ -15,11 +15,11 @@ module BeraterMatchers
           # eg. expect { ... }.to be_overrated
           res = obj.call
 
-          if res.is_a? Berater::BaseLimiter
+          if res.is_a? Berater::Limiter
             # eg. expect { Berater.new(...) }.to be_overrated
             res.limit {}
           end
-        when Berater::BaseLimiter
+        when Berater::Limiter
           # eg. expect(Berater.new(...)).to be_overrated
           obj.limit {}
         end
