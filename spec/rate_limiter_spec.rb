@@ -6,7 +6,7 @@ describe Berater::RateLimiter do
     it 'initializes' do
       expect(limiter.key).to be :key
       expect(limiter.count).to eq 1
-      expect(limiter.interval).to eq 1
+      expect(limiter.interval).to eq :second
     end
 
     it 'has default values' do
@@ -51,22 +51,22 @@ describe Berater::RateLimiter do
     end
 
     context 'with symbols' do
-      it { expect_interval(:sec, 1) }
-      it { expect_interval(:second, 1) }
-      it { expect_interval(:seconds, 1) }
+      it { expect_interval(:sec, :second) }
+      it { expect_interval(:second, :second) }
+      it { expect_interval(:seconds, :second) }
 
-      it { expect_interval(:min, 60) }
-      it { expect_interval(:minute, 60) }
-      it { expect_interval(:minutes, 60) }
+      it { expect_interval(:min, :minute) }
+      it { expect_interval(:minute, :minute) }
+      it { expect_interval(:minutes, :minute) }
 
-      it { expect_interval(:hour, 3600) }
-      it { expect_interval(:hours, 3600) }
+      it { expect_interval(:hour, :hour) }
+      it { expect_interval(:hours, :hour) }
     end
 
     context 'with strings' do
-      it { expect_interval('sec', 1) }
-      it { expect_interval('minute', 60) }
-      it { expect_interval('hours', 3600) }
+      it { expect_interval('sec', :second) }
+      it { expect_interval('minute', :minute) }
+      it { expect_interval('hours', :hour) }
     end
 
     context 'with erroneous values' do
@@ -79,6 +79,17 @@ describe Berater::RateLimiter do
       it { expect_bad_interval(-1) }
       it { expect_bad_interval(:secondz) }
       it { expect_bad_interval('huor') }
+    end
+
+    context 'interprets values' do
+      def expect_sec(interval, expected)
+        limiter = described_class.new(:key, 1, interval)
+        expect(limiter.instance_variable_get(:@interval_sec)).to eq expected
+      end
+
+      it { expect_sec(:second, 1) }
+      it { expect_sec(:minute, 60) }
+      it { expect_sec(:hour, 3600) }
     end
   end
 
