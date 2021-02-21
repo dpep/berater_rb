@@ -181,7 +181,7 @@ describe Berater::RateLimiter do
       check(1, :hours, /1 per hour/)
     end
 
-    it 'works with Integers' do
+    it 'works with integers' do
       check(1, 1, /1 every second/)
       check(1, 2, /1 every 2 seconds/)
       check(2, 3, /2 every 3 seconds/)
