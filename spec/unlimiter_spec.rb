@@ -1,4 +1,6 @@
 describe Berater::Unlimiter do
+  it_behaves_like 'a limiter', described_class.new
+
   describe '.new' do
     it 'initializes without any arguments or options' do
       expect(described_class.new).to be_a described_class
@@ -31,7 +33,4 @@ describe Berater::Unlimiter do
       end
     end
   end
-
-  it_behaves_like 'a lock', described_class.new
-
 end

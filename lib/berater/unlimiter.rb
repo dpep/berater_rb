@@ -6,8 +6,7 @@ module Berater
     end
 
     def limit
-      count = redis.incr(cache_key('count'))
-      lock = Lock.new(self, count, count)
+      lock = Lock.new(self, 0, 0)
 
       if block_given?
         begin

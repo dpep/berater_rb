@@ -1,4 +1,7 @@
 describe Berater::ConcurrencyLimiter do
+  it_behaves_like 'a limiter', described_class.new(:key, 1)
+  it_behaves_like 'a limiter', described_class.new(:key, 1, timeout: 1)
+
   describe '.new' do
     let(:limiter) { described_class.new(:key, 1) }
 
@@ -61,7 +64,7 @@ describe Berater::ConcurrencyLimiter do
   end
 
   describe '#limit' do
-    let(:limiter) { described_class.new(:key, 2, timeout: 1) }
+    let(:limiter) { described_class.new(:key, 2) }
 
     it 'works' do
       expect {|b| limiter.limit(&b) }.to yield_control
@@ -82,18 +85,6 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter.limit).to be_a Berater::Lock
       expect(limiter.limit).to be_a Berater::Lock
 
-      expect(limiter).to be_incapacitated
-    end
-
-    it 'times out locks' do
-      expect(limiter.limit).to be_a Berater::Lock
-      expect(limiter.limit).to be_a Berater::Lock
-      expect(limiter).to be_incapacitated
-
-      Timecop.travel(1)
-
-      expect(limiter.limit).to be_a Berater::Lock
-      expect(limiter.limit).to be_a Berater::Lock
       expect(limiter).to be_incapacitated
     end
 

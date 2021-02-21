@@ -17,7 +17,7 @@ module Berater
     end
 
     def expired?
-      timeout > 0 && @locked_at + timeout < Time.now
+      timeout ? @locked_at + timeout < Time.now : false
     end
 
     def release
@@ -28,8 +28,8 @@ module Berater
       @release_fn ? @release_fn.call : true
     end
 
-    private def timeout
-      limiter.respond_to?(:timeout) ? limiter.timeout : 0
+    def timeout
+      limiter.respond_to?(:timeout) ? limiter.timeout : nil
     end
 
   end
