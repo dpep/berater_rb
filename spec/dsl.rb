@@ -22,6 +22,13 @@ describe Berater::DSL do
       expect(Integer).not_to respond_to(:per)
       expect(Integer).not_to respond_to(:every)
     end
+
+    it 'works with variables' do
+      count = 1
+      interval = :second
+
+      check([ :rate, count, interval ]) { count.per interval }
+    end
   end
 
   context 'concurrency mode' do
@@ -37,6 +44,14 @@ describe Berater::DSL do
       expect(Integer).not_to respond_to(:at_once)
       expect(Integer).not_to respond_to(:at_a_time)
       expect(Integer).not_to respond_to(:concurrently)
+    end
+
+    it 'works with constants' do
+      class Foo
+        CAPACITY = 3
+      end
+
+      check([ :concurrency, Foo::CAPACITY ]) { Foo::CAPACITY.at_once }
     end
   end
 
