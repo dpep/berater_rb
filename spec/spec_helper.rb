@@ -13,6 +13,7 @@ if ENV['CI'] == 'true' || ENV['CODECOV_TOKEN']
 end
 
 require 'berater'
+require 'berater/rspec'
 
 Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 
@@ -21,8 +22,6 @@ RSpec.configure do |config|
     Berater.configure do |c|
       c.redis = Redis.new
     end
-
-    Berater.expunge
   end
 
   # allow 'fit' examples

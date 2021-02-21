@@ -1,5 +1,5 @@
-module OverratedMatchers
-  class BeOverrated
+module BeraterMatchers
+  class Overloaded
     def initialize(type)
       @type = type
     end
@@ -43,22 +43,18 @@ module OverratedMatchers
   end
 
   def be_overloaded
-    BeOverrated.new(Berater::Overloaded)
+    Overloaded.new(Berater::Overloaded)
   end
 
   def be_overrated
-    BeOverrated.new(Berater::RateLimiter::Overrated)
+    Overloaded.new(Berater::RateLimiter::Overrated)
   end
 
   def be_incapacitated
-    BeOverrated.new(Berater::ConcurrencyLimiter::Incapacitated)
+    Overloaded.new(Berater::ConcurrencyLimiter::Incapacitated)
   end
 
   def be_inhibited
-    BeOverrated.new(Berater::Inhibitor::Inhibited)
+    Overloaded.new(Berater::Inhibitor::Inhibited)
   end
-end
-
-RSpec::configure do |config|
-  config.include(OverratedMatchers)
 end
