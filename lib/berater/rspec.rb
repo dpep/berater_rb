@@ -1,5 +1,6 @@
 require 'berater'
 require 'berater/rspec/matchers'
+require 'berater/test_mode'
 require 'rspec'
 
 RSpec.configure do |config|
