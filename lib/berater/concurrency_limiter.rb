@@ -32,7 +32,7 @@ module Berater
       @timeout = timeout
     end
 
-    LUA_SCRIPT = <<~LUA.gsub(/^\s*(--.*\n)?/, '')
+    LUA_SCRIPT = <<~LUA.gsub(/^\s*|\s*--.*/, '')
       local key = KEYS[1]
       local lock_key = KEYS[2]
       local capacity = tonumber(ARGV[1])
