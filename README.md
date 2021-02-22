@@ -72,6 +72,45 @@ lock.release
 
 ```
 
+#### rspec
+Berater has a few tools to make testing easier.  rspec matchers, automatic flushing of Redis between examples, and a test mode to force your desired behavior and avoid redis altogether.  The [Timecop](https://github.com/travisjeffery/timecop) gem is recommended.
+
+```ruby
+require 'berater/rspec'
+require 'berater/test_mode'
+
+describe 'MyWorker' do
+  let(:limiter) { Berater.new(:key, :rate, 1, :second) }
+
+  it 'rate limits' do
+    limiter.limit { ... }
+
+    expect { limiter.limit }.to raise_error(Berater::Overloaded)
+
+    # or use a matcher
+    expect { limiter.limit }.to be_overloaded
+  end
+
+  context 'with test_mode = :pass' do
+    before { Berater.test_mode = :pass }
+
+    it 'always works' do
+      10.times { limiter.limit { ... } }
+    end
+  end
+
+  context 'with test_mode = :fail' do
+    before { Berater.test_mode = :fail }
+
+    it 'always raises an exception' do
+      expect { limiter.limit }.to be_overloaded
+    end
+  end
+end
+
+
+```
+
 ----
 ## Contributing
 
