@@ -53,20 +53,56 @@ module Berater
       end
     end
 
-    def limit
-      ts = Time.now.to_i
+    LUA_SCRIPT = <<~LUA.gsub(/^\s*|\s*--.*/, '')
+      local key = KEYS[1]
+      local ts_key = KEYS[2]
+      local ts = tonumber(ARGV[1])
+      local capacity = tonumber(ARGV[2])
+      local usec_per_drip = tonumber(ARGV[3])
+      local count = 0
 
-      # bucket into time slot
-      rkey = "%s:%d" % [ cache_key(key), ts - ts % @interval_sec ]
+      -- timestamp of last update
+      local last_ts = tonumber(redis.call('GET', ts_key))
 
-      count, _ = redis.multi do
-        redis.incr rkey
-        redis.expire rkey, @interval_sec * 2
+      if last_ts then
+        count = tonumber(redis.call('GET', key)) or 0
+
+        -- adjust for time passing
+        local drips = math.floor((ts - last_ts) / usec_per_drip)
+        count = math.max(0, count - drips)
       end
 
-      raise Overrated if count > @count
+      local allowed = count + 1 <= capacity
 
-      lock = Lock.new(self, count, count)
+      if allowed then
+        count = count + 1
+
+        -- time for bucket to empty, in milliseconds
+        local ttl = math.ceil((count * usec_per_drip) / 1000)
+
+        -- update count and last_ts, with expirations
+        redis.call('SET', key, count, 'PX', ttl)
+        redis.call('SET', ts_key, ts, 'PX', ttl)
+      end
+
+      return { count, allowed }
+    LUA
+
+    def limit
+      usec_per_drip = (@interval_sec * 10**6) / @count
+
+      # timestamp in microseconds
+      ts = (Time.now.to_f * 10**6).to_i
+
+      count, allowed = redis.eval(
+        LUA_SCRIPT,
+        [ cache_key(key), cache_key("#{key}-ts") ],
+        [ ts, @count, usec_per_drip ]
+      )
+
+      raise Overrated unless allowed
+
+      lock = Lock.new(self, "#{ts}-#{count}", count)
 
       if block_given?
         begin
