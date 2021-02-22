@@ -1,3 +1,6 @@
+###  v0.4.0  (2021-02-22)
+- upgrade RateLimiter to leaky bucket algorithm with microsecond precision
+
 ###  v0.3.0  (2021-02-21)
 - Update README.md
 - testing mode
