@@ -17,60 +17,17 @@ Berater.configure do |c|
 end
 
 
-# RateLimiter
-
-Berater(:key, :rate, 2, :second) do |lock|
-  # do work while holding a lock
+Berater(:key, :rate, 2, :second) do
+  # do work, twice per second with a rate limiter
 end
 
 
-## instantiation mode
-limiter = Berater.new(:key, :rate, 2, :second)
-
-limiter.limit do |lock|
-  # do the thing
+Berater(:key, :concurrency, 1) do
+  # or one at a time with a concurrency limiter
 end
-
-limiter.limit do
-  # do another thing
-end
-
-begin
-  limiter.limit { puts "can't do this thing yet" }
-rescue Berater::Overloaded
-  # it explodes
-end
-
-
-# Concurrency
-
-Berater(:key, :concurrency, 1) do |lock|
-  # do work while holding a lock
-end
-
-
-## instantiation mode
-
-limiter = Berater.new(:key, :concurrency, 1)
-
-3.times do
-  limiter.limit { puts 'do work serially' }
-end
-
-lock = limiter.limit
-# hold lock without a block
-
-# if more work is attempted...
-begin
-  limiter.limit { "won't work" }
-rescue Berater::Overloaded
-  # it will explode
-end
-
-# release the lock when the work is done
-lock.release
 
 ```
+
 
 #### rspec
 Berater has a few tools to make testing easier.  rspec matchers, automatic flushing of Redis between examples, and a test mode to force your desired behavior and avoid redis altogether.  The [Timecop](https://github.com/travisjeffery/timecop) gem is recommended.
@@ -107,7 +64,18 @@ describe 'MyWorker' do
     end
   end
 end
+```
 
+#### DSL
+```ruby
+
+Berater(:key) { 1.per second } do
+  ...
+end
+
+Berater(:key) { 3.at_once } do
+  ...
+end
 
 ```
 
