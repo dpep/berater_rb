@@ -12,6 +12,7 @@ describe 'Berater.test_mode' do
       it { expect(limiter).to be_a Berater::Unlimiter }
 
       it 'works per usual' do
+        expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
     end
@@ -22,6 +23,7 @@ describe 'Berater.test_mode' do
       it { expect(limiter).to be_a Berater::Unlimiter }
 
       it 'always works' do
+        expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
     end
@@ -32,7 +34,7 @@ describe 'Berater.test_mode' do
       it { expect(limiter).to be_a Berater::Unlimiter }
 
       it 'never works' do
-        expect { limiter.limit }.to be_overloaded
+        expect { limiter }.to be_overloaded
       end
     end
   end
@@ -46,7 +48,7 @@ describe 'Berater.test_mode' do
       it { expect(limiter).to be_a Berater::Inhibitor }
 
       it 'works per usual' do
-        expect { limiter.limit }.to be_overloaded
+        expect { limiter }.to be_overloaded
       end
     end
 
@@ -56,6 +58,7 @@ describe 'Berater.test_mode' do
       it { expect(limiter).to be_a Berater::Inhibitor }
 
       it 'always works' do
+        expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
     end
@@ -66,7 +69,7 @@ describe 'Berater.test_mode' do
       it { expect(limiter).to be_a Berater::Inhibitor }
 
       it 'never works' do
-        expect { limiter.limit }.to be_overloaded
+        expect { limiter }.to be_overloaded
       end
     end
   end
@@ -94,6 +97,10 @@ describe 'Berater.test_mode' do
         expect(limiter.limit).to be_a Berater::Lock
         expect { limiter.limit }.to be_overloaded
       end
+
+      it 'yields per usual' do
+        expect {|block| limiter.limit(&block) }.to yield_control
+      end
     end
 
     context 'when test_mode = :pass' do
@@ -103,6 +110,7 @@ describe 'Berater.test_mode' do
 
       it 'always works and without calling redis' do
         expect(limiter.redis).not_to receive(:multi)
+        expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
     end
@@ -114,7 +122,7 @@ describe 'Berater.test_mode' do
 
       it 'never works and without calling redis' do
         expect(limiter.redis).not_to receive(:multi)
-        expect { limiter.limit }.to be_overloaded
+        expect { limiter }.to be_overloaded
       end
     end
   end
@@ -142,6 +150,10 @@ describe 'Berater.test_mode' do
         expect(limiter.limit).to be_a Berater::Lock
         expect { limiter.limit }.to be_overloaded
       end
+
+      it 'yields per usual' do
+        expect {|block| limiter.limit(&block) }.to yield_control
+      end
     end
 
     context 'when test_mode = :pass' do
@@ -151,6 +163,7 @@ describe 'Berater.test_mode' do
 
       it 'always works and without calling redis' do
         expect(limiter.redis).not_to receive(:eval)
+        expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
     end
@@ -162,7 +175,7 @@ describe 'Berater.test_mode' do
 
       it 'never works and without calling redis' do
         expect(limiter.redis).not_to receive(:eval)
-        expect { limiter.limit }.to be_overloaded
+        expect { limiter }.to be_overloaded
       end
     end
   end
