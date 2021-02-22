@@ -1,3 +1,14 @@
+###  v0.3.0  (2021-02-21)
+- Update README.md
+- testing mode
+- s/BaseLimiter/Limiter/
+- make rspec setup and matchers accessible.  clean up naming
+- consolidate shared Limiter.limit tests, remove redis call from Unlimiter, expose Lock.timeout
+- dsl
+- store interval value in sym and sec
+- to_s
+- remove Gemfile.lock from git
+
 ###  v0.2.0  (2021-02-15)
 - locks for all limiters
 - clean up lock
