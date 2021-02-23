@@ -1,4 +1,4 @@
-require 'openssl'
+require 'digest'
 
 module Berater
   class LuaScript
@@ -10,7 +10,17 @@ module Berater
     end
 
     def sha
-      @sha ||= OpenSSL::Digest::SHA1.hexdigest(minify)
+      @sha ||= Digest::SHA1.hexdigest(minify)
+    end
+
+    def eval(redis, *args)
+      redis.evalsha(sha, *args)
+    rescue Redis::CommandError => e
+      raise unless e.message.include?('NOSCRIPT')
+
+      # fall back to regular eval, which will trigger
+      # script to be cached for next time
+      redis.eval(minify, *args)
     end
 
     def load(redis)
@@ -21,24 +31,8 @@ module Berater
       end
     end
 
-    def eval(redis, *args)
-      retried = false
-
-      begin
-        redis.evalsha(sha, *args)
-      rescue Redis::CommandError => e
-        raise unless e.message.include?('NOSCRIPT')
-
-        if retried
-          # fall back to regular eval
-          redis.eval(source, *args)
-        else
-          # load script into redis and try again
-          load(redis)
-          retried = true
-          retry
-        end
-      end
+    def loaded?(redis)
+      redis.script('EXISTS', sha)
     end
 
     def to_s

@@ -7,6 +7,21 @@ describe Berater::LuaScript do
 
   it { is_expected.to be_a Berater::LuaScript }
 
+  describe '#eval' do
+    def ping
+      expect(subject.eval(redis)).to eq 'PONG'
+    end
+
+    it { ping }
+
+    it 'loads the script into redis' do
+      expect(redis).to receive(:evalsha).once.and_call_original
+      expect(redis).to receive(:eval).once.and_call_original
+      ping
+      expect(subject.loaded?(redis)).to be true
+    end
+  end
+
   describe '#load' do
     it 'loads script into redis' do
       expect(redis.script('EXISTS', subject.sha)).to be false
@@ -25,33 +40,12 @@ describe Berater::LuaScript do
     end
   end
 
-  describe '#eval' do
-    def ping
-      expect(subject.eval(redis)).to eq 'PONG'
+  describe '#loaded?' do
+    it do
+      expect(subject.loaded?(redis)).to be false
+      subject.load(redis)
+      expect(subject.loaded?(redis)).to be true
     end
-
-    it 'works' do
-      ping
-    end
-
-    it 'loads the script into redis' do
-      expect(subject).to receive(:load).and_call_original
-      ping
-    end
-
-    it 'falls back to eval' do
-      expect(redis).to receive(:evalsha).twice.and_call_original
-      expect(subject).to receive(:load).once # skip load
-      expect(redis).to receive(:eval).once.and_call_original
-      ping
-    end
-
-    it 'does not suppress load errors' do
-      expect(subject).to receive(:load).and_raise(Redis::CommandError)
-
-      expect { ping }.to raise_error(Redis::CommandError)
-    end
-
   end
 
   describe '#to_s' do
