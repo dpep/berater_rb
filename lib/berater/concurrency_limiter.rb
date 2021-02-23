@@ -32,7 +32,7 @@ module Berater
       @timeout = timeout
     end
 
-    LUA_SCRIPT = <<~LUA.gsub(/^\s*|\s*--.*/, '')
+    LUA_SCRIPT = Berater::LuaScript(<<~LUA
       local key = KEYS[1]
       local lock_key = KEYS[2]
       local capacity = tonumber(ARGV[1])
@@ -57,10 +57,11 @@ module Berater
 
       return { count, lock }
     LUA
+    )
 
     def limit(&block)
-      count, lock_id = redis.eval(
-        LUA_SCRIPT,
+      count, lock_id = LUA_SCRIPT.eval(
+        redis,
         [ cache_key(key), cache_key('lock_id') ],
         [ capacity, Time.now.to_i, timeout ]
       )

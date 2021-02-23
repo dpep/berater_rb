@@ -93,7 +93,7 @@ describe 'Berater.test_mode' do
       it_behaves_like 'a RateLimiter'
 
       it 'works per usual' do
-        expect(limiter.redis).to receive(:eval).twice.and_call_original
+        expect(Berater::RateLimiter::LUA_SCRIPT).to receive(:eval).twice.and_call_original
         expect(limiter.limit).to be_a Berater::Lock
         expect { limiter.limit }.to be_overloaded
       end
@@ -109,7 +109,7 @@ describe 'Berater.test_mode' do
       it_behaves_like 'a RateLimiter'
 
       it 'always works and without calling redis' do
-        expect(limiter.redis).not_to receive(:eval)
+        expect(Berater::RateLimiter::LUA_SCRIPT).not_to receive(:eval)
         expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
@@ -121,7 +121,7 @@ describe 'Berater.test_mode' do
       it_behaves_like 'a RateLimiter'
 
       it 'never works and without calling redis' do
-        expect(limiter.redis).not_to receive(:eval)
+        expect(Berater::RateLimiter::LUA_SCRIPT).not_to receive(:eval)
         expect { limiter }.to be_overloaded
       end
     end
@@ -146,7 +146,7 @@ describe 'Berater.test_mode' do
       it_behaves_like 'a ConcurrencyLimiter'
 
       it 'works per usual' do
-        expect(limiter.redis).to receive(:eval).twice.and_call_original
+        expect(Berater::ConcurrencyLimiter::LUA_SCRIPT).to receive(:eval).twice.and_call_original
         expect(limiter.limit).to be_a Berater::Lock
         expect { limiter.limit }.to be_overloaded
       end
@@ -162,7 +162,7 @@ describe 'Berater.test_mode' do
       it_behaves_like 'a ConcurrencyLimiter'
 
       it 'always works and without calling redis' do
-        expect(limiter.redis).not_to receive(:eval)
+        expect(Berater::ConcurrencyLimiter::LUA_SCRIPT).not_to receive(:eval)
         expect {|block| limiter.limit(&block) }.to yield_control
         10.times { expect(limiter.limit).to be_a Berater::Lock }
       end
@@ -174,7 +174,7 @@ describe 'Berater.test_mode' do
       it_behaves_like 'a ConcurrencyLimiter'
 
       it 'never works and without calling redis' do
-        expect(limiter.redis).not_to receive(:eval)
+        expect(Berater::ConcurrencyLimiter::LUA_SCRIPT).not_to receive(:eval)
         expect { limiter }.to be_overloaded
       end
     end

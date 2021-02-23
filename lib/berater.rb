@@ -1,5 +1,7 @@
-require 'berater/version'
+require 'berater/limiter'
 require 'berater/lock'
+require 'berater/lua_script'
+require 'berater/version'
 
 
 module Berater
@@ -59,7 +61,6 @@ def Berater(key, mode, *args, **opts, &block)
 end
 
 # load limiters
-require 'berater/limiter'
 require 'berater/concurrency_limiter'
 require 'berater/inhibitor'
 require 'berater/rate_limiter'

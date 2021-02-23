@@ -53,7 +53,7 @@ module Berater
       end
     end
 
-    LUA_SCRIPT = <<~LUA.gsub(/^\s*|\s*--.*/, '')
+    LUA_SCRIPT = Berater::LuaScript(<<~LUA
       local key = KEYS[1]
       local ts_key = KEYS[2]
       local ts = tonumber(ARGV[1])
@@ -88,6 +88,7 @@ module Berater
 
       return { count, allowed }
     LUA
+    )
 
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @count
@@ -96,8 +97,8 @@ module Berater
       # timestamp in microseconds
       ts = (Time.now.to_f * 10**6).to_i
 
-      count, allowed = redis.eval(
-        LUA_SCRIPT,
+      count, allowed = LUA_SCRIPT.eval(
+        redis,
         [ cache_key(key), cache_key("#{key}-ts") ],
         [ ts, capacity, usec_per_drip, cost ]
       )
