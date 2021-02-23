@@ -5,18 +5,8 @@ module Berater
       super(key, **opts)
     end
 
-    def limit
-      lock = Lock.new(self, 0, 0)
-
-      if block_given?
-        begin
-          yield lock
-        ensure
-          lock.release
-        end
-      else
-        lock
-      end
+    def limit(&block)
+      yield_lock(Lock.new(self, 0, 0), &block)
     end
 
   end

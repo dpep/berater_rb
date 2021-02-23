@@ -89,7 +89,7 @@ module Berater
       return { count, allowed }
     LUA
 
-    def limit(capacity: nil, cost: 1)
+    def limit(capacity: nil, cost: 1, &block)
       capacity ||= @count
       usec_per_drip = (@interval_sec * 10**6) / @count
 
@@ -106,15 +106,7 @@ module Berater
 
       lock = Lock.new(self, "#{ts}-#{count}", count)
 
-      if block_given?
-        begin
-          yield lock
-        ensure
-          lock.release
-        end
-      else
-        lock
-      end
+      yield_lock(lock, &block)
     end
 
     def to_s

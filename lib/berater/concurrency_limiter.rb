@@ -58,7 +58,7 @@ module Berater
       return { count, lock }
     LUA
 
-    def limit
+    def limit(&block)
       count, lock_id = redis.eval(
         LUA_SCRIPT,
         [ cache_key(key), cache_key('lock_id') ],
@@ -69,15 +69,7 @@ module Berater
 
       lock = Lock.new(self, lock_id, count, -> { release(lock_id) })
 
-      if block_given?
-        begin
-          yield lock
-        ensure
-          lock.release
-        end
-      else
-        lock
-      end
+      yield_lock(lock, &block)
     end
 
     private def release(lock_id)

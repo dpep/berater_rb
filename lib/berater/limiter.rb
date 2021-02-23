@@ -26,5 +26,17 @@ module Berater
       "#{self.class}:#{key}"
     end
 
+    def yield_lock(lock, &block)
+      if block_given?
+        begin
+          yield lock
+        ensure
+          lock.release
+        end
+      else
+        lock
+      end
+    end
+
   end
 end
