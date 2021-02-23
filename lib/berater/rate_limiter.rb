@@ -59,6 +59,7 @@ module Berater
       local ts = tonumber(ARGV[1])
       local capacity = tonumber(ARGV[2])
       local usec_per_drip = tonumber(ARGV[3])
+      local cost = tonumber(ARGV[4])
       local count = 0
 
       -- timestamp of last update
@@ -72,10 +73,10 @@ module Berater
         count = math.max(0, count - drips)
       end
 
-      local allowed = count + 1 <= capacity
+      local allowed = (count + cost) <= capacity
 
       if allowed then
-        count = count + 1
+        count = count + cost
 
         -- time for bucket to empty, in milliseconds
         local ttl = math.ceil((count * usec_per_drip) / 1000)
@@ -88,7 +89,8 @@ module Berater
       return { count, allowed }
     LUA
 
-    def limit
+    def limit(capacity: nil, cost: 1)
+      capacity ||= @count
       usec_per_drip = (@interval_sec * 10**6) / @count
 
       # timestamp in microseconds
@@ -97,7 +99,7 @@ module Berater
       count, allowed = redis.eval(
         LUA_SCRIPT,
         [ cache_key(key), cache_key("#{key}-ts") ],
-        [ ts, @count, usec_per_drip ]
+        [ ts, capacity, usec_per_drip, cost ]
       )
 
       raise Overrated unless allowed

@@ -122,6 +122,21 @@ describe Berater::RateLimiter do
       3.times { limiter.limit }
       expect(limiter).to be_overrated
     end
+
+    it 'accepts a dynamic capacity' do
+      limiter = described_class.new(:key, 1, :second)
+
+      expect { limiter.limit(capacity: 0) }.to be_overrated
+      5.times { limiter.limit(capacity: 10) }
+      expect { limiter.limit }.to be_overrated
+    end
+
+    it 'accepts a cost param' do
+      expect { limiter.limit(cost: 4) }.to be_overrated
+
+      limiter.limit(cost: 3)
+      expect { limiter.limit }.to be_overrated
+    end
   end
 
   context 'with same key, different limiters' do
