@@ -7,7 +7,7 @@ module Berater
       super(key, **opts)
     end
 
-    def limit
+    def limit(**opts)
       raise Inhibited
     end
 

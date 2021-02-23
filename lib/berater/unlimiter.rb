@@ -5,7 +5,7 @@ module Berater
       super(key, **opts)
     end
 
-    def limit(&block)
+    def limit(**opts, &block)
       yield_lock(Lock.new(self, 0, 0), &block)
     end
 
