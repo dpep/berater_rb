@@ -17,7 +17,7 @@ Benchmark.bmbm(30) do |x|
 
   x.report('ConcurrencyLimiter') do
     COUNT.times do |i|
-      Berater(:key, :concurrency, COUNT, timeout: 10) { i }
+      Berater(:key, :concurrency, COUNT) { i }
     end
   end
 end

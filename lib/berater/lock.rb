@@ -13,23 +13,14 @@ module Berater
     end
 
     def locked?
-      @released_at.nil? && !expired?
-    end
-
-    def expired?
-      timeout ? @locked_at + timeout < Time.now : false
+      @released_at.nil?
     end
 
     def release
-      raise 'lock expired' if expired?
       raise 'lock already released' unless locked?
 
       @released_at = Time.now
       @release_fn ? @release_fn.call : true
-    end
-
-    def timeout
-      limiter.respond_to?(:timeout) ? limiter.timeout : nil
     end
 
   end

@@ -29,16 +29,6 @@ RSpec.shared_examples 'a limiter' do |limiter|
         expect { lock.release }.to raise_error(RuntimeError, /already/)
       end
 
-      it 'can not be released if expired' do
-        lock = limiter.limit
-
-        if lock.timeout
-          Timecop.travel(lock.timeout)
-
-          expect { lock.release }.to raise_error(RuntimeError, /expired/)
-        end
-      end
-
       it 'does not work in block mode' do
         expect do
           limiter.limit do |lock|
@@ -64,22 +54,6 @@ RSpec.shared_examples 'a limiter' do |limiter|
       end
     end
 
-    describe '#expired?' do
-      it 'works' do
-        lock = limiter.limit
-        expect(lock.expired?).to be false
-
-        if lock.timeout
-          Timecop.travel(lock.timeout)
-
-          expect(lock.expired?).to be true
-        else
-          Timecop.travel(1_000)
-
-          expect(lock.expired?).to be false
-        end
-      end
-    end
   end
 
 end
