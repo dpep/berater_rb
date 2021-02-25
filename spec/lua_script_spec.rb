@@ -1,7 +1,7 @@
 describe Berater::LuaScript do
   subject { Berater::LuaScript('return redis.call("PING")') }
 
-  before { redis.script('FLUSH') }
+  before { redis.script(:flush) }
 
   let(:redis) { Berater.redis }
 
@@ -24,9 +24,9 @@ describe Berater::LuaScript do
 
   describe '#load' do
     it 'loads script into redis' do
-      expect(redis.script('EXISTS', subject.sha)).to be false
+      expect(redis.script(:exists, subject.sha)).to be false
       subject.load(redis)
-      expect(redis.script('EXISTS', subject.sha)).to be true
+      expect(redis.script(:exists, subject.sha)).to be true
     end
 
     it 'returns the sha' do
@@ -35,7 +35,7 @@ describe Berater::LuaScript do
 
     it 'validates the returned sha' do
       allow(redis).to receive(:script).with(:flush).and_call_original
-      expect(redis).to receive(:script).with('LOAD', String).and_return('abc')
+      expect(redis).to receive(:script).with(:load, String).and_return('abc')
       expect { subject.load(redis) }.to raise_error(RuntimeError)
     end
   end

@@ -24,7 +24,7 @@ module Berater
     end
 
     def load(redis)
-      redis.script('LOAD', minify).tap do |sha|
+      redis.script(:load, minify).tap do |sha|
         unless sha == self.sha
           raise "unexpected script SHA: expected #{self.sha}, got #{sha}"
         end
@@ -32,7 +32,7 @@ module Berater
     end
 
     def loaded?(redis)
-      redis.script('EXISTS', sha)
+      redis.script(:exists, sha)
     end
 
     def to_s
