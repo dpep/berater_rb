@@ -21,9 +21,9 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :pass }
 
       it { is_expected.to be_a Berater::Unlimiter }
+      it_behaves_like 'it is not overloaded'
 
       it 'always works' do
-        expect {|block| subject.limit(&block) }.to yield_control
         10.times { expect(subject.limit).to be_a Berater::Lock }
       end
     end
@@ -32,10 +32,7 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :fail }
 
       it { is_expected.to be_a Berater::Unlimiter }
-
-      it 'never works' do
-        expect { subject }.to be_overloaded
-      end
+      it_behaves_like 'it is overloaded'
     end
   end
 
@@ -56,9 +53,9 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :pass }
 
       it { is_expected.to be_a Berater::Inhibitor }
+      it_behaves_like 'it is not overloaded'
 
       it 'always works' do
-        expect {|block| subject.limit(&block) }.to yield_control
         10.times { expect(subject.limit).to be_a Berater::Lock }
       end
     end
@@ -67,10 +64,7 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :fail }
 
       it { is_expected.to be_a Berater::Inhibitor }
-
-      it 'never works' do
-        expect { subject }.to be_overloaded
-      end
+      it_behaves_like 'it is overloaded'
     end
   end
 
@@ -107,10 +101,10 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :pass }
 
       it_behaves_like 'a RateLimiter'
+      it_behaves_like 'it is not overloaded'
 
       it 'always works and without calling redis' do
         expect(Berater::RateLimiter::LUA_SCRIPT).not_to receive(:eval)
-        expect {|block| subject.limit(&block) }.to yield_control
         10.times { expect(subject.limit).to be_a Berater::Lock }
       end
     end
@@ -160,10 +154,10 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :pass }
 
       it_behaves_like 'a ConcurrencyLimiter'
+      it_behaves_like 'it is not overloaded'
 
       it 'always works and without calling redis' do
         expect(Berater::ConcurrencyLimiter::LUA_SCRIPT).not_to receive(:eval)
-        expect {|block| subject.limit(&block) }.to yield_control
         10.times { expect(subject.limit).to be_a Berater::Lock }
       end
     end
@@ -172,6 +166,7 @@ describe 'Berater.test_mode' do
       before { Berater.test_mode = :fail }
 
       it_behaves_like 'a ConcurrencyLimiter'
+      it_behaves_like 'it is overloaded'
 
       it 'never works and without calling redis' do
         expect(Berater::ConcurrencyLimiter::LUA_SCRIPT).not_to receive(:eval)
