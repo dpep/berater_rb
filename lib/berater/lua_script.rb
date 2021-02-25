@@ -43,8 +43,8 @@ module Berater
 
     def minify
       # trim comments (whole line and partial)
-      # and whitespace (prefix, suffix, and empty lines)
-      @minify ||= source.gsub(/^\s*--.*\n|\s*--.*|^\s*|\s*$|^$\n/, '')
+      # and whitespace (prefix and empty lines)
+      @minify ||= source.gsub(/^\s*--.*\n|\s*--.*|^\s*|^$\n/, '').chomp
     end
 
   end

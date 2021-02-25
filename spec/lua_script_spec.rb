@@ -76,6 +76,8 @@ describe Berater::LuaScript do
           if condition then
             call
           end
+
+          return 123
         LUA
       end
 
@@ -84,6 +86,7 @@ describe Berater::LuaScript do
           'if condition then',
           'call',
           'end',
+          'return 123'
         ].join "\n"
       end
 
