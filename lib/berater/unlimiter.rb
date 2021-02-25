@@ -9,5 +9,9 @@ module Berater
       yield_lock(Lock.new(self, 0, 0), &block)
     end
 
+    def overloaded?
+      false
+    end
+
   end
 end

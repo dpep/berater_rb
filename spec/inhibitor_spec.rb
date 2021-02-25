@@ -15,11 +15,9 @@ describe Berater::Inhibitor do
   end
 
   describe '#limit' do
-    let(:limiter) { described_class.new }
+    subject { described_class.new }
 
-    it 'always limits' do
-      expect { limiter.limit }.to be_inhibited
-    end
+    it_behaves_like 'it is overloaded'
   end
 
 end

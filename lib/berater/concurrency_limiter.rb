@@ -38,7 +38,8 @@ module Berater
       local capacity = tonumber(ARGV[1])
       local ts = tonumber(ARGV[2])
       local ttl = tonumber(ARGV[3])
-      local lock
+      local cost = tonumber(ARGV[4])
+      local lock_ids = {}
 
       -- purge stale hosts
       if ttl > 0 then
@@ -48,34 +49,54 @@ module Berater
       -- check capacity
       local count = redis.call('ZCARD', key)
 
-      if count < capacity then
-        -- grab a lock
-        lock = redis.call('INCR', lock_key)
-        redis.call('ZADD', key, ts, lock)
-        count = count + 1
+      if (count + cost <= capacity) and (cost > 0) then
+        -- grab locks, one per cost
+        local lock_id = redis.call('INCRBY', lock_key, cost)
+        local locks = {}
+
+        for i = lock_id - cost + 1, lock_id do
+          table.insert(lock_ids, i)
+
+          table.insert(locks, ts)
+          table.insert(locks, i)
+        end
+
+        redis.call('ZADD', key, unpack(locks))
+        count = count + cost
       end
 
-      return { count, lock }
+      return { count, unpack(lock_ids) }
     LUA
     )
 
-    def limit(&block)
-      count, lock_id = LUA_SCRIPT.eval(
+    def limit(cost: 1, &block)
+      # cost is Integer >= 0
+      count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key(key), cache_key('lock_id') ],
-        [ capacity, Time.now.to_i, timeout ]
+        [ capacity, Time.now.to_i, timeout, cost ]
       )
 
-      raise Incapacitated unless lock_id
-
-      lock = Lock.new(self, lock_id, count, -> { release(lock_id) })
+      if cost == 0
+        lock = Lock.new(self, nil, count)
+      else
+        raise Incapacitated if lock_ids.empty?
+        lock = Lock.new(self, lock_ids[0], count, -> { release(lock_ids) })
+      end
 
       yield_lock(lock, &block)
     end
 
-    private def release(lock_id)
-      res = redis.zrem(cache_key(key), lock_id)
-      res == true || res == 1 # depending on which version of Redis
+    def overloaded?
+      limit(cost: 0) { |lock| lock.contention >= capacity }
+    rescue Overloaded
+      true
+    end
+    alias incapacitated? overloaded?
+
+    private def release(lock_ids)
+      res = redis.zrem(cache_key(key), lock_ids)
+      res == true || res == lock_ids.count # depending on which version of Redis
     end
 
     def to_s

@@ -140,39 +140,62 @@ describe Berater::RateLimiter do
       expect { limiter.limit }.to be_overrated
     end
 
-    it 'accepts a cost param' do
-      expect { limiter.limit(cost: 4) }.to be_overrated
+    context 'works with cost parameter' do
+      it { expect { limiter.limit(cost: 4) }.to be_overrated }
 
-      limiter.limit(cost: 3)
-      expect { limiter.limit }.to be_overrated
+      it 'works within limit' do
+        limiter.limit(cost: 3)
+        expect { limiter.limit }.to be_overrated
+      end
+
+      it 'resets over time' do
+        limiter.limit(cost: 3)
+        expect(limiter).to be_overrated
+
+        Timecop.freeze(1)
+        expect(limiter).not_to be_overrated
+      end
+
+    end
+
+    context 'with same key, different limiters' do
+      let(:limiter_one) { described_class.new(:key, 1, :second) }
+      let(:limiter_two) { described_class.new(:key, 1, :second) }
+
+      it 'works as expected' do
+        expect(limiter_one.limit).not_to be_overrated
+
+        expect(limiter_one).to be_overrated
+        expect(limiter_two).to be_overrated
+      end
+    end
+
+    context 'with different keys, different limiters' do
+      let(:limiter_one) { described_class.new(:one, 1, :second) }
+      let(:limiter_two) { described_class.new(:two, 2, :second) }
+
+      it 'works as expected' do
+        expect(limiter_one.limit).not_to be_overrated
+        expect(limiter_two.limit).not_to be_overrated
+
+        expect(limiter_one).to be_overrated
+        expect(limiter_two.limit).not_to be_overrated
+
+        expect(limiter_one).to be_overrated
+        expect(limiter_two).to be_overrated
+      end
     end
   end
 
-  context 'with same key, different limiters' do
-    let(:limiter_one) { described_class.new(:key, 1, :second) }
-    let(:limiter_two) { described_class.new(:key, 1, :second) }
+  describe '#overloaded?' do
+    let(:limiter) { described_class.new(:key, 1, :second) }
 
-    it 'works as expected' do
-      expect(limiter_one.limit).not_to be_overrated
-
-      expect(limiter_one).to be_overrated
-      expect(limiter_two).to be_overrated
-    end
-  end
-
-  context 'with different keys, different limiters' do
-    let(:limiter_one) { described_class.new(:one, 1, :second) }
-    let(:limiter_two) { described_class.new(:two, 2, :second) }
-
-    it 'works as expected' do
-      expect(limiter_one.limit).not_to be_overrated
-      expect(limiter_two.limit).not_to be_overrated
-
-      expect(limiter_one).to be_overrated
-      expect(limiter_two.limit).not_to be_overrated
-
-      expect(limiter_one).to be_overrated
-      expect(limiter_two).to be_overrated
+    it 'works' do
+      expect(limiter.overloaded?).to be false
+      limiter.limit
+      expect(limiter.overloaded?).to be true
+      Timecop.freeze(1)
+      expect(limiter.overloaded?).to be false
     end
   end
 

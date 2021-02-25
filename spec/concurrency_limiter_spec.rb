@@ -105,70 +105,121 @@ describe Berater::ConcurrencyLimiter do
       2.times { limiter.limit }
       expect(limiter).to be_incapacitated
     end
-  end
 
-  context 'with same key, different limiters' do
-    let(:limiter_one) { described_class.new(:key, 1) }
-    let(:limiter_two) { described_class.new(:key, 1) }
+    context 'with cost parameter' do
+      it { expect { limiter.limit(cost: 4) }.to be_incapacitated }
 
-    it { expect(limiter_one.key).to eq limiter_two.key }
+      it 'works within limit' do
+        limiter.limit(cost: 2)
+        expect(limiter).to be_incapacitated
+      end
 
-    it 'works as expected' do
-      expect(limiter_one.limit).to be_a Berater::Lock
+      it 'releases full cost' do
+        lock = limiter.limit(cost: 2)
+        expect(limiter).to be_incapacitated
 
-      expect(limiter_one).to be_incapacitated
-      expect(limiter_two).to be_incapacitated
+        lock.release
+        expect(limiter).not_to be_incapacitated
+
+        lock = limiter.limit(cost: 2)
+        expect(limiter).to be_incapacitated
+      end
+
+      it 'respects timeout' do
+        limiter.limit(cost: 2)
+        expect(limiter).to be_incapacitated
+
+        Timecop.freeze(30)
+        expect(limiter).not_to be_incapacitated
+
+        limiter.limit(cost: 2)
+        expect(limiter).to be_incapacitated
+      end
+    end
+
+    context 'with same key, different limiters' do
+      let(:limiter_one) { described_class.new(:key, 1) }
+      let(:limiter_two) { described_class.new(:key, 1) }
+
+      it { expect(limiter_one.key).to eq limiter_two.key }
+
+      it 'works as expected' do
+        expect(limiter_one.limit).to be_a Berater::Lock
+
+        expect(limiter_one).to be_incapacitated
+        expect(limiter_two).to be_incapacitated
+      end
+    end
+
+    context 'with same key, different capacities' do
+      let(:limiter_one) { described_class.new(:key, 1) }
+      let(:limiter_two) { described_class.new(:key, 2) }
+
+      it { expect(limiter_one.capacity).not_to eq limiter_two.capacity }
+
+      it 'works as expected' do
+        one_lock = limiter_one.limit
+        expect(one_lock).to be_a Berater::Lock
+
+        expect(limiter_one).to be_incapacitated
+        expect(limiter_two).not_to be_incapacitated
+
+        two_lock = limiter_two.limit
+        expect(two_lock).to be_a Berater::Lock
+
+        expect(limiter_one).to be_incapacitated
+        expect(limiter_two).to be_incapacitated
+
+        one_lock.release
+        expect(limiter_one).to be_incapacitated
+        expect(limiter_two).not_to be_incapacitated
+
+        two_lock.release
+        expect(limiter_one).not_to be_incapacitated
+        expect(limiter_two).not_to be_incapacitated
+      end
+    end
+
+    context 'with different keys, different limiters' do
+      let(:limiter_one) { described_class.new(:one, 1) }
+      let(:limiter_two) { described_class.new(:two, 1) }
+
+      it 'works as expected' do
+        expect(limiter_one).not_to be_incapacitated
+        expect(limiter_two).not_to be_incapacitated
+
+        one_lock = limiter_one.limit
+        expect(one_lock).to be_a Berater::Lock
+
+        expect(limiter_one).to be_incapacitated
+        expect(limiter_two).not_to be_incapacitated
+
+        two_lock = limiter_two.limit
+        expect(two_lock).to be_a Berater::Lock
+
+        expect(limiter_one).to be_incapacitated
+        expect(limiter_two).to be_incapacitated
+      end
     end
   end
 
-  context 'with same key, different capacities' do
-    let(:limiter_one) { described_class.new(:key, 1) }
-    let(:limiter_two) { described_class.new(:key, 2) }
+  describe '#overloaded?' do
+    let(:limiter) { described_class.new(:key, 1, timeout: 30) }
 
-    it { expect(limiter_one.capacity).not_to eq limiter_two.capacity }
-
-    it 'works as expected' do
-      one_lock = limiter_one.limit
-      expect(one_lock).to be_a Berater::Lock
-
-      expect(limiter_one).to be_incapacitated
-      expect(limiter_two).not_to be_incapacitated
-
-      two_lock = limiter_two.limit
-      expect(two_lock).to be_a Berater::Lock
-
-      expect(limiter_one).to be_incapacitated
-      expect(limiter_two).to be_incapacitated
-
-      one_lock.release
-      expect(limiter_one).to be_incapacitated
-      expect(limiter_two).not_to be_incapacitated
-
-      two_lock.release
-      expect(limiter_one).not_to be_incapacitated
-      expect(limiter_two).not_to be_incapacitated
+    it 'works' do
+      expect(limiter.overloaded?).to be false
+      lock = limiter.limit
+      expect(limiter.overloaded?).to be true
+      lock.release
+      expect(limiter.overloaded?).to be false
     end
-  end
 
-  context 'with different keys, different limiters' do
-    let(:limiter_one) { described_class.new(:one, 1) }
-    let(:limiter_two) { described_class.new(:two, 1) }
-
-    it 'works as expected' do
-      expect(limiter_one).not_to be_incapacitated
-      expect(limiter_two).not_to be_incapacitated
-
-      one_lock = limiter_one.limit
-      expect(one_lock).to be_a Berater::Lock
-
-      expect(limiter_one).to be_incapacitated
-      expect(limiter_two).not_to be_incapacitated
-
-      two_lock = limiter_two.limit
-      expect(two_lock).to be_a Berater::Lock
-
-      expect(limiter_one).to be_incapacitated
-      expect(limiter_two).to be_incapacitated
+    it 'respects timeout' do
+      expect(limiter.overloaded?).to be false
+      lock = limiter.limit
+      expect(limiter.overloaded?).to be true
+      Timecop.freeze(30)
+      expect(limiter.overloaded?).to be false
     end
   end
 

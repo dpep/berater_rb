@@ -11,5 +11,10 @@ module Berater
       raise Inhibited
     end
 
+    def overloaded?
+      true
+    end
+    alias inhibited? overloaded?
+
   end
 end

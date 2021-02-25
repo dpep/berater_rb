@@ -16,15 +16,17 @@ module BeraterMatchers
           res = obj.call
 
           if res.is_a? Berater::Limiter
-            # eg. expect { Berater.new(...) }.to be_overrated
-            res.limit {}
+            # eg. expect { Berater.new(...) }.to be_overloaded
+            res.overloaded?
+          else
+            # eg. expect { Berater(...)  }.to be_overloaded
+            # eg. expect { limiter.limit }.to be_overloaded
+            false
           end
         when Berater::Limiter
-          # eg. expect(Berater.new(...)).to be_overrated
-          obj.limit {}
+          # eg. expect(Berater.new(...)).to be_overloaded
+          obj.overloaded?
         end
-
-        false
       rescue @type
         true
       end

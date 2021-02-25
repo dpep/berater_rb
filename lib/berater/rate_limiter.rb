@@ -75,7 +75,7 @@ module Berater
 
       local allowed = (count + cost) <= capacity
 
-      if allowed then
+      if allowed and cost > 0 then
         count = count + cost
 
         -- time for bucket to empty, in milliseconds
@@ -105,10 +105,16 @@ module Berater
 
       raise Overrated unless allowed
 
-      lock = Lock.new(self, "#{ts}-#{count}", count)
-
+      lock = Lock.new(self, ts, count)
       yield_lock(lock, &block)
     end
+
+    def overloaded?
+      limit(cost: 0) { |lock| lock.contention >= count }
+    rescue Overrated
+      true
+    end
+    alias overrated? overloaded?
 
     def to_s
       msg = if @interval.is_a? Integer

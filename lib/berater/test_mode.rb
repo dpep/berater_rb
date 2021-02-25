@@ -33,8 +33,12 @@ module Berater
         stub = stub_klass.allocate
         stub.send(:initialize, *args, **opts)
 
-        instance.define_singleton_method(:limit) do |&block|
-          stub.limit(&block)
+        instance.define_singleton_method(:limit) do |**opts, &block|
+          stub.limit(**opts, &block)
+        end
+
+        instance.define_singleton_method(:overloaded?) do
+          stub.overloaded?
         end
       end
     end
