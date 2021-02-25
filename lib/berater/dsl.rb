@@ -1,5 +1,27 @@
 module Berater
   module DSL
+    refine Berater.singleton_class do
+      def new(key, mode = nil, *args, **opts, &block)
+        if mode.nil?
+          unless args.empty?
+            raise ArgumentError, '0 arguments expected with block'
+          end
+
+          unless block_given?
+            raise ArgumentError, 'expected either mode or block'
+          end
+
+          mode, *args = DSL.eval(&block)
+        else
+          if block_given?
+            raise ArgumentError, 'expected either mode or block, not both'
+          end
+        end
+
+        super(key, mode, *args, **opts)
+      end
+    end
+
     extend self
 
     def eval &block

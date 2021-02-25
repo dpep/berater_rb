@@ -17,23 +17,7 @@ module Berater
     yield self
   end
 
-  def new(key, mode = nil, *args, **opts, &block)
-    if mode.nil?
-      unless args.empty?
-        raise ArgumentError, '0 arguments expected with block'
-      end
-
-      unless block_given?
-        raise ArgumentError, 'expected either mode or block'
-      end
-
-      mode, *args = DSL.eval(&block)
-    else
-      if block_given?
-        raise ArgumentError, 'expected either mode or block, not both'
-      end
-    end
-
+  def new(key, mode, *args, **opts)
     klass = MODES[mode.to_sym]
 
     unless klass
@@ -70,5 +54,3 @@ Berater.register(:concurrency, Berater::ConcurrencyLimiter)
 Berater.register(:inhibited, Berater::Inhibitor)
 Berater.register(:rate, Berater::RateLimiter)
 Berater.register(:unlimited, Berater::Unlimiter)
-
-require 'berater/dsl'

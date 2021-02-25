@@ -1,3 +1,5 @@
+require 'berater/dsl'
+
 describe Berater::DSL do
   def check(expected, &block)
     expect(Berater::DSL.eval(&block)).to eq expected

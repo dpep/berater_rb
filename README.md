@@ -67,7 +67,10 @@ end
 ```
 
 #### DSL
+Experimental...
+
 ```ruby
+using Berater::DSL
 
 Berater(:key) { 1.per second } do
   ...
