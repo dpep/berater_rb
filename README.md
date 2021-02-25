@@ -2,7 +2,7 @@ Berater
 ======
 A framework for limiting resource utilization, with build in rate and capacity limiters.  Backed by [Redis](https://redis.io/).
 
-```
+```ruby
 require 'berater'
 
 Berater(:key, :rate, 2, :second) do
