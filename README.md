@@ -2,52 +2,96 @@ Berater
 ======
 A framework for limiting resource utilization, with build in rate and capacity limiters.  Backed by [Redis](https://redis.io/).
 
-
-#### Install
-```gem install berater```
-
-
-#### Usage
-```ruby
+```
 require 'berater'
-require 'redis'
-
-Berater.configure do |c|
-  c.redis = Redis.new
-end
-
 
 Berater(:key, :rate, 2, :second) do
   # do work, twice per second with a rate limiter
 end
 
 
-Berater(:key, :concurrency, 1) do
-  # or one at a time with a concurrency limiter
+Berater(:key, :concurrency, 3) do
+  # or three simultaneous request at a time, with a concurrency limiter
 end
-
 ```
 
 
-#### rspec
-Berater has a few tools to make testing easier.  rspec matchers, automatic flushing of Redis between examples, and a test mode to force your desired behavior and avoid redis altogether.  The [Timecop](https://github.com/travisjeffery/timecop) gem is recommended.
+#### Install
+```gem install berater```
+
+## RateLimiter
+A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) rate limiter.
 
 ```ruby
-require 'berater/rspec'
+Berater::RateLimiter.new(key, count, interval, **opts)
+```
+* `key` - name of limiter
+* `count` - how many requests
+* `interval` - how often (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
+* `opts`
+  * `redis` - a redis instance
+
+
+eg.
+```ruby
+limiter = Berater::RateLimiter.new(:key, 2, :second, redis: redis)
+limiter.limit do
+  # do work, twice per second with a rate limiter
+end
+
+# or, more conveniently
+Berater(:key, :rate, 2, :second) do
+  ...
+end
+```
+
+## ConcurrencyLimiter
+```ruby
+Berater::ConcurrencyLimiter.new(key, capacity, **opts)
+```
+* `key` - name of limiter
+* `capacity` - maximum simultaneous requests
+* `opts`
+  * `redis` - a redis instance
+  * `timeout` - maximum seconds a request may take before lock is released
+
+eg.
+```ruby
+limiter = Berater::ConcurrencyLimiter.new(:key, 3, redis: redis)
+limiter.limit do
+  # do work, three simultaneous requests at a time
+end
+
+# or, more conveniently
+Berater(:key, :concurrency, 3) do
+  ...
+end
+```
+
+
+#### Configure
+Configure a default redis connection.
+
+```ruby
+Berater.configure do |c|
+  c.redis = Redis.new
+end
+```
+
+
+## Testing
+Berater has a few tools to make testing easier.  And it plays nicely with [Timecop](https://github.com/travisjeffery/timecop).
+
+
+#### test_mode
+Force all calls to `limit` to either pass or fail, without hitting Redis.
+
+```ruby
 require 'berater/test_mode'
 
-describe 'MyWorker' do
+describe 'MyTest' do
   let(:limiter) { Berater.new(:key, :rate, 1, :second) }
-
-  it 'rate limits' do
-    limiter.limit { ... }
-
-    expect { limiter.limit }.to raise_error(Berater::Overloaded)
-
-    # or use a matcher
-    expect { limiter.limit }.to be_overloaded
-  end
-
+  
   context 'with test_mode = :pass' do
     before { Berater.test_mode = :pass }
 
@@ -60,12 +104,45 @@ describe 'MyWorker' do
     before { Berater.test_mode = :fail }
 
     it 'always raises an exception' do
-      expect { limiter.limit }.to be_overloaded
+      expect { limiter.limit }.to raise_error(Berater::Overloaded)
     end
   end
 end
 ```
 
+
+#### rspec
+rspec matchers and automatic flushing of Redis between examples.
+
+```ruby
+require 'berater/rspec'
+
+describe 'MyTest' do
+  let(:limiter) { Berater.new(:key, :rate, 1, :second) }
+
+  it 'rate limits' do
+    limiter.limit
+    
+    expect { limiter.limit }.to be_overloaded
+  end
+end
+```
+
+#### Unlimiter
+A limiter which always succeeds.
+
+```ruby
+limiter = Berater::Unlimiter.new
+```
+
+#### Inhibitor
+A limiter which always fails.
+
+```ruby
+limiter = Berater::Inhibitor.new
+```
+
+----
 #### DSL
 Experimental...
 
