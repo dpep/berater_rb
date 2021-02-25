@@ -43,7 +43,7 @@ describe Berater do
         expect(limiter.redis).to be redis
       end
 
-      it 'works with convinience' do
+      it 'works with convenience' do
         expect(Berater).to receive(:new).and_return(limiter)
         expect {|b| Berater(:key, :unlimited, &b) }.to yield_control
       end
@@ -67,7 +67,7 @@ describe Berater do
         expect(limiter.redis).to be redis
       end
 
-      it 'works with convinience' do
+      it 'works with convenience' do
         expect(Berater).to receive(:new).and_return(limiter)
         expect { Berater(:key, :inhibited) }.to be_inhibited
       end
@@ -91,7 +91,7 @@ describe Berater do
         expect(limiter.redis).to be redis
       end
 
-      it 'works with convinience' do
+      it 'works with convenience' do
         expect(Berater).to receive(:new).and_return(limiter)
         expect {|b| Berater(:key, :rate, 1, :second, &b) }.to yield_control
       end
@@ -115,7 +115,7 @@ describe Berater do
         expect(limiter.redis).to be redis
       end
 
-      it 'works with convinience' do
+      it 'works with convenience' do
         expect(Berater).to receive(:new).and_return(limiter)
         expect {|b| Berater(:key, :concurrency, 1, &b) }.to yield_control
       end
