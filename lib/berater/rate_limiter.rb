@@ -12,34 +12,8 @@ module Berater
     end
 
     private def interval=(interval)
-      @interval = interval.dup
-
-      case @interval
-      when Integer
-        raise ArgumentError, "interval must be >= 0" unless @interval >= 0
-        @interval_sec = @interval
-      when String
-        @interval = @interval.to_sym
-      when Symbol
-      else
-        raise ArgumentError, "unexpected interval type: #{interval.class}"
-      end
-
-      if @interval.is_a? Symbol
-        case @interval
-        when :sec, :second, :seconds
-          @interval = :second
-          @interval_sec = 1
-        when :min, :minute, :minutes
-          @interval = :minute
-          @interval_sec = 60
-        when :hour, :hours
-          @interval = :hour
-          @interval_sec = 60 * 60
-        else
-          raise ArgumentError, "unexpected interval value: #{interval}"
-        end
-      end
+      @interval = interval
+      @interval_usec = Berater::Utils.to_usec(interval)
     end
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
@@ -81,7 +55,7 @@ module Berater
 
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @capacity
-      usec_per_drip = (@interval_sec * 10**6) / @capacity
+      usec_per_drip = @interval_usec / @capacity
 
       # timestamp in microseconds
       ts = (Time.now.to_f * 10**6).to_i
@@ -106,14 +80,14 @@ module Berater
     alias overrated? overloaded?
 
     def to_s
-      msg = if @interval.is_a? Integer
-        if @interval == 1
+      msg = if interval.is_a? Numeric
+        if interval == 1
           "every second"
         else
-          "every #{@interval} seconds"
+          "every #{interval} seconds"
         end
       else
-        "per #{@interval}"
+        "per #{interval}"
       end
 
       "#<#{self.class}(#{key}: #{capacity} #{msg})>"

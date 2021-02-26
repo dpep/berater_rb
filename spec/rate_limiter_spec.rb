@@ -40,57 +40,11 @@ describe Berater::RateLimiter do
   end
 
   describe '#interval' do
-    def expect_interval(interval, expected)
-      limiter = described_class.new(:key, 1, interval)
-      expect(limiter.interval).to eq expected
-    end
-
-    context 'with ints' do
-      it { expect_interval(0, 0) }
-      it { expect_interval(1, 1) }
-      it { expect_interval(33, 33) }
-    end
-
-    context 'with symbols' do
-      it { expect_interval(:sec, :second) }
-      it { expect_interval(:second, :second) }
-      it { expect_interval(:seconds, :second) }
-
-      it { expect_interval(:min, :minute) }
-      it { expect_interval(:minute, :minute) }
-      it { expect_interval(:minutes, :minute) }
-
-      it { expect_interval(:hour, :hour) }
-      it { expect_interval(:hours, :hour) }
-    end
-
-    context 'with strings' do
-      it { expect_interval('sec', :second) }
-      it { expect_interval('minute', :minute) }
-      it { expect_interval('hours', :hour) }
-    end
-
-    context 'with erroneous values' do
-      def expect_bad_interval(interval)
-        expect do
-          described_class.new(:key, 1, interval)
-        end.to raise_error(ArgumentError)
-      end
-
-      it { expect_bad_interval(-1) }
-      it { expect_bad_interval(:secondz) }
-      it { expect_bad_interval('huor') }
-    end
-
-    context 'interprets values' do
-      def expect_sec(interval, expected)
-        limiter = described_class.new(:key, 1, interval)
-        expect(limiter.instance_variable_get(:@interval_sec)).to eq expected
-      end
-
-      it { expect_sec(:second, 1) }
-      it { expect_sec(:minute, 60) }
-      it { expect_sec(:hour, 3600) }
+    subject { described_class.new(:key, 1, :second) }
+    # see spec/utils_spec.rb for more
+    it 'saves the interval in original and microsecond format' do
+      expect(subject.interval).to be :second
+      expect(subject.instance_variable_get(:@interval_usec)).to be 10**6
     end
   end
 
@@ -216,16 +170,6 @@ describe Berater::RateLimiter do
       check(1, 'second', /1 per second/)
       check(1, 'minute', /1 per minute/)
       check(1, 'hour', /1 per hour/)
-    end
-
-    it 'normalizes' do
-      check(1, :sec, /1 per second/)
-      check(1, :seconds, /1 per second/)
-
-      check(1, :min, /1 per minute/)
-      check(1, :minutes, /1 per minute/)
-
-      check(1, :hours, /1 per hour/)
     end
 
     it 'works with integers' do

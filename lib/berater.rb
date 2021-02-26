@@ -1,6 +1,7 @@
 require 'berater/limiter'
 require 'berater/lock'
 require 'berater/lua_script'
+require 'berater/utils'
 require 'berater/version'
 
 module Berater
