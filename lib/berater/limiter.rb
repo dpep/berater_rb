@@ -1,7 +1,7 @@
 module Berater
   class Limiter
 
-    attr_reader :key, :options
+    attr_reader :key, :capacity, :options
 
     def redis
       options[:redis] || Berater.redis
@@ -21,9 +21,20 @@ module Berater
 
     protected
 
-    def initialize(key, **opts)
+    def initialize(key, capacity, **opts)
       @key = key
+      self.capacity = capacity
       @options = opts
+    end
+
+    def capacity=(capacity)
+      unless capacity.is_a? Integer
+        raise ArgumentError, "expected Integer, found #{capacity.class}"
+      end
+
+      raise ArgumentError, "capacity must be >= 0" unless capacity >= 0
+
+      @capacity = capacity
     end
 
     def cache_key(key)

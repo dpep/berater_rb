@@ -4,7 +4,7 @@ module Berater
     class Inhibited < Overloaded; end
 
     def initialize(key = :inhibitor, *args, **opts)
-      super(key, **opts)
+      super(key, 0, **opts)
     end
 
     def limit(**opts)

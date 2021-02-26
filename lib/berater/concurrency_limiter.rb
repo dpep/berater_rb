@@ -3,23 +3,12 @@ module Berater
 
     class Incapacitated < Overloaded; end
 
-    attr_reader :capacity, :timeout
+    attr_reader :timeout
 
     def initialize(key, capacity, **opts)
-      super(key, **opts)
+      super(key, capacity, **opts)
 
-      self.capacity = capacity
       self.timeout = opts[:timeout] || 0
-    end
-
-    private def capacity=(capacity)
-      unless capacity.is_a? Integer
-        raise ArgumentError, "expected Integer, found #{capacity.class}"
-      end
-
-      raise ArgumentError, "capacity must be >= 0" unless capacity >= 0
-
-      @capacity = capacity
     end
 
     private def timeout=(timeout)

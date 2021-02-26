@@ -3,23 +3,12 @@ module Berater
 
     class Overrated < Overloaded; end
 
-    attr_accessor :capacity, :interval
+    attr_accessor :interval
 
     def initialize(key, capacity, interval, **opts)
-      super(key, **opts)
+      super(key, capacity, **opts)
 
-      self.capacity = capacity
       self.interval = interval
-    end
-
-    private def capacity=(capacity)
-      unless capacity.is_a? Integer
-        raise ArgumentError, "expected Integer, found #{capacity.class}"
-      end
-
-      raise ArgumentError, "capacity must be >= 0" unless capacity >= 0
-
-      @capacity = capacity
     end
 
     private def interval=(interval)
