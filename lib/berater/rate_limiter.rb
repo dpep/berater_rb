@@ -21,9 +21,11 @@ module Berater
       local ts_key = KEYS[2]
       local ts = tonumber(ARGV[1])
       local capacity = tonumber(ARGV[2])
-      local usec_per_drip = tonumber(ARGV[3])
+      local interval_usec = tonumber(ARGV[3])
       local cost = tonumber(ARGV[4])
+
       local count = 0
+      local usec_per_drip = interval_usec / capacity
 
       -- timestamp of last update
       local last_ts = tonumber(redis.call('GET', ts_key))
@@ -55,7 +57,6 @@ module Berater
 
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @capacity
-      usec_per_drip = @interval_usec / @capacity
 
       # timestamp in microseconds
       ts = (Time.now.to_f * 10**6).to_i
@@ -63,7 +64,7 @@ module Berater
       count, allowed = LUA_SCRIPT.eval(
         redis,
         [ cache_key(key), cache_key("#{key}-ts") ],
-        [ ts, capacity, usec_per_drip, cost ]
+        [ ts, capacity, @interval_usec, cost ]
       )
 
       raise Overrated unless allowed
