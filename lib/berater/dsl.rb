@@ -55,12 +55,12 @@ module Berater
     def install
       Integer.class_eval do
         def per(unit)
-          [ :rate, self, unit ]
+          [ self, unit ]
         end
         alias every per
 
         def at_once
-          [ :concurrency, self ]
+          [ self ]
         end
         alias concurrently at_once
         alias at_a_time at_once

@@ -13,13 +13,13 @@ describe Berater::DSL do
     end
 
     it 'parses' do
-      check([ :rate, 1, :second ]) { 1.per second }
-      check([ :rate, 3, :minute ]) { 3.per minute }
-      check([ :rate, 5, :hour ]) { 5.every hour }
+      check([ 1, :second ]) { 1.per second }
+      check([ 3, :minute ]) { 3.per minute }
+      check([ 5, :hour ]) { 5.every hour }
     end
 
     it 'cleans up afterward' do
-      check([ :rate, 1, :second ]) { 1.per second }
+      check([ 1, :second ]) { 1.per second }
 
       expect(Integer).not_to respond_to(:per)
       expect(Integer).not_to respond_to(:every)
@@ -29,19 +29,19 @@ describe Berater::DSL do
       count = 1
       interval = :second
 
-      check([ :rate, count, interval ]) { count.per interval }
+      check([ count, interval ]) { count.per interval }
     end
   end
 
   context 'concurrency mode' do
     it 'parses' do
-      check([ :concurrency, 1 ]) { 1.at_once }
-      check([ :concurrency, 3 ]) { 3.at_a_time }
-      check([ :concurrency, 5 ]) { 5.concurrently }
+      check([ 1 ]) { 1.at_once }
+      check([ 3 ]) { 3.at_a_time }
+      check([ 5 ]) { 5.concurrently }
     end
 
     it 'cleans up afterward' do
-      check([ :concurrency, 1 ]) { 1.at_once }
+      check([ 1 ]) { 1.at_once }
 
       expect(Integer).not_to respond_to(:at_once)
       expect(Integer).not_to respond_to(:at_a_time)
@@ -53,7 +53,7 @@ describe Berater::DSL do
         CAPACITY = 3
       end
 
-      check([ :concurrency, Foo::CAPACITY ]) { Foo::CAPACITY.at_once }
+      check([ Foo::CAPACITY ]) { Foo::CAPACITY.at_once }
     end
   end
 

@@ -26,7 +26,7 @@ describe Berater do
 
   describe '.new' do
     context 'unlimited mode' do
-      let(:limiter) { Berater.new(:key, :unlimited) }
+      let(:limiter) { Berater.new(:key, Float::INFINITY) }
 
       it 'instantiates an Unlimiter' do
         expect(limiter).to be_a Berater::Unlimiter
@@ -39,13 +39,13 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:key, :unlimited, redis: redis)
+        limiter = Berater.new(:key, Float::INFINITY, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
 
     context 'inhibited mode' do
-      let(:limiter) { Berater.new(:key, :inhibited) }
+      let(:limiter) { Berater.new(:key, 0) }
 
       it 'instantiates an Inhibitor' do
         expect(limiter).to be_a Berater::Inhibitor
@@ -58,13 +58,13 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:key, :inhibited, redis: redis)
+        limiter = Berater.new(:key, 0, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
 
     context 'rate mode' do
-      let(:limiter) { Berater.new(:key, :rate, 1, :second) }
+      let(:limiter) { Berater.new(:key, 1, :second) }
 
       it 'instantiates a RateLimiter' do
         expect(limiter).to be_a Berater::RateLimiter
@@ -77,13 +77,13 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:key, :rate, 1, :second, redis: redis)
+        limiter = Berater.new(:key, 1, :second, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
 
     context 'concurrency mode' do
-      let(:limiter) { Berater.new(:key, :concurrency, 1) }
+      let(:limiter) { Berater.new(:key, 1) }
 
       it 'instantiates a ConcurrencyLimiter' do
         expect(limiter).to be_a Berater::ConcurrencyLimiter
@@ -96,7 +96,7 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:key, :concurrency, 1, redis: redis)
+        limiter = Berater.new(:key, 1, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
@@ -117,23 +117,11 @@ describe Berater do
       end
     end
 
-    include_examples 'test convenience', [
-      Berater::Unlimiter,
-      :unlimited,
-    ]
+    include_examples 'test convenience', Berater::Unlimiter, Float::INFINITY
 
-    include_examples 'test convenience', [
-      Berater::RateLimiter,
-      :rate,
-      1,
-      :second,
-    ]
+    include_examples 'test convenience', Berater::RateLimiter, 1, :second
 
-    include_examples 'test convenience', [
-      Berater::ConcurrencyLimiter,
-      :concurrency,
-      1,
-    ]
+    include_examples 'test convenience', Berater::ConcurrencyLimiter, 1
   end
 
 end

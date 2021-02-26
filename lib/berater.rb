@@ -3,13 +3,10 @@ require 'berater/lock'
 require 'berater/lua_script'
 require 'berater/version'
 
-
 module Berater
   extend self
 
   class Overloaded < StandardError; end
-
-  MODES = {}
 
   attr_accessor :redis
 
@@ -17,14 +14,22 @@ module Berater
     yield self
   end
 
-  def new(key, mode, *args, **opts)
-    klass = MODES[mode.to_sym]
-
-    unless klass
-      raise ArgumentError, "invalid mode: #{mode}"
+  def new(key, capacity, interval = nil, **opts)
+    case capacity
+    when :unlimited, Float::INFINITY
+      Berater::Unlimiter
+    when :inhibited, 0
+      Berater::Inhibitor
+    else
+      if interval
+        Berater::RateLimiter
+      else
+        Berater::ConcurrencyLimiter
+      end
+    end.yield_self do |klass|
+      args = [ key, capacity, interval ].compact
+      klass.new(*args, **opts)
     end
-
-    klass.new(key, *args, **opts)
   end
 
   def register(mode, klass)
@@ -40,8 +45,8 @@ module Berater
 end
 
 # convenience method
-def Berater(key, mode, *args, **opts, &block)
-  Berater.new(key, mode, *args, **opts).limit(&block)
+def Berater(key, capacity, interval = nil, **opts, &block)
+  Berater.new(key, capacity, interval, **opts).limit(&block)
 end
 
 # load limiters
@@ -49,8 +54,3 @@ require 'berater/concurrency_limiter'
 require 'berater/inhibitor'
 require 'berater/rate_limiter'
 require 'berater/unlimiter'
-
-Berater.register(:concurrency, Berater::ConcurrencyLimiter)
-Berater.register(:inhibited, Berater::Inhibitor)
-Berater.register(:rate, Berater::RateLimiter)
-Berater.register(:unlimited, Berater::Unlimiter)

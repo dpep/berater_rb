@@ -31,13 +31,9 @@ describe Berater do
     expect(limiter.timeout).to be 2
   end
 
-  it 'does not accept mode/args and dsl block' do
+  it 'does not accept args and dsl block' do
     expect {
-      Berater.new(:key, :rate) { 1.per second }
-    }.to raise_error(ArgumentError)
-
-    expect {
-      Berater.new(:key, :concurrency, 2) { 3.at_once }
+      Berater.new(:key, 2) { 3.at_once }
     }.to raise_error(ArgumentError)
   end
 
