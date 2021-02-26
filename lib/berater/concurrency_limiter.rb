@@ -12,13 +12,9 @@ module Berater
     end
 
     private def timeout=(timeout)
-      unless timeout.is_a? Integer
-        raise ArgumentError, "expected Integer, found #{timeout.class}"
-      end
-
-      raise ArgumentError, "timeout must be >= 0" unless timeout >= 0
-
       @timeout = timeout
+      timeout = 0 if timeout == Float::INFINITY
+      @timeout_usec = Berater::Utils.to_usec(timeout)
     end
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
@@ -63,10 +59,13 @@ module Berater
       capacity ||= @capacity
       # cost is Integer >= 0
 
+      # timestamp in microseconds
+      ts = (Time.now.to_f * 10**6).to_i
+
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key(key), cache_key('lock_id') ],
-        [ capacity, Time.now.to_i, timeout, cost ]
+        [ capacity, ts, @timeout_usec, cost ]
       )
 
       if cost == 0

@@ -40,8 +40,10 @@ describe Berater::RateLimiter do
   end
 
   describe '#interval' do
-    subject { described_class.new(:key, 1, :second) }
     # see spec/utils_spec.rb for more
+
+    subject { described_class.new(:key, 1, :second) }
+
     it 'saves the interval in original and microsecond format' do
       expect(subject.interval).to be :second
       expect(subject.instance_variable_get(:@interval_usec)).to be 10**6

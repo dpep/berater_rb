@@ -40,26 +40,18 @@ describe Berater::ConcurrencyLimiter do
   end
 
   describe '#timeout' do
-    def expect_timeout(timeout)
-      limiter = described_class.new(:key, 1, timeout: timeout)
-      expect(limiter.timeout).to eq timeout
+    # see spec/utils_spec.rb
+
+    it 'saves the interval in original and microsecond format' do
+      limiter = described_class.new(:key, 1, timeout: 3)
+      expect(limiter.timeout).to be 3
+      expect(limiter.instance_variable_get(:@timeout_usec)).to be (3 * 10**6)
     end
 
-    it { expect_timeout(0) }
-    it { expect_timeout(1) }
-    it { expect_timeout(10_000) }
-
-    context 'with erroneous values' do
-      def expect_bad_timeout(timeout)
-        expect do
-          described_class.new(:key, 1, timeout: timeout)
-        end.to raise_error ArgumentError
-      end
-
-      it { expect_bad_timeout(0.5) }
-      it { expect_bad_timeout(-1) }
-      it { expect_bad_timeout('1') }
-      it { expect_bad_timeout(:one) }
+    it 'handles infinity' do
+      limiter = described_class.new(:key, 1, timeout: Float::INFINITY)
+      expect(limiter.timeout).to be Float::INFINITY
+      expect(limiter.instance_variable_get(:@timeout_usec)).to be 0
     end
   end
 
@@ -96,12 +88,26 @@ describe Berater::ConcurrencyLimiter do
       end
     end
 
-    it 'resets over time' do
+    it 'limit resets over time' do
       2.times { limiter.limit }
       expect(limiter).to be_incapacitated
 
-      Timecop.travel(30)
+      Timecop.freeze(30)
 
+      2.times { limiter.limit }
+      expect(limiter).to be_incapacitated
+    end
+
+    it 'limit resets with millisecond precision' do
+      2.times { limiter.limit }
+      expect(limiter).to be_incapacitated
+
+      # travel forward to just before first lock times out
+      Timecop.freeze(29.999)
+      expect(limiter).to be_incapacitated
+
+      # traveling one more millisecond will decrement the count
+      Timecop.freeze(0.001)
       2.times { limiter.limit }
       expect(limiter).to be_incapacitated
     end
