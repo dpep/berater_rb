@@ -19,7 +19,7 @@ describe Berater do
     limiter = Berater.new(:key) { 1.per second }
     expect(limiter).to be_a Berater::RateLimiter
     expect(limiter.key).to be :key
-    expect(limiter.count).to be 1
+    expect(limiter.capacity).to be 1
     expect(limiter.interval).to be :second
   end
 

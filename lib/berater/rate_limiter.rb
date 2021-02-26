@@ -3,23 +3,23 @@ module Berater
 
     class Overrated < Overloaded; end
 
-    attr_accessor :count, :interval
+    attr_accessor :capacity, :interval
 
-    def initialize(key, count, interval, **opts)
+    def initialize(key, capacity, interval, **opts)
       super(key, **opts)
 
-      self.count = count
+      self.capacity = capacity
       self.interval = interval
     end
 
-    private def count=(count)
-      unless count.is_a? Integer
-        raise ArgumentError, "expected Integer, found #{count.class}"
+    private def capacity=(capacity)
+      unless capacity.is_a? Integer
+        raise ArgumentError, "expected Integer, found #{capacity.class}"
       end
 
-      raise ArgumentError, "count must be >= 0" unless count >= 0
+      raise ArgumentError, "capacity must be >= 0" unless capacity >= 0
 
-      @count = count
+      @capacity = capacity
     end
 
     private def interval=(interval)
@@ -91,8 +91,8 @@ module Berater
     )
 
     def limit(capacity: nil, cost: 1, &block)
-      capacity ||= @count
-      usec_per_drip = (@interval_sec * 10**6) / @count
+      capacity ||= @capacity
+      usec_per_drip = (@interval_sec * 10**6) / @capacity
 
       # timestamp in microseconds
       ts = (Time.now.to_f * 10**6).to_i
@@ -110,7 +110,7 @@ module Berater
     end
 
     def overloaded?
-      limit(cost: 0) { |lock| lock.contention >= count }
+      limit(cost: 0) { |lock| lock.contention >= capacity }
     rescue Overrated
       true
     end
@@ -127,7 +127,7 @@ module Berater
         "per #{@interval}"
       end
 
-      "#<#{self.class}(#{key}: #{count} #{msg})>"
+      "#<#{self.class}(#{key}: #{capacity} #{msg})>"
     end
 
   end

@@ -6,7 +6,7 @@ describe Berater::RateLimiter do
 
     it 'initializes' do
       expect(limiter.key).to be :key
-      expect(limiter.count).to eq 1
+      expect(limiter.capacity).to eq 1
       expect(limiter.interval).to eq :second
     end
 
@@ -15,27 +15,27 @@ describe Berater::RateLimiter do
     end
   end
 
-  describe '#count' do
-    def expect_count(count)
-      limiter = described_class.new(:key, count, :second)
-      expect(limiter.count).to eq count
+  describe '#capacity' do
+    def expect_capacity(capacity)
+      limiter = described_class.new(:key, capacity, :second)
+      expect(limiter.capacity).to eq capacity
     end
 
-    it { expect_count(0) }
-    it { expect_count(1) }
-    it { expect_count(100) }
+    it { expect_capacity(0) }
+    it { expect_capacity(1) }
+    it { expect_capacity(100) }
 
     context 'with erroneous values' do
-      def expect_bad_count(count)
+      def expect_bad_capacity(capacity)
         expect do
-          described_class.new(:key, count, :second)
+          described_class.new(:key, capacity, :second)
         end.to raise_error ArgumentError
       end
 
-      it { expect_bad_count(0.5) }
-      it { expect_bad_count(-1) }
-      it { expect_bad_count('1') }
-      it { expect_bad_count(:one) }
+      it { expect_bad_capacity(0.5) }
+      it { expect_bad_capacity(-1) }
+      it { expect_bad_capacity('1') }
+      it { expect_bad_capacity(:one) }
     end
   end
 
@@ -200,9 +200,9 @@ describe Berater::RateLimiter do
   end
 
   describe '#to_s' do
-    def check(count, interval, expected)
+    def check(capacity, interval, expected)
       expect(
-        described_class.new(:key, count, interval).to_s
+        described_class.new(:key, capacity, interval).to_s
       ).to match(expected)
     end
 
