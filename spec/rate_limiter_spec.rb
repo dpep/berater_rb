@@ -137,7 +137,7 @@ describe Berater::RateLimiter do
 
       expect { limiter.limit(capacity: 0) }.to be_overrated
       5.times { limiter.limit(capacity: 10) }
-      expect { limiter.limit }.to be_overrated
+      expect { limiter }.to be_overrated
     end
 
     context 'works with cost parameter' do

@@ -135,6 +135,14 @@ describe Berater::ConcurrencyLimiter do
         limiter.limit(cost: 2)
         expect(limiter).to be_incapacitated
       end
+
+      it 'accepts a dynamic capacity' do
+        limiter = described_class.new(:key, 1)
+
+        expect { limiter.limit(capacity: 0) }.to be_incapacitated
+        5.times { limiter.limit(capacity: 10) }
+        expect { limiter }.to be_incapacitated
+      end
     end
 
     context 'with same key, different limiters' do

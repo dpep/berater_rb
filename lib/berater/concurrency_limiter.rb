@@ -70,8 +70,10 @@ module Berater
     LUA
     )
 
-    def limit(cost: 1, &block)
+    def limit(capacity: nil, cost: 1, &block)
+      capacity ||= @capacity
       # cost is Integer >= 0
+
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key(key), cache_key('lock_id') ],
