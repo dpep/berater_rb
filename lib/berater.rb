@@ -33,10 +33,6 @@ module Berater
     end
   end
 
-  def register(mode, klass)
-    MODES[mode.to_sym] = klass
-  end
-
   def expunge
     redis.scan_each(match: "#{self.name}*") do |key|
       redis.del key
