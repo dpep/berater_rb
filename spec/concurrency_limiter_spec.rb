@@ -237,6 +237,90 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
+  describe 'dynamic_limits' do
+    let(:limiter) { described_class.new(:key, 1) }
+
+    describe '#save_limits' do
+      it 'saves to redis' do
+        expect(limiter.redis).to receive(:setex)
+        expect(limiter).to receive(:config_key)
+        limiter.save_limits
+      end
+    end
+
+    describe '.load_limits' do
+      it 'loads from redis' do
+        limiter.save_limits
+        capacity = Berater.load_limits(limiter.key)[0]
+        expect(capacity).to eq limiter.capacity
+      end
+    end
+
+    it 'is disabled by default' do
+      expect(limiter.dynamic_limits).to be false
+      expect(limiter).not_to receive(:config_key)
+      limiter.limit
+    end
+
+    it 'can be enabled per instance' do
+      limiter = described_class.new(:key, 1, dynamic_limits: true)
+      expect(limiter).to receive(:config_key)
+      limiter.limit
+    end
+
+    context 'with dynamic_limits enabled' do
+      before do
+        Berater.configure do |c|
+          c.dynamic_limits = true
+        end
+
+        limiter.save_limits
+      end
+
+      it 'is enabled' do
+        expect(limiter).to receive(:config_key)
+        limiter.limit
+      end
+
+      it 'overrides instance limit' do
+        limiter.limit
+        expect { limiter }.to be_incapacitated
+
+        limiter_two = described_class.new(:key, 2)
+        expect { limiter_two }.to be_incapacitated
+      end
+
+      it 'yields to limit parameter' do
+        limiter.limit
+        expect { limiter }.to be_incapacitated
+
+        limiter.limit(capacity: 2)
+      end
+
+      describe '#overloaded?' do
+        let(:limiter) { described_class.new(:key, 2) }
+
+        before do
+          2.times { limiter.limit }
+        end
+
+        it 'respects limit' do
+          expect(limiter).to be_incapacitated
+        end
+
+        it 'respects saved limit override' do
+          expect(
+            described_class.new(:key, 1)
+          ).to be_incapacitated
+
+          expect(
+            described_class.new(:key, 3)
+          ).to be_incapacitated
+        end
+      end
+    end
+  end
+
   describe '#to_s' do
     def check(capacity, expected)
       expect(

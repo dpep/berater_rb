@@ -20,11 +20,24 @@ module Berater
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
       local key = KEYS[1]
       local lock_key = KEYS[2]
+      local conf_key = KEYS[3]
       local capacity = tonumber(ARGV[1])
       local ts = tonumber(ARGV[2])
       local ttl = tonumber(ARGV[3])
       local cost = tonumber(ARGV[4])
       local lock_ids = {}
+
+      if conf_key then
+        local config = redis.call('GET', conf_key)
+
+        if config then
+          -- use dynamic capacity limit
+          capacity = tonumber(config)
+
+          -- reset ttl for a week
+          redis.call('EXPIRE', conf_key, 604800)
+        end
+      end
 
       -- purge stale hosts
       if ttl > 0 then
@@ -64,15 +77,17 @@ module Berater
     )
 
     def limit(capacity: nil, cost: 1, &block)
+      limit_key = if capacity.nil? && dynamic_limits
+        config_key
+      end
       capacity ||= @capacity
-      # cost is Integer >= 0
 
       # timestamp in microseconds
       ts = (Time.now.to_f * 10**6).to_i
 
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
-        [ cache_key(key), cache_key('lock_id') ],
+        [ cache_key(key), cache_key('lock_id'), limit_key ],
         [ capacity, ts, @timeout_usec, cost ]
       )
 
