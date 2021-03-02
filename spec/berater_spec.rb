@@ -111,16 +111,11 @@ describe Berater do
 
         Berater(:key, *args)
       end
-
-      it 'yields' do
-        expect {|b| Berater(:key, *args, &b) }.to yield_control
-      end
     end
 
     include_examples 'test convenience', Berater::Unlimiter, Float::INFINITY
-
+    include_examples 'test convenience', Berater::Inhibitor, 0
     include_examples 'test convenience', Berater::RateLimiter, 1, :second
-
     include_examples 'test convenience', Berater::ConcurrencyLimiter, 1
   end
 

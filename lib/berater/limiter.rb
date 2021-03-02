@@ -28,7 +28,7 @@ module Berater
     end
 
     def capacity=(capacity)
-      unless capacity.is_a? Integer
+      unless capacity.is_a?(Integer) || capacity == Float::INFINITY
         raise ArgumentError, "expected Integer, found #{capacity.class}"
       end
 
