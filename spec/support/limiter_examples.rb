@@ -53,7 +53,6 @@ RSpec.shared_examples 'a limiter' do |limiter|
         end
       end
     end
-
   end
 
 end
