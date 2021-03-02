@@ -9,5 +9,6 @@ RSpec.configure do |config|
   config.after do
     Berater.expunge rescue nil
     Berater.redis.script(:flush) rescue nil
+    Berater.reset
   end
 end

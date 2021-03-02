@@ -15,6 +15,10 @@ module Berater
     yield self
   end
 
+  def reset
+    @redis = nil
+  end
+
   def new(key, capacity, interval = nil, **opts)
     case capacity
     when :unlimited, Float::INFINITY
