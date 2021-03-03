@@ -7,12 +7,12 @@ describe Berater do
   it { is_expected.to respond_to :configure }
 
   describe '.configure' do
-    it 'can be set via configure' do
+    it 'is used with a block' do
       Berater.configure do |c|
         c.redis = :redis
       end
 
-      expect(Berater.redis).to eq :redis
+      expect(Berater.redis).to be :redis
     end
   end
 
