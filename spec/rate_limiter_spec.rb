@@ -112,6 +112,10 @@ describe Berater::RateLimiter do
         expect(limiter).not_to be_overrated
       end
 
+      it 'can be a Float' do
+        2.times { limiter.limit(cost: 1.5) }
+        expect(limiter).to be_overrated
+      end
     end
 
     context 'with same key, different limiters' do
