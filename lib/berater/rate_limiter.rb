@@ -6,9 +6,9 @@ module Berater
     attr_accessor :interval
 
     def initialize(key, capacity, interval, **opts)
-      super(key, capacity, **opts)
-
       self.interval = interval
+
+      super(key, capacity, @interval_usec, **opts)
     end
 
     private def interval=(interval)
@@ -19,12 +19,28 @@ module Berater
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
       local key = KEYS[1]
       local ts_key = KEYS[2]
+      local conf_key = KEYS[3]
       local ts = tonumber(ARGV[1])
       local capacity = tonumber(ARGV[2])
       local interval_usec = tonumber(ARGV[3])
       local cost = tonumber(ARGV[4])
       local count = 0
       local allowed
+
+      if conf_key then
+        local config = redis.call('GET', conf_key)
+
+        if config then
+          -- use dynamic capacity limit
+          capacity, interval_usec = string.match(config, "(%d+):(%d+)")
+          capacity = tonumber(capacity)
+          interval_usec = tonumber(interval_usec)
+
+          -- reset ttl for a week
+          redis.call('EXPIRE', conf_key, 604800)
+        end
+      end
+
       local usec_per_drip = interval_usec / capacity
 
       -- timestamp of last update
@@ -61,6 +77,9 @@ module Berater
     )
 
     def limit(capacity: nil, cost: 1, &block)
+      limit_key = if capacity.nil? && dynamic_limits
+        config_key
+      end
       capacity ||= @capacity
 
       # timestamp in microseconds
@@ -68,7 +87,7 @@ module Berater
 
       count, allowed = LUA_SCRIPT.eval(
         redis,
-        [ cache_key(key), cache_key("#{key}-ts") ],
+        [ cache_key(key), cache_key("#{key}-ts"), limit_key ],
         [ ts, capacity, @interval_usec, cost ]
       )
 

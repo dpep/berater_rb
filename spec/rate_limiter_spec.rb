@@ -88,7 +88,7 @@ describe Berater::RateLimiter do
       expect(limiter).to be_overrated
     end
 
-    it 'accepts a dynamic capacity' do
+    it 'accepts a capacity override' do
       limiter = described_class.new(:key, 1, :second)
 
       expect { limiter.limit(capacity: 0) }.to be_overrated
@@ -156,6 +156,93 @@ describe Berater::RateLimiter do
       expect(limiter.overloaded?).to be true
       Timecop.freeze(1)
       expect(limiter.overloaded?).to be false
+    end
+  end
+
+  describe 'dynamic_limits' do
+    let(:limiter) { described_class.new(:key, 1, :minute) }
+
+    describe '#save_limits' do
+      it 'saves to redis' do
+        expect(limiter.redis).to receive(:setex)
+        expect(limiter).to receive(:config_key)
+        limiter.save_limits
+      end
+    end
+
+    describe '.load_limits' do
+      it 'loads from redis' do
+        limiter.save_limits
+
+        capacity, interval = Berater.load_limits(limiter.key)
+        expect(capacity).to eq limiter.capacity
+        expect(interval).to eq limiter.instance_variable_get(:@interval_usec)
+      end
+    end
+
+    it 'is disabled by default' do
+      expect(limiter.dynamic_limits).to be false
+      expect(limiter).not_to receive(:config_key)
+      limiter.limit
+    end
+
+    it 'can be enabled per instance' do
+      limiter = described_class.new(:key, 1, :minute, dynamic_limits: true)
+      expect(limiter).to receive(:config_key)
+      limiter.limit
+    end
+
+    context 'with dynamic_limits enabled' do
+      before do
+        Berater.configure do |c|
+          c.dynamic_limits = true
+        end
+
+        limiter.save_limits
+      end
+
+      it 'is enabled' do
+        expect(limiter).to receive(:config_key)
+        limiter.limit
+      end
+
+      it 'overrides instance limit' do
+        limiter.limit
+        expect { limiter }.to be_overrated
+
+        limiter_two = described_class.new(:key, 2, :second)
+        Timecop.freeze(1)
+        expect { limiter_two }.to be_overrated
+      end
+
+      it 'yields to limit parameter' do
+        limiter.limit
+        expect { limiter }.to be_overrated
+
+        limiter.limit(capacity: 2)
+      end
+
+      describe '#overloaded?' do
+        let(:limiter) { described_class.new(:key, 2, :minute) }
+
+        before do
+          2.times { limiter.limit }
+        end
+
+        it 'respects limit' do
+          expect(limiter).to be_overrated
+        end
+
+        it 'respects saved limit override' do
+          expect(
+            described_class.new(:key, 1, :second)
+          ).to be_overrated
+
+          expect(
+            described_class.new(:key, 3, :second)
+          ).to be_overrated
+        end
+      end
     end
   end
 

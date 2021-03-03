@@ -9,14 +9,14 @@ module Berater
 
   class Overloaded < StandardError; end
 
-  attr_accessor :redis
+  attr_accessor :redis, :dynamic_limits
 
   def configure
     yield self
   end
 
   def reset
-    @redis = nil
+    @redis = @dynamic_limits = nil
   end
 
   def new(key, capacity, interval = nil, **opts)
@@ -35,6 +35,10 @@ module Berater
       args = [ key, capacity, interval ].compact
       klass.new(*args, **opts)
     end
+  end
+
+  def load_limits(key, redis: Berater.redis)
+    Berater::Limiter.load_limits(key, redis: redis)
   end
 
   def expunge
