@@ -47,7 +47,12 @@ end
 
 # convenience method
 def Berater(key, capacity, interval = nil, **opts, &block)
-  Berater.new(key, capacity, interval, **opts).limit(&block)
+  limiter = Berater.new(key, capacity, interval, **opts)
+  if block_given?
+    limiter.limit(&block)
+  else
+    limiter
+  end
 end
 
 # load limiters

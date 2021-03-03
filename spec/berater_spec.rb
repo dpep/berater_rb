@@ -102,14 +102,26 @@ describe Berater do
     end
   end
 
-  describe 'convenience method Berater()' do
+  describe 'Berater() - convenience method' do
     RSpec.shared_examples 'test convenience' do |klass, *args|
-      it 'creates and calls limit' do
-        limiter = double(klass)
-        expect(klass).to receive(:new).and_return(limiter)
-        expect(limiter).to receive(:limit)
+      it 'creates a limiter' do
+        limiter = Berater(:key, *args)
+        expect(limiter).to be_a klass
+      end
 
-        Berater(:key, *args)
+      context 'with a block' do
+        it 'creates a limiter and calls limit' do
+          limiter = Berater(:key, *args)
+          expect(klass).to receive(:new).and_return(limiter)
+          expect(limiter).to receive(:limit).and_call_original
+
+          begin
+            res = Berater(:key, *args) { true }
+            expect(res).to be true
+          rescue Berater::Overloaded
+            expect(klass).to be Berater::Inhibitor
+          end
+        end
       end
     end
 
