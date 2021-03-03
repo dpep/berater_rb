@@ -48,7 +48,7 @@ lock.release
 
 
 #### Berater::Lock
-Created when a call to `.limit` is successful, it also contains some useful information
+Created when a call to `.limit` is successful.
 
 ```ruby
 Berater(*) do |lock|
