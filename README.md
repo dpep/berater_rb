@@ -1,6 +1,7 @@
 Berater
 ======
-A framework for limiting resource utilization, with build in rate and capacity limiters.  Backed by [Redis](https://redis.io/).
+Limiting resource utilization.  Backed by [Redis](https://redis.io/).
+
 
 ```ruby
 require 'berater'
@@ -15,22 +16,65 @@ Berater(:key, 3) do
 end
 ```
 
+```ruby
+Berater(key, capacity, interval = nil, **opts, &block)
+```
+Do something...within limits
+* `key` - name of limiter
+* `capacity` - how many requests
+* `interval` - how often the limit resets, if it does (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
+* `opts`
+  * `redis` - a redis instance
+* `block` - optional block to call immediately via `.limit`
 
-#### Install
-```gem install berater```
+
+## Berater::Limiter
+The base class for all limiters.
+
+```ruby
+limiter = Berater(*)
+limiter.limit(**opts) do
+  # limited work
+end
+
+lock = limiter.limit
+# do some work inline
+lock.release
+```
+
+`.limit` - acquire a lock.  Raises a `Berater::Overloaded` error if limits have been exceeded.  When passed a block, it will execute the block unless the limit has been exceeded.  Otherwise it returns the lock, which should be released once completed.
+* `capacity` - override the limiter's capacity for this call
+* `cost` - the relative cost of this piece of work, default is 1
+
+
+#### Berater::Lock
+Created when a call to `.limit` is successful, it also contains some useful information
+
+```ruby
+Berater(*) do |lock|
+  lock.contention
+end
+
+# or inline
+lock = Berater(*).limit
+```
+
+* `.contention` - capacity currently being used
+* `.locked` - whether the lock is currently being held
+* `.release` - release capacity being held
+
 
 ## RateLimiter
 A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) rate limiter.
 
 ```ruby
-Berater::RateLimiter.new(key, count, interval, **opts)
+Berater::RateLimiter.new(key, capacity, interval, **opts)
 ```
 * `key` - name of limiter
-* `count` - how many requests
+* `capacity` - how many requests
 * `interval` - how often (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
 * `opts`
   * `redis` - a redis instance
-
 
 eg.
 ```ruby
@@ -44,6 +88,7 @@ Berater(:key, 2, :second) do
   ...
 end
 ```
+
 
 ## ConcurrencyLimiter
 ```ruby
@@ -69,7 +114,10 @@ end
 ```
 
 
-#### Configure
+
+## Install
+```gem install berater```
+
 Configure a default redis connection.
 
 ```ruby
@@ -78,6 +126,7 @@ Berater.configure do |c|
 end
 ```
 
+
 ## Integrations
 
 #### Rails
@@ -85,9 +134,9 @@ Convert limit errors into a HTTP [status code](https://developer.mozilla.org/en-
 
 ```ruby
 class ApplicationController < ActionController::Base
-    rescue_from Berater::Overloaded do
-      head :too_many_requests
-    end
+  rescue_from Berater::Overloaded do
+    head :too_many_requests
+  end
 end
 ```
 
