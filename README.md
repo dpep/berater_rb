@@ -78,6 +78,26 @@ Berater.configure do |c|
 end
 ```
 
+## Integrations
+
+#### Rails
+Convert limit errors into a HTTP [status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429)
+
+```ruby
+class ApplicationController < ActionController::Base
+    rescue_from Berater::Overloaded do
+      head :too_many_requests
+    end
+end
+```
+
+#### Sidekiq
+Ensure Berater plays nice with [Sidekiq Ent](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting#custom-errors)
+
+```ruby
+Sidekiq::Limiter.errors << Berater::Overloaded
+```
+
 
 ## Testing
 Berater has a few tools to make testing easier.  And it plays nicely with [Timecop](https://github.com/travisjeffery/timecop).
