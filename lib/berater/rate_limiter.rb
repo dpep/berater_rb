@@ -23,8 +23,8 @@ module Berater
       local capacity = tonumber(ARGV[2])
       local interval_usec = tonumber(ARGV[3])
       local cost = tonumber(ARGV[4])
-
       local count = 0
+      local allowed
       local usec_per_drip = interval_usec / capacity
 
       -- timestamp of last update
@@ -38,17 +38,22 @@ module Berater
         count = math.max(0, count - drips)
       end
 
-      local allowed = (count + cost) <= capacity
+      if cost == 0 then
+        -- just check limit, ie. for .overlimit?
+        allowed = count < capacity
+      else
+        allowed = (count + cost) <= capacity
 
-      if allowed and cost > 0 then
-        count = count + cost
+        if allowed then
+          count = count + cost
 
-        -- time for bucket to empty, in milliseconds
-        local ttl = math.ceil((count * usec_per_drip) / 1000)
+          -- time for bucket to empty, in milliseconds
+          local ttl = math.ceil((count * usec_per_drip) / 1000)
 
-        -- update count and last_ts, with expirations
-        redis.call('SET', key, count, 'PX', ttl)
-        redis.call('SET', ts_key, ts, 'PX', ttl)
+          -- update count and last_ts, with expirations
+          redis.call('SET', key, count, 'PX', ttl)
+          redis.call('SET', ts_key, ts, 'PX', ttl)
+        end
       end
 
       return { count, allowed }
@@ -74,7 +79,7 @@ module Berater
     end
 
     def overloaded?
-      limit(cost: 0) { |lock| lock.contention >= capacity }
+      limit(cost: 0) { false }
     rescue Overrated
       true
     end

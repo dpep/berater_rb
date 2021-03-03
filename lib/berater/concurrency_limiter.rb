@@ -34,7 +34,12 @@ module Berater
       -- check capacity
       local count = redis.call('ZCARD', key)
 
-      if (count + cost <= capacity) and (cost > 0) then
+      if cost == 0 then
+        -- just check limit, ie. for .overlimit?
+        if count < capacity then
+          table.insert(lock_ids, true)
+        end
+      elseif (count + cost) <= capacity then
         -- grab locks, one per cost
         local lock_id = redis.call('INCRBY', lock_key, cost)
         local locks = {}
@@ -71,10 +76,11 @@ module Berater
         [ capacity, ts, @timeout_usec, cost ]
       )
 
+      raise Incapacitated if lock_ids.empty?
+
       if cost == 0
         lock = Lock.new(self, nil, count)
       else
-        raise Incapacitated if lock_ids.empty?
         lock = Lock.new(self, lock_ids[0], count, -> { release(lock_ids) })
       end
 
@@ -82,7 +88,7 @@ module Berater
     end
 
     def overloaded?
-      limit(cost: 0) { |lock| lock.contention >= capacity }
+      limit(cost: 0) { false }
     rescue Overloaded
       true
     end
