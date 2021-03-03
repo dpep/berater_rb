@@ -5,12 +5,12 @@ A framework for limiting resource utilization, with build in rate and capacity l
 ```ruby
 require 'berater'
 
-Berater(:key, :rate, 2, :second) do
+Berater(:key, 2, :second) do
   # do work, twice per second with a rate limiter
 end
 
 
-Berater(:key, :concurrency, 3) do
+Berater(:key, 3) do
   # or three simultaneous request at a time, with a concurrency limiter
 end
 ```
@@ -40,7 +40,7 @@ limiter.limit do
 end
 
 # or, more conveniently
-Berater(:key, :rate, 2, :second) do
+Berater(:key, 2, :second) do
   ...
 end
 ```
@@ -63,7 +63,7 @@ limiter.limit do
 end
 
 # or, more conveniently
-Berater(:key, :concurrency, 3) do
+Berater(:key, 3) do
   ...
 end
 ```
@@ -110,7 +110,7 @@ Force all calls to `limit` to either pass or fail, without hitting Redis.
 require 'berater/test_mode'
 
 describe 'MyTest' do
-  let(:limiter) { Berater.new(:key, :rate, 1, :second) }
+  let(:limiter) { Berater.new(:key, 1, :second) }
   
   context 'with test_mode = :pass' do
     before { Berater.test_mode = :pass }
@@ -138,7 +138,7 @@ rspec matchers and automatic flushing of Redis between examples.
 require 'berater/rspec'
 
 describe 'MyTest' do
-  let(:limiter) { Berater.new(:key, :rate, 1, :second) }
+  let(:limiter) { Berater.new(:key, 1, :second) }
 
   it 'rate limits' do
     limiter.limit
