@@ -37,7 +37,6 @@ module Berater
       if (count + cost <= capacity) and (cost > 0) then
         -- grab locks, one per cost
         local lock_id = redis.call('INCRBY', lock_key, cost)
-        -- TODO: expire
         local locks = {}
 
         for i = lock_id - cost + 1, lock_id do
@@ -49,6 +48,10 @@ module Berater
 
         redis.call('ZADD', key, unpack(locks))
         count = count + cost
+
+        if ttl > 0 then
+          redis.call('PEXPIRE', key, ttl)
+        end
       end
 
       return { count, unpack(lock_ids) }
