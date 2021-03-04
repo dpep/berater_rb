@@ -3,10 +3,6 @@ module Berater
     refine Berater.singleton_class do
       def new(key, mode = nil, *args, **opts, &block)
         if mode.nil?
-          unless args.empty?
-            raise ArgumentError, '0 arguments expected with block'
-          end
-
           unless block_given?
             raise ArgumentError, 'expected either mode or block'
           end
@@ -39,13 +35,6 @@ module Berater
     end
 
     private
-
-    def each &block
-      Berater::MODES.map do |mode, limiter|
-        next unless limiter.const_defined?(:DSL, false)
-        limiter.const_get(:DSL)
-      end.compact.each(&block)
-    end
 
     KEYWORDS = [
       :second, :minute, :hour,
