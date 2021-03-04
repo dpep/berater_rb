@@ -3,4 +3,5 @@
 comment: false
 
 coverage:
-  precision: 2
+  precision: 0
+  range: "95...100"
