@@ -55,4 +55,18 @@ RSpec.shared_examples 'a limiter' do |limiter|
     end
   end
 
+  describe '#overloaded?' do
+    it 'indicates whether limit will be successful or not' do
+      if limiter.overloaded?
+        expect { limiter.limit }.to be_overloaded
+      else
+        expect(limiter.limit).to be_a Berater::Lock
+      end
+    end
+  end
+
+  describe '#to_s' do
+    it { expect(limiter.to_s).to match(/Berater/) }
+  end
+
 end
