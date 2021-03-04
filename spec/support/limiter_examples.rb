@@ -1,5 +1,23 @@
 RSpec.shared_examples 'a limiter' do |limiter|
 
+  describe '#initialize' do
+    it 'has a key' do
+      expect(limiter.key).not_to be nil
+    end
+
+    it 'has a capacity' do
+      expect(limiter.capacity).to be_a(Integer).or(be Float::INFINITY)
+    end
+
+    it 'has a redis' do
+      expect(limiter).to respond_to(:redis)
+    end
+
+    it 'has options' do
+      expect(limiter.options).to be_a Hash
+    end
+  end
+
   describe '#limit' do
     it 'yields' do
       expect {|block| limiter.limit(&block) }.to yield_control
