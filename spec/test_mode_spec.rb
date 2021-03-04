@@ -3,6 +3,25 @@ require 'berater/test_mode'
 describe 'Berater.test_mode' do
   after { Berater.test_mode = nil }
 
+  describe '.test_mode' do
+    it 'can be turned on' do
+      Berater.test_mode = :pass
+      expect(Berater.test_mode).to be :pass
+
+      Berater.test_mode = :fail
+      expect(Berater.test_mode).to be :fail
+    end
+
+    it 'can be turned off' do
+      Berater.test_mode = nil
+      expect(Berater.test_mode).to be nil
+    end
+
+    it 'validates input' do
+      expect { Berater.test_mode = :foo }.to raise_error(ArgumentError)
+    end
+  end
+
   describe 'Unlimiter' do
     subject { Berater::Unlimiter.new }
 
