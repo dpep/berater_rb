@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.version     = package.const_get 'VERSION'
   s.authors     = ['Daniel Pepper']
   s.summary     = package.to_s
-  s.description = 'rate limiter'
+  s.description = 'work...within limits'
   s.homepage    = "https://github.com/dpep/#{package_name}_rb"
   s.license     = 'MIT'
 
