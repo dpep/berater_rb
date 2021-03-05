@@ -28,7 +28,7 @@ module Berater
       # don't stub self
       return super if self < stub_klass
 
-      # swap out limit method with stub
+      # swap out limit and overloaded? methods with stub
       super.tap do |instance|
         stub = stub_klass.allocate
         stub.send(:initialize, *args, **opts)
