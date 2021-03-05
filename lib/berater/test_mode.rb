@@ -11,10 +11,15 @@ module Berater
     end
 
     @test_mode = mode
+
+    # overload class methods
+    unless Berater::Limiter.singleton_class.ancestors.include?(TestMode)
+      Berater::Limiter.singleton_class.prepend(TestMode)
+    end
   end
 
-  class Limiter
-    def self.new(*args, **opts)
+  module TestMode
+    def new(*args, **opts)
       return super unless Berater.test_mode
 
       # chose a stub class with desired behavior

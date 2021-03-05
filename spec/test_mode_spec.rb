@@ -1,7 +1,35 @@
-require 'berater/test_mode'
+describe Berater::TestMode, order: :defined do
+  let(:reset_test_mode) { true }
 
-describe 'Berater.test_mode' do
-  after { Berater.test_mode = nil }
+  after do
+    Berater.test_mode = nil if reset_test_mode
+  end
+
+  context 'when first loaded' do
+    let(:reset_test_mode) { false }
+
+    it 'has already been loaded by "berater/rspec", unfortunately' do
+      expect { Berater.test_mode }.not_to raise_error(NoMethodError)
+    end
+
+    it 'defaults to off' do
+      expect(Berater.test_mode).to be nil
+    end
+
+    it 'did not prepend .new yet' do
+      expect(Berater::Limiter.singleton_class.ancestors).not_to include(described_class)
+    end
+
+    it 'prepends when first turned on' do
+      Berater.test_mode = :pass
+
+      expect(Berater::Limiter.singleton_class.ancestors).to include(described_class)
+    end
+
+    it 'preserves the original functionality via super' do
+      expect { Berater::Limiter.new }.to raise_error(NotImplementedError)
+    end
+  end
 
   describe '.test_mode' do
     it 'can be turned on' do
