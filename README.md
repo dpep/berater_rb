@@ -1,10 +1,15 @@
 Berater
 ======
-Limiting resource utilization.  Backed by [Redis](https://redis.io/).
+Do work...within limits.  Backed by [Redis](https://redis.io/).
 
 
 ```ruby
 require 'berater'
+require 'redis'
+
+Berater.configure do |c|
+  c.redis = Redis.new
+end
 
 Berater(:key, 2, :second) do
   # do work, twice per second with a rate limiter
@@ -16,10 +21,10 @@ Berater(:key, 3) do
 end
 ```
 
+## Berater
 ```ruby
 Berater(key, capacity, interval = nil, **opts, &block)
 ```
-Do something...within limits
 * `key` - name of limiter
 * `capacity` - how many requests
 * `interval` - how often the limit resets, if it does (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
@@ -64,8 +69,8 @@ lock = Berater(*).limit
 * `.release` - release capacity being held
 
 
-## RateLimiter
-A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) rate limiter.
+## Berater::RateLimiter
+A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) rate limiter.  Useful when you want to limit usage within a given time window, eg. 2 times per second.
 
 ```ruby
 Berater::RateLimiter.new(key, capacity, interval, **opts)
@@ -90,7 +95,9 @@ end
 ```
 
 
-## ConcurrencyLimiter
+## Berater::ConcurrencyLimiter
+Useful to limit the amount of work done concurrently, ie. simulteneously.  eg. less than 3 connections at once.
+
 ```ruby
 Berater::ConcurrencyLimiter.new(key, capacity, **opts)
 ```
@@ -98,7 +105,7 @@ Berater::ConcurrencyLimiter.new(key, capacity, **opts)
 * `capacity` - maximum simultaneous requests
 * `opts`
   * `redis` - a redis instance
-  * `timeout` - maximum seconds a request may take before lock is released
+  * `timeout` - maximum seconds a lock may be held
 
 eg.
 ```ruby
