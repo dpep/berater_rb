@@ -6,9 +6,8 @@ module Berater
     attr_accessor :interval
 
     def initialize(key, capacity, interval, **opts)
-      super(key, capacity, **opts)
-
       self.interval = interval
+      super(key, capacity, @interval_usec, **opts)
     end
 
     private def interval=(interval)

@@ -26,11 +26,23 @@ module Berater
       "#<#{self.class}>"
     end
 
+    def ==(other)
+      self.class == other.class &&
+      self.key == other.key &&
+      self.capacity == other.capacity &&
+      self.args == other.args &&
+      self.options == other.options &&
+      self.redis.connection == other.redis.connection
+    end
+
     protected
 
-    def initialize(key, capacity, **opts)
+    attr_reader :args
+
+    def initialize(key, capacity, *args, **opts)
       @key = key
       self.capacity = capacity
+      @args = args
       @options = opts
     end
 
