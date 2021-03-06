@@ -1,3 +1,44 @@
+###  v0.5.0  (2021-03-05)
+- comparison operator for limiters
+- use fail matcher
+- riddle
+- fix rspec complaint about expect {...}.not_to raise
+- test_mode upgrade
+- remove unused code
+- simplify tests
+- test coverage
+- RateLimiter supports cost type Float
+- upgrade convenience method
+- Update README.md
+- simplify overloaded?
+- re-expire concurrency keys
+- Berater.reset
+- set Unlimiter capacity to infinity
+- update benchmark
+- upgrade ConcurrencyLimiter to microsecond precision timeout
+- push more logic into redis
+- extract and expand conversion to microsecond logic
+- simplify Berater instatiation by using implicit mode
+- move capacity into base limiter
+- dynamic capacity for concurrency limiter
+- s/RateLimiter.count/RateLimiter.capacity/
+- add cost param to ConcurrencyLimiter, add Limiter.overloaded?
+- overloaded examples
+- s/limiter/subject/
+- refine out DSL...for now
+- abstract out convenience method tests
+- symbolize redis.script
+- fix minify bug
+- improve redis caching
+- cache lua scripts
+- remove lock timeout / expiration
+- benchmark limiters
+- test_mode compatibility
+- refactor our yield of lock mess
+- test coverage for concurrency timeout
+- test coverage for millisecond precision
+- dynamic ratelimit capacity and cost
+
 ###  v0.4.0  (2021-02-22)
 - upgrade RateLimiter to leaky bucket algorithm with microsecond precision
 
