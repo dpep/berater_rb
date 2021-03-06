@@ -65,7 +65,7 @@ lock = Berater(*).limit
 ```
 
 * `.contention` - capacity currently being used
-* `.locked` - whether the lock is currently being held
+* `.locked?` - whether the lock is currently being held
 * `.release` - release capacity being held
 
 
