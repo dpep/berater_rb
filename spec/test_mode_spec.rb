@@ -5,11 +5,13 @@ describe Berater::TestMode, order: :defined do
     Berater.test_mode = nil if reset_test_mode
   end
 
-  context 'when first loaded' do
+  context 'after test_mode.rb was required, but not used' do
     let(:reset_test_mode) { false }
 
     it 'has already been loaded by "berater/rspec", unfortunately' do
-      # expect { Berater.test_mode }.to raise_error(NoMethodError)
+      expect {
+        expect { Berater.test_mode }.to raise_error(NoMethodError)
+      }.to fail
     end
 
     it 'defaults to off' do
