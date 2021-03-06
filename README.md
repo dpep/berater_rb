@@ -160,7 +160,7 @@ Berater has a few tools to make testing easier.  And it plays nicely with [Timec
 
 
 #### test_mode
-Force all calls to `limit` to either pass or fail, without hitting Redis.
+Force all `limit` calls to either pass or fail, without hitting Redis.
 
 ```ruby
 require 'berater/test_mode'
