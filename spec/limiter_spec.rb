@@ -1,7 +1,15 @@
 describe Berater::Limiter do
-
   it 'can not be initialized' do
     expect { described_class.new }.to raise_error(NotImplementedError)
+  end
+
+  describe 'abstract methods' do
+    let(:limiter) { Class.new(described_class).new(:key, 1) }
+
+    it do
+      expect { limiter.limit }.to raise_error(NotImplementedError)
+      expect { limiter.overloaded? }.to raise_error(NotImplementedError)
+    end
   end
 
   describe '==' do

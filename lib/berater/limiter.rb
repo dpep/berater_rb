@@ -3,13 +3,6 @@ module Berater
 
     attr_reader :key, :capacity, :options
 
-    def self.new(*)
-      # can only call via subclass
-      raise NotImplementedError if self == Berater::Limiter
-
-      super
-    end
-
     def redis
       options[:redis] || Berater.redis
     end
@@ -33,6 +26,13 @@ module Berater
       self.args == other.args &&
       self.options == other.options &&
       self.redis.connection == other.redis.connection
+    end
+
+    def self.new(*)
+      # can only call via subclass
+      raise NotImplementedError if self == Berater::Limiter
+
+      super
     end
 
     protected
