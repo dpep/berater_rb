@@ -1,6 +1,6 @@
 Berater
 ======
-Do work...within limits.  Backed by [Redis](https://redis.io/).
+All systems have limits, beyond which they tend to fail.  So we should strive to understand a system's limits and work within them.  Better to cause a few excessive requests to fail than bring down the whole server and deal with a chaotic, systemic failure.  Berater makes working within limits easy.
 
 
 ```ruby
@@ -219,6 +219,17 @@ limiter = Berater::Inhibitor.new
 ```
 
 ----
+## Misc
+
+#### A riddle!
+
+What's the difference between a rate limiter and a concurrency limiter?  Can you build one with the other?
+
+Both enforce limits, but differ with respect to time and memory.  A rate limiter can be implemented using a concurrency limiter, by allowing every lock to timeout.  A concurrency limiter can nearly be implemented using a rate limiter, by decrementing the used capacity when a lock is released.  The order of locks, however, is lost and thus a timeout will not properly function.
+
+An [example](https://github.com/dpep/berater_rb/blob/master/spec/riddle_spec.rb) is worth a thousand words  :)
+
+
 #### DSL
 Experimental...
 
