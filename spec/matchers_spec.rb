@@ -16,6 +16,12 @@ describe 'be_overloaded' do
     it { expect { limiter.limit }.not_to be_inhibited }
     it { expect { limiter.limit }.not_to be_overrated }
     it { expect { limiter.limit }.not_to be_incapacitated }
+
+    it 'catches false positives' do
+      expect {
+        expect { limiter }.to be_overloaded
+      }.to fail
+    end
   end
 
   context 'Berater::Inhibitor' do
@@ -29,6 +35,12 @@ describe 'be_overloaded' do
 
     it { expect { limiter.limit }.to be_overloaded }
     it { expect { limiter.limit }.to be_inhibited }
+
+    it 'catches false negatives' do
+      expect {
+        expect { limiter }.not_to be_overloaded
+      }.to fail
+    end
   end
 
   context 'Berater::RateLimiter' do
