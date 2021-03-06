@@ -1,4 +1,5 @@
-describe 'be_overloaded' do
+describe Berater::Matchers::Overloaded do
+
   context 'Berater::Unlimiter' do
     let(:limiter) { Berater.new(:key, :unlimited) }
 
@@ -16,12 +17,6 @@ describe 'be_overloaded' do
     it { expect { limiter.limit }.not_to be_inhibited }
     it { expect { limiter.limit }.not_to be_overrated }
     it { expect { limiter.limit }.not_to be_incapacitated }
-
-    it 'catches false positives' do
-      expect {
-        expect { limiter }.to be_overloaded
-      }.to fail
-    end
   end
 
   context 'Berater::Inhibitor' do
@@ -35,12 +30,6 @@ describe 'be_overloaded' do
 
     it { expect { limiter.limit }.to be_overloaded }
     it { expect { limiter.limit }.to be_inhibited }
-
-    it 'catches false negatives' do
-      expect {
-        expect { limiter }.not_to be_overloaded
-      }.to fail
-    end
   end
 
   context 'Berater::RateLimiter' do
@@ -125,6 +114,39 @@ describe 'be_overloaded' do
       it 'should be_incapacitated' do
         expect { 3.times { limiter.limit } }.to be_incapacitated
       end
+    end
+  end
+
+  context 'when matchers fail' do
+    let(:unlimiter) { Berater::Unlimiter.new }
+    let(:inhibitor) { Berater::Inhibitor.new }
+
+    it 'catches false negatives' do
+      expect {
+        expect { unlimiter }.to be_overloaded
+      }.to fail
+
+      expect {
+        expect { unlimiter.limit }.to be_overloaded
+      }.to fail
+
+      expect {
+        expect { 123 }.to be_overloaded
+      }.to fail
+    end
+
+    it 'catches false positives' do
+      expect {
+        expect { inhibitor }.not_to be_overloaded
+      }.to fail
+
+      expect {
+        expect { inhibitor.limit }.not_to be_overloaded
+      }.to fail
+
+      expect {
+        expect { raise Berater::Overloaded }.not_to be_overloaded
+      }.to fail
     end
   end
 end
