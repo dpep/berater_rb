@@ -123,30 +123,64 @@ describe Berater::Matchers::Overloaded do
 
     it 'catches false negatives' do
       expect {
+        expect(unlimiter).to be_overloaded
+      }.to fail_including('expected to be overloaded')
+
+      expect {
         expect { unlimiter }.to be_overloaded
-      }.to fail
+      }.to fail_including('expected to be overloaded')
 
       expect {
         expect { unlimiter.limit }.to be_overloaded
-      }.to fail
+      }.to fail_including("expected #{Berater::Overloaded} to be raised")
 
       expect {
         expect { 123 }.to be_overloaded
-      }.to fail
+      }.to fail_including("expected #{Berater::Overloaded} to be raised")
     end
 
     it 'catches false positives' do
       expect {
+        expect(inhibitor).not_to be_overloaded
+      }.to fail_including('expected not to be overloaded')
+
+      expect {
         expect { inhibitor }.not_to be_overloaded
-      }.to fail
+      }.to fail_including('expected not to be overloaded')
 
       expect {
         expect { inhibitor.limit }.not_to be_overloaded
-      }.to fail
+      }.to fail_including("did not expect #{Berater::Overloaded} to be raised")
 
       expect {
         expect { raise Berater::Overloaded }.not_to be_overloaded
-      }.to fail
+      }.to fail_including("did not expect #{Berater::Overloaded} to be raised")
+    end
+
+    it 'supports different verbs' do
+      expect {
+        expect { unlimiter }.to be_overrated
+      }.to fail_including('expected to be overrated')
+
+      expect {
+        expect { unlimiter }.to be_incapacitated
+      }.to fail_including('expected to be incapacitated')
+    end
+
+    it 'supports different exceptions' do
+      expect {
+        expect { 123 }.to be_overrated
+      }.to fail_including(
+        "expected #{Berater::RateLimiter::Overrated} to be raised"
+      )
+
+      expect {
+        expect {
+          raise Berater::ConcurrencyLimiter::Incapacitated
+        }.not_to be_incapacitated
+      }.to fail_including(
+        "did not expect #{Berater::ConcurrencyLimiter::Incapacitated} to be raised"
+      )
     end
   end
 end

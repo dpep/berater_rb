@@ -53,7 +53,7 @@ module Berater
 
       def failure_message_when_negated
         if @limiter
-          "did not expect to be #{verb}"
+          "expected not to be #{verb}"
         else
           "did not expect #{@type} to be raised"
         end
