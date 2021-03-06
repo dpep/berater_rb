@@ -1,5 +1,7 @@
 require 'byebug'
 require 'redis'
+require 'rspec'
+require 'rspec/matchers/fail_matchers'
 require 'simplecov'
 require 'timecop'
 
@@ -39,4 +41,7 @@ RSpec.configure do |config|
 
   # reduce noise in backtraces
   config.filter_gems_from_backtrace('timecop')
+
+  # expect { ... }.to fail
+  config.include RSpec::Matchers::FailMatchers
 end
