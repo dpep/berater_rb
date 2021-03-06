@@ -96,7 +96,7 @@ end
 
 
 ## Berater::ConcurrencyLimiter
-Useful to limit the amount of work done concurrently, ie. simulteneously.  eg. less than 3 connections at once.
+Useful to limit the amount of work done concurrently, ie. simulteneously.  eg. no more than 3 connections at once.
 
 ```ruby
 Berater::ConcurrencyLimiter.new(key, capacity, **opts)
@@ -104,8 +104,8 @@ Berater::ConcurrencyLimiter.new(key, capacity, **opts)
 * `key` - name of limiter
 * `capacity` - maximum simultaneous requests
 * `opts`
-  * `redis` - a redis instance
   * `timeout` - maximum seconds a lock may be held
+  * `redis` - a redis instance
 
 eg.
 ```ruby
