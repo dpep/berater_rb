@@ -43,8 +43,16 @@ limiter.limit(**opts) do
 end
 
 lock = limiter.limit
-# do some work inline
+# do work inline
 lock.release
+
+limiter.limit(cost: 2) do
+# do extra expensive work
+end
+
+limiter.limit(capacity: 3) do
+# do work within the new capacity limit
+end
 ```
 
 `.limit` - acquire a lock.  Raises a `Berater::Overloaded` error if limits have been exceeded.  When passed a block, it will execute the block unless the limit has been exceeded.  Otherwise it returns the lock, which should be released once completed.
