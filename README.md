@@ -254,6 +254,24 @@ end
 
 ```
 
+
+### Load Shedding
+If work has different priorities, then preemptively shedding load will facilitate more graceful failures.  Low priority work should yield to higher priorty work.  Here's a simple, yet effective approach:
+
+```ruby
+limiter = Berater(*)
+
+capacity = if priority == :low
+  (limiter.capacity * 0.8).to_i
+end
+
+limiter.limit(capacity: capacity) do
+  # work
+end 
+
+```
+
+
 ----
 ## Contributing
 
