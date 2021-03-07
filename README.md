@@ -77,7 +77,7 @@ Berater::RateLimiter.new(key, capacity, interval, **opts)
 ```
 * `key` - name of limiter
 * `capacity` - how many requests
-* `interval` - how often (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
+* `interval` - how often, ie. how much time it takes for the limit to reset.  Either number of seconds or a symbol: `:second`, `:minute`, `hour`
 * `opts`
   * `redis` - a redis instance
 
@@ -104,7 +104,7 @@ Berater::ConcurrencyLimiter.new(key, capacity, **opts)
 * `key` - name of limiter
 * `capacity` - maximum simultaneous requests
 * `opts`
-  * `timeout` - maximum seconds a lock may be held
+  * `timeout` - maximum seconds a lock may be held (optional, but recommended)
   * `redis` - a redis instance
 
 eg.
