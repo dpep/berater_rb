@@ -1,3 +1,12 @@
+###  v0.6.0  (2021-03-07)
+- enforce rate interval > 0, since otherwise what even is the expected behavior?
+- switch to millisecond precision, to match redis pexpire
+- support for capacity/cost to be floats
+- simplify lock and add dynamic count
+- Update README.md
+- test matchers description
+- upgrade rspec matchers
+
 ###  v0.5.0  (2021-03-05)
 - comparison operator for limiters
 - use fail matcher
