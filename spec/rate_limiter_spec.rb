@@ -33,7 +33,6 @@ describe Berater::RateLimiter do
         end.to raise_error ArgumentError
       end
 
-      # it { expect_bad_capacity(0.5) }
       it { expect_bad_capacity(-1) }
       it { expect_bad_capacity('1') }
       it { expect_bad_capacity(:one) }
