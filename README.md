@@ -52,7 +52,7 @@ lock.release
 * `cost` - the relative cost of this piece of work, default is 1
 
 
-#### Berater::Lock
+### Berater::Lock
 Created when a call to `.limit` is successful.
 
 ```ruby
@@ -136,7 +136,7 @@ end
 
 ## Integrations
 
-#### Rails
+### Rails
 Convert limit errors into a HTTP [status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429)
 
 ```ruby
@@ -147,7 +147,7 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-#### Sidekiq
+### Sidekiq
 Ensure Berater plays nice with [Sidekiq Ent](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting#custom-errors)
 
 ```ruby
@@ -159,7 +159,7 @@ Sidekiq::Limiter.errors << Berater::Overloaded
 Berater has a few tools to make testing easier.  And it plays nicely with [Timecop](https://github.com/travisjeffery/timecop).
 
 
-#### test_mode
+### test_mode
 Force all `limit` calls to either pass or fail, without hitting Redis.
 
 ```ruby
@@ -187,7 +187,7 @@ end
 ```
 
 
-#### rspec
+### rspec
 rspec matchers and automatic flushing of Redis between examples.
 
 ```ruby
@@ -204,14 +204,14 @@ describe 'MyTest' do
 end
 ```
 
-#### Unlimiter
+### Unlimiter
 A limiter which always succeeds.
 
 ```ruby
 limiter = Berater::Unlimiter.new
 ```
 
-#### Inhibitor
+### Inhibitor
 A limiter which always fails.
 
 ```ruby
@@ -221,7 +221,7 @@ limiter = Berater::Inhibitor.new
 ----
 ## Misc
 
-#### A riddle!
+### A riddle!
 
 What's the difference between a rate limiter and a concurrency limiter?  Can you build one with the other?
 
@@ -230,7 +230,7 @@ Both enforce limits, but differ with respect to time and memory.  A rate limiter
 An [example](https://github.com/dpep/berater_rb/blob/master/spec/riddle_spec.rb) is worth a thousand words  :)
 
 
-#### DSL
+### DSL
 Experimental...
 
 ```ruby
