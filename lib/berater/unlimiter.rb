@@ -6,7 +6,7 @@ module Berater
     end
 
     def limit(**opts, &block)
-      yield_lock(Lock.new(self, Float::INFINITY, 0), &block)
+      yield_lock(Lock.new(Float::INFINITY, 0), &block)
     end
 
     def overloaded?

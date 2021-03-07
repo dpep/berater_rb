@@ -26,8 +26,7 @@ RSpec.shared_examples 'a limiter' do |limiter|
     context 'uses a lock' do
       def check(limiter, lock)
         expect(lock).to be_a Berater::Lock
-        expect(lock.limiter).to eq limiter
-        expect(lock).to respond_to :id
+        expect(lock.capacity).to eq limiter.capacity
         expect(lock.contention).to be_a Integer
       end
 

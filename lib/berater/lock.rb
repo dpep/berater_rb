@@ -1,11 +1,10 @@
 module Berater
   class Lock
 
-    attr_reader :limiter, :id, :contention
+    attr_reader :capacity, :contention
 
-    def initialize(limiter, id, contention, release_fn = nil)
-      @limiter = limiter
-      @id = id
+    def initialize(capacity, contention, release_fn = nil)
+      @capacity = capacity
       @contention = contention
       @locked_at = Time.now
       @release_fn = release_fn

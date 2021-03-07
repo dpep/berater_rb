@@ -78,11 +78,10 @@ module Berater
 
       raise Incapacitated if lock_ids.empty?
 
-      if cost == 0
-        lock = Lock.new(self, nil, count)
-      else
-        lock = Lock.new(self, lock_ids[0], count, -> { release(lock_ids) })
+      release_fn = if cost > 0
+        proc { release(lock_ids) }
       end
+      lock = Lock.new(capacity, count, release_fn)
 
       yield_lock(lock, &block)
     end

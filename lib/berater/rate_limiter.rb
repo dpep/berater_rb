@@ -73,7 +73,7 @@ module Berater
 
       raise Overrated unless allowed
 
-      lock = Lock.new(self, ts, count)
+      lock = Lock.new(capacity, count)
       yield_lock(lock, &block)
     end
 
