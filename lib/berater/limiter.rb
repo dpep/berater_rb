@@ -47,11 +47,15 @@ module Berater
     end
 
     def capacity=(capacity)
-      unless capacity.is_a?(Integer) || capacity == Float::INFINITY
-        raise ArgumentError, "expected Integer, found #{capacity.class}"
+      unless capacity.is_a?(Numeric)
+        raise ArgumentError, "expected Numeric, found #{capacity.class}"
       end
 
-      raise ArgumentError, "capacity must be >= 0" unless capacity >= 0
+      if capacity == Float::INFINITY
+        raise ArgumentError, 'infinite capacity not supported, use Unlimiter'
+      end
+
+      raise ArgumentError, 'capacity must be >= 0' unless capacity >= 0
 
       @capacity = capacity
     end

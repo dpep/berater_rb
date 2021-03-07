@@ -172,20 +172,11 @@ describe Berater::TestMode, order: :defined do
   describe 'ConcurrencyLimiter' do
     subject { Berater::ConcurrencyLimiter.new(:key, 1) }
 
-    shared_examples 'a ConcurrencyLimiter' do
-      it { expect(subject).to be_a Berater::ConcurrencyLimiter }
-
-      it 'checks arguments' do
-        expect {
-          Berater::ConcurrencyLimiter.new(:key, 1.0)
-        }.to raise_error(ArgumentError)
-      end
-    end
-
     context 'when test_mode = nil' do
       before { Berater.test_mode = nil }
 
-      it_behaves_like 'a ConcurrencyLimiter'
+      it { is_expected.to be_a Berater::ConcurrencyLimiter }
+
       it_behaves_like 'it is not overloaded'
 
       it 'works per usual' do
@@ -198,14 +189,16 @@ describe Berater::TestMode, order: :defined do
     context 'when test_mode = :pass' do
       before { Berater.test_mode = :pass }
 
-      it_behaves_like 'a ConcurrencyLimiter'
+      it { is_expected.to be_a Berater::ConcurrencyLimiter }
+
       it_behaves_like 'it always works, without redis'
     end
 
     context 'when test_mode = :fail' do
       before { Berater.test_mode = :fail }
 
-      it_behaves_like 'a ConcurrencyLimiter'
+      it { is_expected.to be_a Berater::ConcurrencyLimiter }
+
       it_behaves_like 'it never works, without redis'
     end
   end

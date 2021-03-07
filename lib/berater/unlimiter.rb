@@ -13,5 +13,9 @@ module Berater
       false
     end
 
+    protected def capacity=(*)
+      @capacity = Float::INFINITY
+    end
+
   end
 end

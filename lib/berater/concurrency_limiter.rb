@@ -65,7 +65,13 @@ module Berater
 
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @capacity
-      # cost is Integer >= 0
+
+      # since fractional cost is not supported, capacity behaves like int
+      capacity = capacity.to_i
+
+      unless cost.is_a?(Integer) && cost >= 0
+        raise ArgumentError, "invalid cost: #{cost}"
+      end
 
       # timestamp in microseconds
       ts = (Time.now.to_f * 10**6).to_i

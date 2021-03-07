@@ -23,6 +23,7 @@ describe Berater::RateLimiter do
 
     it { expect_capacity(0) }
     it { expect_capacity(1) }
+    it { expect_capacity(1.5) }
     it { expect_capacity(100) }
 
     context 'with erroneous values' do
@@ -32,7 +33,7 @@ describe Berater::RateLimiter do
         end.to raise_error ArgumentError
       end
 
-      it { expect_bad_capacity(0.5) }
+      # it { expect_bad_capacity(0.5) }
       it { expect_bad_capacity(-1) }
       it { expect_bad_capacity('1') }
       it { expect_bad_capacity(:one) }
@@ -86,6 +87,19 @@ describe Berater::RateLimiter do
 
       3.times { limiter.limit }
       expect(limiter).to be_overrated
+    end
+
+    context 'when capacity is a Float' do
+      let(:limiter) { described_class.new(:key, 1.5, :second) }
+
+      it 'still works' do
+        limiter.limit
+        expect(limiter).not_to be_overrated
+
+        expect { limiter.limit }.to be_overrated
+
+        limiter.limit(cost: 0.5)
+      end
     end
 
     it 'accepts a dynamic capacity' do

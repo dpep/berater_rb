@@ -23,6 +23,7 @@ describe Berater::ConcurrencyLimiter do
 
     it { expect_capacity(0) }
     it { expect_capacity(1) }
+    it { expect_capacity(1.5) }
     it { expect_capacity(10_000) }
 
     context 'with erroneous values' do
@@ -32,7 +33,6 @@ describe Berater::ConcurrencyLimiter do
         end.to raise_error ArgumentError
       end
 
-      it { expect_bad_capacity(0.5) }
       it { expect_bad_capacity(-1) }
       it { expect_bad_capacity('1') }
       it { expect_bad_capacity(:one) }
@@ -84,6 +84,18 @@ describe Berater::ConcurrencyLimiter do
       let(:limiter) { described_class.new(:key, 0) }
 
       it 'always fails' do
+        expect(limiter).to be_incapacitated
+      end
+    end
+
+    context 'when capacity is a Float' do
+      let(:limiter) { described_class.new(:key, 1.5) }
+
+      it 'still works' do
+        lock = limiter.limit
+
+        # since fractional cost is not supported
+        expect(lock.capacity).to be 1
         expect(limiter).to be_incapacitated
       end
     end
@@ -148,6 +160,11 @@ describe Berater::ConcurrencyLimiter do
         expect { limiter.limit(capacity: 0) }.to be_incapacitated
         5.times { limiter.limit(capacity: 10) }
         expect { limiter }.to be_incapacitated
+      end
+
+      it 'only allows positive, Integer values' do
+        expect { limiter.limit(cost: -1) }.to raise_error(ArgumentError)
+        expect { limiter.limit(cost: 1.5) }.to raise_error(ArgumentError)
       end
     end
 
