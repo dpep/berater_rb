@@ -13,6 +13,10 @@ module Berater
     private def interval=(interval)
       @interval = interval
       @interval_msec = Berater::Utils.to_msec(interval)
+
+      unless @interval_msec > 0
+        raise ArgumentError, 'interval must be > 0'
+      end
     end
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA

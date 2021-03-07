@@ -48,6 +48,16 @@ describe Berater::RateLimiter do
       expect(subject.interval).to be :second
       expect(subject.instance_variable_get(:@interval_msec)).to be 10**3
     end
+
+    it 'must be > 0' do
+      expect {
+        described_class.new(:key, 1, 0)
+      }.to raise_error(ArgumentError)
+
+      expect {
+        described_class.new(:key, 1, -1)
+      }.to raise_error(ArgumentError)
+    end
   end
 
   describe '#limit' do
