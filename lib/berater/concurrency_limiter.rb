@@ -14,7 +14,7 @@ module Berater
     private def timeout=(timeout)
       @timeout = timeout
       timeout = 0 if timeout == Float::INFINITY
-      @timeout_usec = Berater::Utils.to_usec(timeout)
+      @timeout_msec = Berater::Utils.to_msec(timeout)
     end
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
@@ -73,13 +73,13 @@ module Berater
         raise ArgumentError, "invalid cost: #{cost}"
       end
 
-      # timestamp in microseconds
-      ts = (Time.now.to_f * 10**6).to_i
+      # timestamp in milliseconds
+      ts = (Time.now.to_f * 10**3).to_i
 
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key(key), cache_key('lock_id') ],
-        [ capacity, ts, @timeout_usec, cost ]
+        [ capacity, ts, @timeout_msec, cost ]
       )
 
       raise Incapacitated if lock_ids.empty?

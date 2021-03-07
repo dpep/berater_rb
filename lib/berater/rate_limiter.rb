@@ -7,12 +7,12 @@ module Berater
 
     def initialize(key, capacity, interval, **opts)
       self.interval = interval
-      super(key, capacity, @interval_usec, **opts)
+      super(key, capacity, @interval_msec, **opts)
     end
 
     private def interval=(interval)
       @interval = interval
-      @interval_usec = Berater::Utils.to_usec(interval)
+      @interval_msec = Berater::Utils.to_msec(interval)
     end
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
@@ -20,11 +20,11 @@ module Berater
       local ts_key = KEYS[2]
       local ts = tonumber(ARGV[1])
       local capacity = tonumber(ARGV[2])
-      local interval_usec = tonumber(ARGV[3])
+      local interval_msec = tonumber(ARGV[3])
       local cost = tonumber(ARGV[4])
       local count = 0
       local allowed
-      local usec_per_drip = interval_usec / capacity
+      local msec_per_drip = interval_msec / capacity
 
       -- timestamp of last update
       local last_ts = tonumber(redis.call('GET', ts_key))
@@ -33,7 +33,7 @@ module Berater
         count = tonumber(redis.call('GET', key)) or 0
 
         -- adjust for time passing
-        local drips = math.floor((ts - last_ts) / usec_per_drip)
+        local drips = math.floor((ts - last_ts) / msec_per_drip)
         count = math.max(0, count - drips)
       end
 
@@ -47,7 +47,7 @@ module Berater
           count = count + cost
 
           -- time for bucket to empty, in milliseconds
-          local ttl = math.ceil((count * usec_per_drip) / 1000)
+          local ttl = math.ceil(count * msec_per_drip)
 
           -- update count and last_ts, with expirations
           redis.call('SET', key, count, 'PX', ttl)
@@ -62,13 +62,13 @@ module Berater
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @capacity
 
-      # timestamp in microseconds
-      ts = (Time.now.to_f * 10**6).to_i
+      # timestamp in milliseconds
+      ts = (Time.now.to_f * 10**3).to_i
 
       count, allowed = LUA_SCRIPT.eval(
         redis,
         [ cache_key(key), cache_key("#{key}-ts") ],
-        [ ts, capacity, @interval_usec, cost ]
+        [ ts, capacity, @interval_msec, cost ]
       )
 
       raise Overrated unless allowed

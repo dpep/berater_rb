@@ -3,12 +3,12 @@ module Berater
     extend self
 
     refine Object do
-      def to_usec
-        Berater::Utils.to_usec(self)
+      def to_msec
+        Berater::Utils.to_msec(self)
       end
     end
 
-    def to_usec(val)
+    def to_msec(val)
       res = val
 
       if val.is_a? String
@@ -39,7 +39,7 @@ module Berater
         raise ArgumentError, "infinite values not allowed"
       end
 
-      (res * 10**6).to_i
+      (res * 10**3).to_i
     end
 
   end

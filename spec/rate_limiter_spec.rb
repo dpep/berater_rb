@@ -45,9 +45,9 @@ describe Berater::RateLimiter do
 
     subject { described_class.new(:key, 1, :second) }
 
-    it 'saves the interval in original and microsecond format' do
+    it 'saves the interval in original and millisecond format' do
       expect(subject.interval).to be :second
-      expect(subject.instance_variable_get(:@interval_usec)).to be 10**6
+      expect(subject.instance_variable_get(:@interval_msec)).to be 10**3
     end
   end
 
@@ -69,24 +69,42 @@ describe Berater::RateLimiter do
       expect(limiter).to be_overrated
     end
 
-    it 'limit resets over time, with millisecond precision' do
+    it 'resets limit over time' do
       3.times { limiter.limit }
       expect(limiter).to be_overrated
 
-      # travel forward to just before the count decrements
-      Timecop.freeze(0.333)
-      expect(limiter).to be_overrated
-
-      # traveling one more millisecond will decrement the count
-      Timecop.freeze(0.001)
-      limiter.limit
-      expect(limiter).to be_overrated
-
-      # traveling 1 second will reset the count
       Timecop.freeze(1)
 
       3.times { limiter.limit }
       expect(limiter).to be_overrated
+    end
+
+    context 'with millisecond precision' do
+      it 'resets limit over time' do
+        3.times { limiter.limit }
+        expect(limiter).to be_overrated
+
+        # travel forward to just before the count decrements
+        Timecop.freeze(0.333)
+        expect(limiter).to be_overrated
+
+        # traveling one more millisecond will decrement the count
+        Timecop.freeze(0.001)
+        limiter.limit
+        expect(limiter).to be_overrated
+      end
+
+      it 'works when drip rate is < 1 per millisecond' do
+        limiter = described_class.new(:key, 2_000, :second)
+
+        limiter.capacity.times { limiter.limit }
+        expect(limiter).to be_overrated
+
+        Timecop.freeze(0.001)
+        expect(limiter).not_to be_overrated
+
+        2.times { limiter.limit }
+      end
     end
 
     context 'when capacity is a Float' do
