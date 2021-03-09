@@ -1,3 +1,7 @@
+###  v0.6.1  (2021-03-09)
+- simplify
+- test_mode upgrade, fractional cost support for concurrency limiter
+
 ###  v0.6.0  (2021-03-07)
 - enforce rate interval > 0, since otherwise what even is the expected behavior?
 - switch to millisecond precision, to match redis pexpire
