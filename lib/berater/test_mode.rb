@@ -11,36 +11,33 @@ module Berater
     end
 
     @test_mode = mode
-
-    # overload class methods
-    unless Berater::Limiter.singleton_class.ancestors.include?(TestMode)
-      Berater::Limiter.singleton_class.prepend(TestMode)
-    end
   end
 
   module TestMode
-    def new(*args, **opts)
-      return super unless Berater.test_mode
+    def acquire_lock(*)
+      case Berater.test_mode
+      when :pass
+        Lock.new(Float::INFINITY, 0)
+      when :fail
+        # find class specific Overloaded error
+        e = self.class.constants.map do |name|
+          self.class.const_get(name)
+        end.find do |const|
+          const < Berater::Overloaded
+        end || Berater::Overloaded
 
-      # stub desired behavior
-      super.tap do |instance|
-        instance.define_singleton_method(:acquire_lock) do |*|
-          case Berater.test_mode
-          when :pass
-            Lock.new(Float::INFINITY, 0)
-          when :fail
-            # find class specific Overloaded error
-            e = self.class.constants.map do |name|
-              self.class.const_get(name)
-            end.find do |const|
-              const < Berater::Overloaded
-            end || Berater::Overloaded
-
-            raise e
-          end
-        end
+        raise e
+      else
+        super
       end
     end
   end
 
+end
+
+# stub each Limiter subclass
+ObjectSpace.each_object(Class).each do |klass|
+  next unless klass < Berater::Limiter
+
+  klass.prepend(Berater::TestMode)
 end

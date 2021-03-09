@@ -1,31 +1,20 @@
-describe Berater::TestMode, order: :defined do
-  let(:reset_test_mode) { true }
-
+describe Berater::TestMode do
   after do
-    Berater.test_mode = nil if reset_test_mode
+    Berater.test_mode = nil
   end
 
-  context 'after test_mode.rb was required, but not used' do
-    let(:reset_test_mode) { false }
-
-    it 'has already been loaded by "berater/rspec", unfortunately' do
-      expect {
-        expect { Berater.test_mode }.to raise_error(NoMethodError)
-      }.to fail
+  context 'after test_mode.rb has been loaded' do
+    it 'monkey patches Berater' do
+      expect(Berater).to respond_to(:test_mode)
     end
 
     it 'defaults to off' do
       expect(Berater.test_mode).to be nil
     end
 
-    it 'did not prepend .new yet' do
-      expect(Berater::Limiter.singleton_class.ancestors).not_to include(described_class)
-    end
-
-    it 'prepends when first turned on' do
-      Berater.test_mode = :pass
-
-      expect(Berater::Limiter.singleton_class.ancestors).to include(described_class)
+    it 'prepends Limiter subclasses' do
+      expect(Berater::Unlimiter.ancestors).to include(described_class)
+      expect(Berater::Inhibitor.ancestors).to include(described_class)
     end
 
     it 'preserves the original functionality via super' do
@@ -50,6 +39,14 @@ describe Berater::TestMode, order: :defined do
     it 'validates input' do
       expect { Berater.test_mode = :foo }.to raise_error(ArgumentError)
     end
+
+    it 'works no matter when limiter was created' do
+      limiter = Berater::Unlimiter.new
+      expect(limiter).not_to be_overloaded
+
+      Berater.test_mode = :fail
+      expect(limiter).to be_overloaded
+    end
   end
 
   shared_examples 'it always works, without redis' do
@@ -61,7 +58,7 @@ describe Berater::TestMode, order: :defined do
     it_behaves_like 'it is not overloaded'
 
     it 'always works' do
-      expect_any_instance_of(Berater::Limiter).to receive(:limit).exactly(10).times
+      expect_any_instance_of(Berater::Limiter).to receive(:limit).exactly(10).times.and_call_original
       10.times { subject.limit }
     end
   end
@@ -75,7 +72,7 @@ describe Berater::TestMode, order: :defined do
     it_behaves_like 'it is overloaded'
 
     it 'never works' do
-      # expect_any_instance_of(Berater::Limiter).to receive(:limit)
+      expect_any_instance_of(Berater::Limiter).to receive(:limit).and_call_original
       expect { subject }.to be_overloaded
     end
   end
