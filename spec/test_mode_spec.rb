@@ -47,6 +47,12 @@ describe Berater::TestMode do
       Berater.test_mode = :fail
       expect(limiter).to be_overloaded
     end
+
+    it 'supports a generic expectation' do
+      Berater.test_mode = :pass
+      expect_any_instance_of(Berater::Limiter).to receive(:limit)
+      Berater::Unlimiter.new.limit
+    end
   end
 
   shared_examples 'it always works, without redis' do
@@ -58,7 +64,6 @@ describe Berater::TestMode do
     it_behaves_like 'it is not overloaded'
 
     it 'always works' do
-      expect_any_instance_of(Berater::Limiter).to receive(:limit).exactly(10).times.and_call_original
       10.times { subject.limit }
     end
   end
@@ -70,11 +75,6 @@ describe Berater::TestMode do
     end
 
     it_behaves_like 'it is overloaded'
-
-    it 'never works' do
-      expect_any_instance_of(Berater::Limiter).to receive(:limit).and_call_original
-      expect { subject }.to be_overloaded
-    end
   end
 
   describe 'Unlimiter' do
@@ -100,7 +100,8 @@ describe Berater::TestMode do
       it { is_expected.to be_a Berater::Unlimiter }
       it_behaves_like 'it never works, without redis'
 
-      it 'raises the proper exception' do
+      it 'supports class specific logic' do
+        expect(subject.overloaded?).to be true
         expect { subject.limit }.to raise_error(Berater::Overloaded)
       end
     end
@@ -129,7 +130,8 @@ describe Berater::TestMode do
       it { is_expected.to be_a Berater::Inhibitor }
       it_behaves_like 'it never works, without redis'
 
-      it 'raises the proper exception' do
+      it 'supports class specific logic' do
+        expect(subject.inhibited?).to be true
         expect { subject.limit }.to raise_error(Berater::Inhibitor::Inhibited)
       end
     end
@@ -174,7 +176,8 @@ describe Berater::TestMode do
       it_behaves_like 'a RateLimiter'
       it_behaves_like 'it never works, without redis'
 
-      it 'raises the proper exception' do
+      it 'supports class specific logic' do
+        expect(subject.overrated?).to be true
         expect { subject.limit }.to raise_error(Berater::RateLimiter::Overrated)
       end
     end
@@ -212,7 +215,8 @@ describe Berater::TestMode do
 
       it_behaves_like 'it never works, without redis'
 
-      it 'raises the proper exception' do
+      it 'supports class specific logic' do
+        expect(subject.incapacitated?).to be true
         expect { subject.limit }.to raise_error(Berater::ConcurrencyLimiter::Incapacitated)
       end
     end
