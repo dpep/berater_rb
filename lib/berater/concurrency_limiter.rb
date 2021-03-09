@@ -63,15 +63,10 @@ module Berater
     LUA
     )
 
-    def limit(capacity: nil, cost: 1, &block)
-      capacity ||= @capacity
-
-      # since fractional cost is not supported, capacity behaves like int
+    protected def acquire_lock(capacity, cost)
+      # fractional cost is not supported, but make it work
       capacity = capacity.to_i
-
-      unless cost.is_a?(Integer) && cost >= 0
-        raise ArgumentError, "invalid cost: #{cost}"
-      end
+      cost = cost.ceil
 
       # timestamp in milliseconds
       ts = (Time.now.to_f * 10**3).to_i
@@ -87,16 +82,10 @@ module Berater
       release_fn = if cost > 0
         proc { release(lock_ids) }
       end
-      lock = Lock.new(capacity, count, release_fn)
 
-      yield_lock(lock, &block)
+      Lock.new(capacity, count, release_fn)
     end
 
-    def overloaded?
-      limit(cost: 0) { false }
-    rescue Overloaded
-      true
-    end
     alias incapacitated? overloaded?
 
     private def release(lock_ids)

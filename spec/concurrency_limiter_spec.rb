@@ -124,6 +124,12 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter).to be_incapacitated
     end
 
+    it 'accepts a dynamic capacity' do
+      expect { limiter.limit(capacity: 0) }.to be_incapacitated
+      5.times { limiter.limit(capacity: 10) }
+      expect { limiter }.to be_incapacitated
+    end
+
     context 'with cost parameter' do
       it { expect { limiter.limit(cost: 4) }.to be_incapacitated }
 
@@ -154,17 +160,21 @@ describe Berater::ConcurrencyLimiter do
         expect(limiter).to be_incapacitated
       end
 
-      it 'accepts a dynamic capacity' do
-        limiter = described_class.new(:key, 1)
+      context 'with fractional costs' do
+        it 'rounds up' do
+          limiter.limit(cost: 1.5)
+          expect(limiter).to be_incapacitated
+        end
 
-        expect { limiter.limit(capacity: 0) }.to be_incapacitated
-        5.times { limiter.limit(capacity: 10) }
-        expect { limiter }.to be_incapacitated
+        it 'accumulates correctly' do
+          limiter.limit(cost: 0.5) # => 1
+          limiter.limit(cost: 0.7) # => 2
+          expect(limiter).to be_incapacitated
+        end
       end
 
-      it 'only allows positive, Integer values' do
+      it 'only allows positive values' do
         expect { limiter.limit(cost: -1) }.to raise_error(ArgumentError)
-        expect { limiter.limit(cost: 1.5) }.to raise_error(ArgumentError)
       end
     end
 

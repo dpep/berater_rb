@@ -22,28 +22,22 @@ module Berater
     def new(*args, **opts)
       return super unless Berater.test_mode
 
-      # chose a stub class with desired behavior
-      stub_klass = case Berater.test_mode
-      when :pass
-        Berater::Unlimiter
-      when :fail
-        Berater::Inhibitor
-      end
-
-      # don't stub self
-      return super if self < stub_klass
-
-      # swap out limit and overloaded? methods with stub
+      # stub desired behavior
       super.tap do |instance|
-        stub = stub_klass.allocate
-        stub.send(:initialize, *args, **opts)
+        instance.define_singleton_method(:acquire_lock) do |*|
+          case Berater.test_mode
+          when :pass
+            Lock.new(Float::INFINITY, 0)
+          when :fail
+            # find class specific Overloaded error
+            e = self.class.constants.map do |name|
+              self.class.const_get(name)
+            end.find do |const|
+              const < Berater::Overloaded
+            end || Berater::Overloaded
 
-        instance.define_singleton_method(:limit) do |**opts, &block|
-          stub.limit(**opts, &block)
-        end
-
-        instance.define_singleton_method(:overloaded?) do
-          stub.overloaded?
+            raise e
+          end
         end
       end
     end

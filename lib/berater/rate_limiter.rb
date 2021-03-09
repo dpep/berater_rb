@@ -63,9 +63,7 @@ module Berater
     LUA
     )
 
-    def limit(capacity: nil, cost: 1, &block)
-      capacity ||= @capacity
-
+    protected def acquire_lock(capacity, cost)
       # timestamp in milliseconds
       ts = (Time.now.to_f * 10**3).to_i
 
@@ -77,15 +75,9 @@ module Berater
 
       raise Overrated unless allowed
 
-      lock = Lock.new(capacity, count)
-      yield_lock(lock, &block)
+      Lock.new(capacity, count)
     end
 
-    def overloaded?
-      limit(cost: 0) { false }
-    rescue Overrated
-      true
-    end
     alias overrated? overloaded?
 
     def to_s

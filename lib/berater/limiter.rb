@@ -7,12 +7,34 @@ module Berater
       options[:redis] || Berater.redis
     end
 
-    def limit
-      raise NotImplementedError
+    def limit(capacity: nil, cost: 1, &block)
+      capacity ||= @capacity
+
+      unless capacity.is_a?(Numeric)
+        raise ArgumentError, "invalid capacity: #{capacity}"
+      end
+
+      unless cost.is_a?(Numeric) && cost >= 0
+        raise ArgumentError, "invalid cost: #{cost}"
+      end
+
+      lock = acquire_lock(capacity, cost)
+
+      if block_given?
+        begin
+          yield lock
+        ensure
+          lock.release
+        end
+      else
+        lock
+      end
     end
 
     def overloaded?
-      raise NotImplementedError
+      limit(cost: 0) { false }
+    rescue Overloaded
+      true
     end
 
     def to_s
@@ -60,20 +82,12 @@ module Berater
       @capacity = capacity
     end
 
-    def cache_key(key)
-      "#{self.class}:#{key}"
+    def acquire_lock(capacity, cost)
+      raise NotImplementedError
     end
 
-    def yield_lock(lock, &block)
-      if block_given?
-        begin
-          yield lock
-        ensure
-          lock.release
-        end
-      else
-        lock
-      end
+    def cache_key(key)
+      "#{self.class}:#{key}"
     end
 
   end

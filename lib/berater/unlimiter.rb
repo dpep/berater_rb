@@ -5,16 +5,14 @@ module Berater
       super(key, Float::INFINITY, **opts)
     end
 
-    def limit(**opts, &block)
-      yield_lock(Lock.new(Float::INFINITY, 0), &block)
-    end
+    protected
 
-    def overloaded?
-      false
-    end
-
-    protected def capacity=(*)
+    def capacity=(*)
       @capacity = Float::INFINITY
+    end
+
+    def acquire_lock(*)
+      Lock.new(Float::INFINITY, 0)
     end
 
   end

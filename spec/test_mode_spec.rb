@@ -61,6 +61,7 @@ describe Berater::TestMode, order: :defined do
     it_behaves_like 'it is not overloaded'
 
     it 'always works' do
+      expect_any_instance_of(Berater::Limiter).to receive(:limit).exactly(10).times
       10.times { subject.limit }
     end
   end
@@ -74,6 +75,7 @@ describe Berater::TestMode, order: :defined do
     it_behaves_like 'it is overloaded'
 
     it 'never works' do
+      # expect_any_instance_of(Berater::Limiter).to receive(:limit)
       expect { subject }.to be_overloaded
     end
   end
@@ -100,6 +102,10 @@ describe Berater::TestMode, order: :defined do
 
       it { is_expected.to be_a Berater::Unlimiter }
       it_behaves_like 'it never works, without redis'
+
+      it 'raises the proper exception' do
+        expect { subject.limit }.to raise_error(Berater::Overloaded)
+      end
     end
   end
 
@@ -125,6 +131,10 @@ describe Berater::TestMode, order: :defined do
 
       it { is_expected.to be_a Berater::Inhibitor }
       it_behaves_like 'it never works, without redis'
+
+      it 'raises the proper exception' do
+        expect { subject.limit }.to raise_error(Berater::Inhibitor::Inhibited)
+      end
     end
   end
 
@@ -166,6 +176,10 @@ describe Berater::TestMode, order: :defined do
 
       it_behaves_like 'a RateLimiter'
       it_behaves_like 'it never works, without redis'
+
+      it 'raises the proper exception' do
+        expect { subject.limit }.to raise_error(Berater::RateLimiter::Overrated)
+      end
     end
   end
 
@@ -200,6 +214,10 @@ describe Berater::TestMode, order: :defined do
       it { is_expected.to be_a Berater::ConcurrencyLimiter }
 
       it_behaves_like 'it never works, without redis'
+
+      it 'raises the proper exception' do
+        expect { subject.limit }.to raise_error(Berater::ConcurrencyLimiter::Incapacitated)
+      end
     end
   end
 
