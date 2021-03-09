@@ -10,29 +10,27 @@ module Berater
       end
 
       def matches?(obj)
-        begin
-          case obj
-          when Proc
-            # eg. expect { ... }.to be_overrated
-            res = obj.call
+        case obj
+        when Proc
+          # eg. expect { ... }.to be_overrated
+          res = obj.call
 
-            if res.is_a? Berater::Limiter
-              # eg. expect { Berater.new(...) }.to be_overloaded
-              @limiter = res
-              res.overloaded?
-            else
-              # eg. expect { Berater(...)  }.to be_overloaded
-              # eg. expect { limiter.limit }.to be_overloaded
-              false
-            end
-          when Berater::Limiter
-            # eg. expect(Berater.new(...)).to be_overloaded
-            @limiter = obj
-            obj.overloaded?
+          if res.is_a? Berater::Limiter
+            # eg. expect { Berater.new(...) }.to be_overloaded
+            @limiter = res
+            res.overloaded?
+          else
+            # eg. expect { Berater(...)  }.to be_overloaded
+            # eg. expect { limiter.limit }.to be_overloaded
+            false
           end
-        rescue @type
-          true
+        when Berater::Limiter
+          # eg. expect(Berater.new(...)).to be_overloaded
+          @limiter = obj
+          obj.overloaded?
         end
+      rescue @type
+        true
       end
 
       def description
