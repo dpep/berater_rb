@@ -12,7 +12,43 @@ describe Berater::Limiter do
     end
   end
 
-  describe '==' do
+  describe '#limit' do
+    subject { Berater::Unlimiter.new }
+
+    context 'with a capacity parameter' do
+      it 'overrides the stored value' do
+        is_expected.to receive(:acquire_lock).with(3, anything)
+
+        subject.limit(capacity: 3)
+      end
+
+      it 'validates the type' do
+        expect {
+          subject.limit(capacity: 'abc')
+        }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with a cost parameter' do
+      it 'overrides the stored value' do
+        is_expected.to receive(:acquire_lock).with(anything, 2)
+
+        subject.limit(cost: 2)
+      end
+
+      it 'validates' do
+        expect {
+          subject.limit(cost: 'abc')
+        }.to raise_error(ArgumentError)
+
+        expect {
+          subject.limit(cost: -1)
+        }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
+  describe '#==' do
     let(:limiter)  { Berater::RateLimiter.new(:key, 1, :second) }
 
     it 'equals itself' do
