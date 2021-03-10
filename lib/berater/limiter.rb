@@ -52,7 +52,7 @@ module Berater
 
     def self.new(*)
       # can only call via subclass
-      raise NotImplementedError if self == Berater::Limiter
+      raise NoMethodError if self == Berater::Limiter
 
       super
     end

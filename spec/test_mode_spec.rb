@@ -18,7 +18,7 @@ describe Berater::TestMode do
     end
 
     it 'preserves the original functionality via super' do
-      expect { Berater::Limiter.new }.to raise_error(NotImplementedError)
+      expect { Berater::Limiter.new }.to raise_error(NoMethodError)
     end
   end
 
