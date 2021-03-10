@@ -1,3 +1,7 @@
+###  v0.6.2  (2021-03-10)
+- fix test mode, use NoMethodError for Limiter.new
+- test coverage
+
 ###  v0.6.1  (2021-03-09)
 - simplify
 - test_mode upgrade, fractional cost support for concurrency limiter
