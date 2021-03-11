@@ -156,9 +156,11 @@ end
 ```
 
 ### Sidekiq
-Ensure Berater plays nice with [Sidekiq Ent](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting#custom-errors)
+[Sidekiq Ent](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting#custom-errors) provides a framework for applying limitations to Sidekiq jobs.  It offers a bunch of built in limiter types, and reschedules workers for a later time when limits are exceeded.  If you prefer to use Berater's limiters within that framework, just add:
 
 ```ruby
+# config/initializers/sidekiq.rb
+
 Sidekiq::Limiter.errors << Berater::Overloaded
 ```
 
