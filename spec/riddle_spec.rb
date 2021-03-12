@@ -42,11 +42,11 @@ class ConcurrenyRiddler
     timeout ||= 1_000 # fake infinity
 
     limiter = Berater::RateLimiter.new(:key, capacity, timeout)
-    limiter.limit
+    lock = limiter.limit
     yield if block_given?
   ensure
     # decrement counter
-    limiter.redis.decr(limiter.send(:cache_key, :key))
+    limiter.redis.decr(limiter.send(:cache_key, :key)) if lock
   end
 end
 
