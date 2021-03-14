@@ -10,11 +10,11 @@ module Berater
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @capacity
 
-      unless capacity.is_a?(Numeric)
+      unless capacity.is_a?(Numeric) && capacity >= 0
         raise ArgumentError, "invalid capacity: #{capacity}"
       end
 
-      unless cost.is_a?(Numeric) && cost >= 0
+      unless cost.is_a?(Numeric) && cost >= 0 && cost < Float::INFINITY
         raise ArgumentError, "invalid cost: #{cost}"
       end
 
