@@ -28,7 +28,7 @@ module Berater
 
       -- purge stale hosts
       if ttl > 0 then
-        redis.call('ZREMRANGEBYSCORE', key, '-inf', ts - ttl)
+        redis.call('ZREMRANGEBYSCORE', key, 0, ts - ttl)
       end
 
       -- check capacity
