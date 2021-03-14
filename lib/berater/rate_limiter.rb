@@ -64,7 +64,7 @@ module Berater
         end
       end
 
-      return { count, allowed }
+      return { tostring(count), allowed }
     LUA
     )
 
@@ -80,7 +80,7 @@ module Berater
 
       raise Overrated unless allowed
 
-      Lock.new(capacity, count)
+      Lock.new(capacity, count.to_f)
     end
 
     alias overrated? overloaded?

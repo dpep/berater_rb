@@ -6,7 +6,7 @@ RSpec.shared_examples 'a limiter' do |limiter|
     end
 
     it 'has a capacity' do
-      expect(limiter.capacity).to be_a(Integer).or(be Float::INFINITY)
+      expect(limiter.capacity).to be_a(Numeric).or(be Float::INFINITY)
     end
 
     it 'has a redis' do
@@ -27,7 +27,7 @@ RSpec.shared_examples 'a limiter' do |limiter|
       def check(limiter, lock)
         expect(lock).to be_a Berater::Lock
         expect(lock.capacity).to eq limiter.capacity
-        expect(lock.contention).to be_a Integer
+        expect(lock.contention).to be_a Numeric
       end
 
       it 'works inline' do

@@ -1,5 +1,6 @@
 describe Berater::RateLimiter do
   it_behaves_like 'a limiter', Berater.new(:key, 3, :second)
+  it_behaves_like 'a limiter', Berater.new(:key, 3.5, :second)
 
   describe '.new' do
     let(:limiter) { described_class.new(:key, 1, :second) }
@@ -153,9 +154,17 @@ describe Berater::RateLimiter do
         expect(limiter).not_to be_overrated
       end
 
-      it 'can be a Float' do
-        2.times { limiter.limit(cost: 1.5) }
-        expect(limiter).to be_overrated
+      context 'when cost is a Float' do
+        it 'still works' do
+          2.times { limiter.limit(cost: 1.5) }
+          expect(limiter).to be_overrated
+        end
+
+        it 'calculates contention correctly' do
+          # note: Redis must return Floats as strings to maintain precision
+          lock = limiter.limit(cost: 1.5)
+          expect(lock.contention).to be 1.5
+        end
       end
     end
 
