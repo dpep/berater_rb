@@ -36,9 +36,13 @@ module Berater
       if last_ts then
         count = tonumber(redis.call('GET', key)) or 0
 
-        -- adjust for time passing
-        local drips = math.floor((ts - last_ts) / msec_per_drip)
-        count = math.max(0, count - drips)
+        -- adjust for time passing, guarding against clock skew
+        if ts > last_ts then
+          local drips = math.floor((ts - last_ts) / msec_per_drip)
+          count = math.max(0, count - drips)
+        else
+          ts = last_ts
+        end
       end
 
       if cost == 0 then
@@ -52,6 +56,7 @@ module Berater
 
           -- time for bucket to empty, in milliseconds
           local ttl = math.ceil(count * msec_per_drip)
+          ttl = ttl + 100 -- margin of error, for clock skew
 
           -- update count and last_ts, with expirations
           redis.call('SET', key, count, 'PX', ttl)

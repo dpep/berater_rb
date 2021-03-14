@@ -159,6 +159,40 @@ describe Berater::RateLimiter do
       end
     end
 
+    context 'with clock skew' do
+      let(:limiter) { described_class.new(:key, 10, :second) }
+
+      it 'works skewing backward' do
+        limiter.limit(cost: 9)
+
+        Timecop.freeze(-0.1) do
+          limiter.limit
+          expect(limiter).to be_overrated
+        end
+
+        expect(limiter).to be_overrated
+
+        Timecop.freeze(0.1)
+        limiter.limit
+        expect(limiter).to be_overrated
+      end
+
+      it 'works skewing forward' do
+        limiter.limit
+
+        Timecop.freeze(0.1) do
+          # one drip later
+          limiter.limit(cost: 10)
+          expect(limiter).to be_overrated
+        end
+
+        expect(limiter).to be_overrated
+
+        Timecop.freeze(0.1)
+        expect(limiter).to be_overrated
+      end
+    end
+
     context 'with same key, different limiters' do
       let(:limiter_one) { described_class.new(:key, 1, :second) }
       let(:limiter_two) { described_class.new(:key, 1, :second) }
