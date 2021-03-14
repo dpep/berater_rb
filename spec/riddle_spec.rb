@@ -46,7 +46,11 @@ class ConcurrenyRiddler
     yield if block_given?
   ensure
     # decrement counter
-    limiter.redis.decr(limiter.send(:cache_key, :key)) if lock
+    if lock
+      key = limiter.send(:cache_key, :key)
+      count, ts = limiter.redis.get(key).split ';'
+      limiter.redis.set(key, "#{count.to_f - 1};#{ts}")
+    end
   end
 end
 

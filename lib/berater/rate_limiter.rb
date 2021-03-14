@@ -26,15 +26,17 @@ module Berater
       local capacity = tonumber(ARGV[2])
       local interval_msec = tonumber(ARGV[3])
       local cost = tonumber(ARGV[4])
-      local count = 0
-      local allowed
+
+      local allowed -- whether lock was acquired
+      local count -- capacity being utilized
       local msec_per_drip = interval_msec / capacity
+      local state = redis.call('GET', key)
 
-      -- timestamp of last update
-      local last_ts = tonumber(redis.call('GET', ts_key))
-
-      if last_ts then
-        count = tonumber(redis.call('GET', key)) or 0
+      if state then
+        local last_ts -- timestamp of last update
+        count, last_ts = string.match(state, '([%d.]+);(%w+)')
+        count = tonumber(count)
+        last_ts = tonumber(last_ts, 16)
 
         -- adjust for time passing, guarding against clock skew
         if ts > last_ts then
@@ -43,6 +45,8 @@ module Berater
         else
           ts = last_ts
         end
+      else
+        count = 0
       end
 
       if cost == 0 then
@@ -58,9 +62,9 @@ module Berater
           local ttl = math.ceil(count * msec_per_drip)
           ttl = ttl + 100 -- margin of error, for clock skew
 
-          -- update count and last_ts, with expirations
-          redis.call('SET', key, count, 'PX', ttl)
-          redis.call('SET', ts_key, ts, 'PX', ttl)
+          -- update count and last_ts, with expiration
+          state = string.format('%f;%X', count, ts)
+          redis.call('SET', key, state, 'PX', ttl)
         end
       end
 
@@ -74,7 +78,7 @@ module Berater
 
       count, allowed = LUA_SCRIPT.eval(
         redis,
-        [ cache_key(key), cache_key("#{key}-ts") ],
+        [ cache_key(key) ],
         [ ts, capacity, @interval_msec, cost ]
       )
 
