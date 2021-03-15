@@ -25,10 +25,10 @@ end
 Berater(key, capacity, **opts, &block)
 ```
 * `key` - name of limiter
-* `capacity` - how many requests
+* `capacity` - maximum number of requests permitted
 * `opts`
   * `redis` - a redis instance
-  * `interval` - how often the limit resets, if it does (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
+  * `interval` - how often the capacity limit resets, if it does (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
 * `block` - optional block to call immediately via `.limit`
 
 
@@ -86,8 +86,8 @@ A [leaky bucket](https://en.wikipedia.org/wiki/Leaky_bucket) rate limiter.  Usef
 Berater::RateLimiter.new(key, capacity, interval, **opts)
 ```
 * `key` - name of limiter
-* `capacity` - how many requests
-* `interval` - how often, ie. how much time it takes for the limit to reset.  Either number of seconds or a symbol: `:second`, `:minute`, `hour`
+* `capacity` - maximum number of requests permitted
+* `interval` - how often the capacity limit resets.  Either number of seconds or a symbol: `:second`, `:minute`, `hour`
 * `opts`
   * `redis` - a redis instance
 
@@ -112,7 +112,7 @@ Useful to limit the amount of work done concurrently, ie. simulteneously.  eg. n
 Berater::ConcurrencyLimiter.new(key, capacity, **opts)
 ```
 * `key` - name of limiter
-* `capacity` - maximum simultaneous requests
+* `capacity` - maximum number of simultaneous requests
 * `opts`
   * `timeout` - maximum seconds a lock may be held (optional, but recommended)
   * `redis` - a redis instance
