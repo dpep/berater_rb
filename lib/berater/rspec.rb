@@ -1,7 +1,7 @@
 require 'berater'
 require 'berater/rspec/matchers'
 require 'berater/test_mode'
-require 'rspec'
+require 'rspec/core'
 
 RSpec.configure do |config|
   config.include(Berater::Matchers)
