@@ -117,9 +117,9 @@ Berater::ConcurrencyLimiter.new(key, capacity, **opts)
 
 eg.
 ```ruby
-limiter = Berater::ConcurrencyLimiter.new(:key, 3, redis: redis)
+limiter = Berater::ConcurrencyLimiter.new(:key, 3, redis: redis, timeout: 30)
 limiter.limit do
-  # do work, three simultaneous requests at a time
+  # do work, three simultaneous requests at a time for no more than 30 seconds each
 end
 
 # or, more conveniently
