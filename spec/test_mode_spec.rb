@@ -101,7 +101,6 @@ describe Berater::TestMode do
       it_behaves_like 'it never works, without redis'
 
       it 'supports class specific logic' do
-        expect(subject.overloaded?).to be true
         expect { subject.limit }.to raise_error(Berater::Overloaded)
       end
     end
@@ -131,7 +130,6 @@ describe Berater::TestMode do
       it_behaves_like 'it never works, without redis'
 
       it 'supports class specific logic' do
-        expect(subject.inhibited?).to be true
         expect { subject.limit }.to raise_error(Berater::Inhibitor::Inhibited)
       end
     end
@@ -177,7 +175,6 @@ describe Berater::TestMode do
       it_behaves_like 'it never works, without redis'
 
       it 'supports class specific logic' do
-        expect(subject.overrated?).to be true
         expect { subject.limit }.to raise_error(Berater::RateLimiter::Overrated)
       end
     end
@@ -216,7 +213,6 @@ describe Berater::TestMode do
       it_behaves_like 'it never works, without redis'
 
       it 'supports class specific logic' do
-        expect(subject.incapacitated?).to be true
         expect { subject.limit }.to raise_error(Berater::ConcurrencyLimiter::Incapacitated)
       end
     end

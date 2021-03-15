@@ -18,7 +18,7 @@ describe Berater::ConcurrencyLimiter do
   describe '#capacity' do
     def expect_capacity(capacity)
       limiter = described_class.new(:key, capacity)
-      expect(limiter.capacity).to eq capacity
+      expect(limiter.capacity).to eq capacity.to_i
     end
 
     it { expect_capacity(0) }
@@ -244,23 +244,23 @@ describe Berater::ConcurrencyLimiter do
     end
   end
 
-  describe '#overloaded?' do
-    let(:limiter) { described_class.new(:key, 1, timeout: 30) }
+  describe '#utilization' do
+    let(:limiter) { described_class.new(:key, 10, timeout: 30) }
 
     it 'works' do
-      expect(limiter.overloaded?).to be false
-      lock = limiter.limit
-      expect(limiter.overloaded?).to be true
-      lock.release
-      expect(limiter.overloaded?).to be false
-    end
+      expect(limiter.utilization).to be 0.0
 
-    it 'respects timeout' do
-      expect(limiter.overloaded?).to be false
-      lock = limiter.limit
-      expect(limiter.overloaded?).to be true
-      Timecop.freeze(30)
-      expect(limiter.overloaded?).to be false
+      2.times { limiter.limit }
+      expect(limiter.utilization).to be 0.2
+
+      Timecop.freeze(15)
+
+      8.times { limiter.limit }
+      expect(limiter.utilization).to be 1.0
+
+      Timecop.freeze(15)
+
+      expect(limiter.utilization).to be 0.8
     end
   end
 

@@ -8,6 +8,9 @@ module Berater
     def initialize(key, capacity, **opts)
       super(key, capacity, **opts)
 
+      # round fractional capacity
+      self.capacity = capacity.to_i
+
       self.timeout = opts[:timeout] || 0
     end
 
@@ -35,10 +38,8 @@ module Berater
       local count = redis.call('ZCARD', key)
 
       if cost == 0 then
-        -- just check limit, ie. for .overlimit?
-        if count < capacity then
-          table.insert(lock_ids, true)
-        end
+        -- just checking count
+        table.insert(lock_ids, true)
       elseif (count + cost) <= capacity then
         -- grab locks, one per cost
         local lock_id = redis.call('INCRBY', lock_key, cost)
@@ -64,7 +65,7 @@ module Berater
     )
 
     protected def acquire_lock(capacity, cost)
-      # fractional cost is not supported, but make it work
+      # round fractional capacity and cost
       capacity = capacity.to_i
       cost = cost.ceil
 
@@ -85,8 +86,6 @@ module Berater
 
       Lock.new(capacity, count, release_fn)
     end
-
-    alias incapacitated? overloaded?
 
     private def release(lock_ids)
       res = redis.zrem(cache_key(key), lock_ids)

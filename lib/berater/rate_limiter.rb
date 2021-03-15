@@ -50,8 +50,8 @@ module Berater
       end
 
       if cost == 0 then
-        -- just check limit, ie. for .overlimit?
-        allowed = count < capacity
+        -- just checking count
+        allowed = true
       else
         allowed = (count + cost) <= capacity
 
@@ -88,8 +88,6 @@ module Berater
 
       Lock.new(capacity, count)
     end
-
-    alias overrated? overloaded?
 
     def to_s
       msg = if interval.is_a? Numeric

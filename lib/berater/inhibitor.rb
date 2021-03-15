@@ -7,8 +7,6 @@ module Berater
       super(key, 0, **opts)
     end
 
-    alias inhibited? overloaded?
-
     protected def acquire_lock(*)
       raise Inhibited
     end

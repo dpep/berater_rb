@@ -8,7 +8,7 @@ describe Berater::Limiter do
 
     it do
       expect { limiter.limit }.to raise_error(NotImplementedError)
-      expect { limiter.overloaded? }.to raise_error(NotImplementedError)
+      expect { limiter.utilization }.to raise_error(NotImplementedError)
     end
   end
 

@@ -231,15 +231,21 @@ describe Berater::RateLimiter do
     end
   end
 
-  describe '#overloaded?' do
-    let(:limiter) { described_class.new(:key, 1, :second) }
+  describe '#utilization' do
+    let(:limiter) { described_class.new(:key, 10, :minute) }
 
-    it 'works' do
-      expect(limiter.overloaded?).to be false
-      limiter.limit
-      expect(limiter.overloaded?).to be true
-      Timecop.freeze(1)
-      expect(limiter.overloaded?).to be false
+    it do
+      expect(limiter.utilization).to be 0.0
+
+      2.times { limiter.limit }
+      expect(limiter.utilization).to be 0.2
+
+      8.times { limiter.limit }
+      expect(limiter.utilization).to be 1.0
+
+      Timecop.freeze(30)
+
+      expect(limiter.utilization).to be 0.5
     end
   end
 

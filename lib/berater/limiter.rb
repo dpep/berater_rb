@@ -31,10 +31,16 @@ module Berater
       end
     end
 
-    def overloaded?
-      limit(cost: 0) { false }
-    rescue Overloaded
-      true
+    def utilization
+      lock = limit(cost: 0)
+
+      if lock.capacity == 0
+        1.0
+      else
+        lock.contention.to_f / lock.capacity
+      end
+    rescue Berater::Overloaded
+      1.0
     end
 
     def to_s
