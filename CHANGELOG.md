@@ -1,3 +1,6 @@
+###  v0.7.1  (2021-03-15)
+- slim rspec requirement down to core
+
 ###  v0.7.0  (2021-03-15)
 - move interval to options
 - Update README.md
