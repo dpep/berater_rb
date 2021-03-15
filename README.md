@@ -95,11 +95,11 @@ eg.
 ```ruby
 limiter = Berater::RateLimiter.new(:key, 2, :second, redis: redis)
 limiter.limit do
-  # do work, twice per second with a rate limiter
+  # do work, twice per second
 end
 
 # or, more conveniently
-Berater(:key, 2, :second) do
+Berater(:key, 2, interval: :second) do
   ...
 end
 ```
@@ -121,7 +121,7 @@ eg.
 ```ruby
 limiter = Berater::ConcurrencyLimiter.new(:key, 3, redis: redis, timeout: 30)
 limiter.limit do
-  # do work, three simultaneous requests at a time for no more than 30 seconds each
+  # allow only three simultaneous requests at a time, for no more than 30 seconds each
 end
 
 # or, more conveniently
