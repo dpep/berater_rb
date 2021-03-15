@@ -1,3 +1,15 @@
+###  v0.7.0  (2021-03-15)
+- move interval to options
+- Update README.md
+- simplify by removing all one-off limiter specific lanugage
+- swap out overloaded? for utilization
+- zrem from 0, since there are no negative timestamps.  maybe that space will be useful for storage?
+- composite keys
+- fix precision bug
+- account for clock skew
+- fix riddle - only decrement count if lock was acquired
+- Update README.md
+
 ###  v0.6.2  (2021-03-10)
 - fix test mode, use NoMethodError for Limiter.new
 - test coverage
