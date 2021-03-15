@@ -82,9 +82,11 @@ module Berater
         [ ts, capacity, @interval_msec, cost ]
       )
 
+      count = count.include?('.') ? count.to_f : count.to_i
+
       raise Overrated unless allowed
 
-      Lock.new(capacity, count.to_f)
+      Lock.new(capacity, count)
     end
 
     alias overrated? overloaded?
