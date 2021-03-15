@@ -55,26 +55,28 @@ describe Berater::TestMode do
     end
   end
 
-  shared_examples 'it always works, without redis' do
+  shared_examples 'it supports test_mode' do
     before do
+      # without hitting Redis
       Berater.redis = nil
       expect_any_instance_of(Berater::LuaScript).not_to receive(:eval)
     end
 
-    it_behaves_like 'it is not overloaded'
+    context 'with test_mode = :pass' do
+      before { Berater.test_mode = :pass }
 
-    it 'always works' do
-      10.times { subject.limit }
-    end
-  end
+      it_behaves_like 'it is not overloaded'
 
-  shared_examples 'it never works, without redis' do
-    before do
-      Berater.redis = nil
-      expect_any_instance_of(Berater::LuaScript).not_to receive(:eval)
+      it 'always works' do
+        10.times { subject.limit }
+      end
     end
 
-    it_behaves_like 'it is overloaded'
+    context 'with test_mode = :fail' do
+      before { Berater.test_mode = :fail }
+
+      it_behaves_like 'it is overloaded'
+    end
   end
 
   describe 'Unlimiter' do
@@ -83,27 +85,10 @@ describe Berater::TestMode do
     context 'when test_mode = nil' do
       before { Berater.test_mode = nil }
 
-      it { is_expected.to be_a Berater::Unlimiter }
-      it_behaves_like 'it always works, without redis'
+      it_behaves_like 'it is not overloaded'
     end
 
-    context 'when test_mode = :pass' do
-      before { Berater.test_mode = :pass }
-
-      it { is_expected.to be_a Berater::Unlimiter }
-      it_behaves_like 'it always works, without redis'
-    end
-
-    context 'when test_mode = :fail' do
-      before { Berater.test_mode = :fail }
-
-      it { is_expected.to be_a Berater::Unlimiter }
-      it_behaves_like 'it never works, without redis'
-
-      it 'supports class specific logic' do
-        expect { subject.limit }.to raise_error(Berater::Overloaded)
-      end
-    end
+    it_behaves_like 'it supports test_mode'
   end
 
   describe 'Inhibitor' do
@@ -112,46 +97,18 @@ describe Berater::TestMode do
     context 'when test_mode = nil' do
       before { Berater.test_mode = nil }
 
-      it { is_expected.to be_a Berater::Inhibitor }
-      it_behaves_like 'it never works, without redis'
+      it_behaves_like 'it is overloaded'
     end
 
-    context 'when test_mode = :pass' do
-      before { Berater.test_mode = :pass }
-
-      it { is_expected.to be_a Berater::Inhibitor }
-      it_behaves_like 'it always works, without redis'
-    end
-
-    context 'when test_mode = :fail' do
-      before { Berater.test_mode = :fail }
-
-      it { is_expected.to be_a Berater::Inhibitor }
-      it_behaves_like 'it never works, without redis'
-
-      it 'supports class specific logic' do
-        expect { subject.limit }.to raise_error(Berater::Inhibitor::Inhibited)
-      end
-    end
+    it_behaves_like 'it supports test_mode'
   end
 
   describe 'RateLimiter' do
     subject { Berater::RateLimiter.new(:key, 1, :second) }
 
-    shared_examples 'a RateLimiter' do
-      it { is_expected.to be_a Berater::RateLimiter }
-
-      it 'checks arguments' do
-        expect {
-          Berater::RateLimiter.new(:key, 1)
-        }.to raise_error(ArgumentError)
-      end
-    end
-
     context 'when test_mode = nil' do
       before { Berater.test_mode = nil }
 
-      it_behaves_like 'a RateLimiter'
       it_behaves_like 'it is not overloaded'
 
       it 'works per usual' do
@@ -161,23 +118,7 @@ describe Berater::TestMode do
       end
     end
 
-    context 'when test_mode = :pass' do
-      before { Berater.test_mode = :pass }
-
-      it_behaves_like 'a RateLimiter'
-      it_behaves_like 'it always works, without redis'
-    end
-
-    context 'when test_mode = :fail' do
-      before { Berater.test_mode = :fail }
-
-      it_behaves_like 'a RateLimiter'
-      it_behaves_like 'it never works, without redis'
-
-      it 'supports class specific logic' do
-        expect { subject.limit }.to raise_error(Berater::RateLimiter::Overrated)
-      end
-    end
+    it_behaves_like 'it supports test_mode'
   end
 
   describe 'ConcurrencyLimiter' do
@@ -185,8 +126,6 @@ describe Berater::TestMode do
 
     context 'when test_mode = nil' do
       before { Berater.test_mode = nil }
-
-      it { is_expected.to be_a Berater::ConcurrencyLimiter }
 
       it_behaves_like 'it is not overloaded'
 
@@ -197,25 +136,7 @@ describe Berater::TestMode do
       end
     end
 
-    context 'when test_mode = :pass' do
-      before { Berater.test_mode = :pass }
-
-      it { is_expected.to be_a Berater::ConcurrencyLimiter }
-
-      it_behaves_like 'it always works, without redis'
-    end
-
-    context 'when test_mode = :fail' do
-      before { Berater.test_mode = :fail }
-
-      it { is_expected.to be_a Berater::ConcurrencyLimiter }
-
-      it_behaves_like 'it never works, without redis'
-
-      it 'supports class specific logic' do
-        expect { subject.limit }.to raise_error(Berater::ConcurrencyLimiter::Incapacitated)
-      end
-    end
+    it_behaves_like 'it supports test_mode'
   end
 
 end

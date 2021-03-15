@@ -77,14 +77,14 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter.limit).to be_a Berater::Lock
       expect(limiter.limit).to be_a Berater::Lock
 
-      expect(limiter).to be_incapacitated
+      expect(limiter).to be_overloaded
     end
 
     context 'with capacity 0' do
       let(:limiter) { described_class.new(:key, 0) }
 
       it 'always fails' do
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
       end
     end
 
@@ -96,80 +96,80 @@ describe Berater::ConcurrencyLimiter do
 
         # since fractional cost is not supported
         expect(lock.capacity).to be 1
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
       end
     end
 
     it 'limit resets over time' do
       2.times { limiter.limit }
-      expect(limiter).to be_incapacitated
+      expect(limiter).to be_overloaded
 
       Timecop.freeze(30)
 
       2.times { limiter.limit }
-      expect(limiter).to be_incapacitated
+      expect(limiter).to be_overloaded
     end
 
     it 'limit resets with millisecond precision' do
       2.times { limiter.limit }
-      expect(limiter).to be_incapacitated
+      expect(limiter).to be_overloaded
 
       # travel forward to just before first lock times out
       Timecop.freeze(29.999)
-      expect(limiter).to be_incapacitated
+      expect(limiter).to be_overloaded
 
       # traveling one more millisecond will decrement the count
       Timecop.freeze(0.001)
       2.times { limiter.limit }
-      expect(limiter).to be_incapacitated
+      expect(limiter).to be_overloaded
     end
 
     it 'accepts a dynamic capacity' do
-      expect { limiter.limit(capacity: 0) }.to be_incapacitated
+      expect { limiter.limit(capacity: 0) }.to be_overloaded
       5.times { limiter.limit(capacity: 10) }
-      expect { limiter }.to be_incapacitated
+      expect { limiter }.to be_overloaded
     end
 
     context 'with cost parameter' do
-      it { expect { limiter.limit(cost: 4) }.to be_incapacitated }
+      it { expect { limiter.limit(cost: 4) }.to be_overloaded }
 
       it 'works within limit' do
         limiter.limit(cost: 2)
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
       end
 
       it 'releases full cost' do
         lock = limiter.limit(cost: 2)
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
 
         lock.release
-        expect(limiter).not_to be_incapacitated
+        expect(limiter).not_to be_overloaded
 
         lock = limiter.limit(cost: 2)
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
       end
 
       it 'respects timeout' do
         limiter.limit(cost: 2)
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
 
         Timecop.freeze(30)
-        expect(limiter).not_to be_incapacitated
+        expect(limiter).not_to be_overloaded
 
         limiter.limit(cost: 2)
-        expect(limiter).to be_incapacitated
+        expect(limiter).to be_overloaded
       end
 
       context 'with fractional costs' do
         it 'rounds up' do
           limiter.limit(cost: 1.5)
-          expect(limiter).to be_incapacitated
+          expect(limiter).to be_overloaded
         end
 
         it 'accumulates correctly' do
           limiter.limit(cost: 0.5) # => 1
           limiter.limit(cost: 0.7) # => 2
-          expect(limiter).to be_incapacitated
+          expect(limiter).to be_overloaded
         end
       end
 
@@ -187,8 +187,8 @@ describe Berater::ConcurrencyLimiter do
       it 'works as expected' do
         expect(limiter_one.limit).to be_a Berater::Lock
 
-        expect(limiter_one).to be_incapacitated
-        expect(limiter_two).to be_incapacitated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).to be_overloaded
       end
     end
 
@@ -202,22 +202,22 @@ describe Berater::ConcurrencyLimiter do
         one_lock = limiter_one.limit
         expect(one_lock).to be_a Berater::Lock
 
-        expect(limiter_one).to be_incapacitated
-        expect(limiter_two).not_to be_incapacitated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).not_to be_overloaded
 
         two_lock = limiter_two.limit
         expect(two_lock).to be_a Berater::Lock
 
-        expect(limiter_one).to be_incapacitated
-        expect(limiter_two).to be_incapacitated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).to be_overloaded
 
         one_lock.release
-        expect(limiter_one).to be_incapacitated
-        expect(limiter_two).not_to be_incapacitated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).not_to be_overloaded
 
         two_lock.release
-        expect(limiter_one).not_to be_incapacitated
-        expect(limiter_two).not_to be_incapacitated
+        expect(limiter_one).not_to be_overloaded
+        expect(limiter_two).not_to be_overloaded
       end
     end
 
@@ -226,20 +226,20 @@ describe Berater::ConcurrencyLimiter do
       let(:limiter_two) { described_class.new(:two, 1) }
 
       it 'works as expected' do
-        expect(limiter_one).not_to be_incapacitated
-        expect(limiter_two).not_to be_incapacitated
+        expect(limiter_one).not_to be_overloaded
+        expect(limiter_two).not_to be_overloaded
 
         one_lock = limiter_one.limit
         expect(one_lock).to be_a Berater::Lock
 
-        expect(limiter_one).to be_incapacitated
-        expect(limiter_two).not_to be_incapacitated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).not_to be_overloaded
 
         two_lock = limiter_two.limit
         expect(two_lock).to be_a Berater::Lock
 
-        expect(limiter_one).to be_incapacitated
-        expect(limiter_two).to be_incapacitated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).to be_overloaded
       end
     end
   end

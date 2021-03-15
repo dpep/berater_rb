@@ -1,8 +1,6 @@
 module Berater
   class ConcurrencyLimiter < Limiter
 
-    class Incapacitated < Overloaded; end
-
     attr_reader :timeout
 
     def initialize(key, capacity, **opts)
@@ -78,7 +76,7 @@ module Berater
         [ capacity, ts, @timeout_msec, cost ]
       )
 
-      raise Incapacitated if lock_ids.empty?
+      raise Overloaded if lock_ids.empty?
 
       release_fn = if cost > 0
         proc { release(lock_ids) }

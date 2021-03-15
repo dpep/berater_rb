@@ -76,42 +76,42 @@ describe Berater::RateLimiter do
     it 'limits excessive calls' do
       3.times { limiter.limit }
 
-      expect(limiter).to be_overrated
+      expect(limiter).to be_overloaded
     end
 
     it 'resets limit over time' do
       3.times { limiter.limit }
-      expect(limiter).to be_overrated
+      expect(limiter).to be_overloaded
 
       Timecop.freeze(1)
 
       3.times { limiter.limit }
-      expect(limiter).to be_overrated
+      expect(limiter).to be_overloaded
     end
 
     context 'with millisecond precision' do
       it 'resets limit over time' do
         3.times { limiter.limit }
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
 
         # travel forward to just before the count decrements
         Timecop.freeze(0.333)
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
 
         # traveling one more millisecond will decrement the count
         Timecop.freeze(0.001)
         limiter.limit
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
       end
 
       it 'works when drip rate is < 1 per millisecond' do
         limiter = described_class.new(:key, 2_000, :second)
 
         limiter.capacity.times { limiter.limit }
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
 
         Timecop.freeze(0.001)
-        expect(limiter).not_to be_overrated
+        expect(limiter).not_to be_overloaded
 
         2.times { limiter.limit }
       end
@@ -122,9 +122,9 @@ describe Berater::RateLimiter do
 
       it 'still works' do
         limiter.limit
-        expect(limiter).not_to be_overrated
+        expect(limiter).not_to be_overloaded
 
-        expect { limiter.limit }.to be_overrated
+        expect { limiter.limit }.to be_overloaded
 
         limiter.limit(cost: 0.5)
       end
@@ -133,31 +133,31 @@ describe Berater::RateLimiter do
     it 'accepts a dynamic capacity' do
       limiter = described_class.new(:key, 1, :second)
 
-      expect { limiter.limit(capacity: 0) }.to be_overrated
+      expect { limiter.limit(capacity: 0) }.to be_overloaded
       5.times { limiter.limit(capacity: 10) }
-      expect { limiter }.to be_overrated
+      expect { limiter }.to be_overloaded
     end
 
     context 'works with cost parameter' do
-      it { expect { limiter.limit(cost: 4) }.to be_overrated }
+      it { expect { limiter.limit(cost: 4) }.to be_overloaded }
 
       it 'works within limit' do
         limiter.limit(cost: 3)
-        expect { limiter.limit }.to be_overrated
+        expect { limiter.limit }.to be_overloaded
       end
 
       it 'resets over time' do
         limiter.limit(cost: 3)
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
 
         Timecop.freeze(1)
-        expect(limiter).not_to be_overrated
+        expect(limiter).not_to be_overloaded
       end
 
       context 'when cost is a Float' do
         it 'still works' do
           2.times { limiter.limit(cost: 1.5) }
-          expect(limiter).to be_overrated
+          expect(limiter).to be_overloaded
         end
 
         it 'calculates contention correctly' do
@@ -176,14 +176,14 @@ describe Berater::RateLimiter do
 
         Timecop.freeze(-0.1) do
           limiter.limit
-          expect(limiter).to be_overrated
+          expect(limiter).to be_overloaded
         end
 
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
 
         Timecop.freeze(0.1)
         limiter.limit
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
       end
 
       it 'works skewing forward' do
@@ -192,13 +192,13 @@ describe Berater::RateLimiter do
         Timecop.freeze(0.1) do
           # one drip later
           limiter.limit(cost: 10)
-          expect(limiter).to be_overrated
+          expect(limiter).to be_overloaded
         end
 
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
 
         Timecop.freeze(0.1)
-        expect(limiter).to be_overrated
+        expect(limiter).to be_overloaded
       end
     end
 
@@ -207,10 +207,10 @@ describe Berater::RateLimiter do
       let(:limiter_two) { described_class.new(:key, 1, :second) }
 
       it 'works as expected' do
-        expect(limiter_one.limit).not_to be_overrated
+        expect(limiter_one.limit).not_to be_overloaded
 
-        expect(limiter_one).to be_overrated
-        expect(limiter_two).to be_overrated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).to be_overloaded
       end
     end
 
@@ -219,14 +219,14 @@ describe Berater::RateLimiter do
       let(:limiter_two) { described_class.new(:two, 2, :second) }
 
       it 'works as expected' do
-        expect(limiter_one.limit).not_to be_overrated
-        expect(limiter_two.limit).not_to be_overrated
+        expect(limiter_one.limit).not_to be_overloaded
+        expect(limiter_two.limit).not_to be_overloaded
 
-        expect(limiter_one).to be_overrated
-        expect(limiter_two.limit).not_to be_overrated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two.limit).not_to be_overloaded
 
-        expect(limiter_one).to be_overrated
-        expect(limiter_two).to be_overrated
+        expect(limiter_one).to be_overloaded
+        expect(limiter_two).to be_overloaded
       end
     end
   end

@@ -38,7 +38,6 @@ module Berater
 
     KEYWORDS = [
       :second, :minute, :hour,
-      :unlimited, :inhibited,
     ].freeze
 
     def install

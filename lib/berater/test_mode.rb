@@ -19,14 +19,7 @@ module Berater
       when :pass
         Lock.new(Float::INFINITY, 0)
       when :fail
-        # find class specific Overloaded error
-        e = self.class.constants.map do |name|
-          self.class.const_get(name)
-        end.find do |const|
-          const.is_a?(Class) && const < Berater::Overloaded
-        end || Berater::Overloaded
-
-        raise e
+        raise Overloaded
       else
         super
       end

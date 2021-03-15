@@ -21,9 +21,9 @@ module Berater
 
   def new(key, capacity, interval = nil, **opts)
     case capacity
-    when :unlimited, Float::INFINITY
+    when Float::INFINITY
       Berater::Unlimiter
-    when :inhibited, 0
+    when 0
       Berater::Inhibitor
     else
       if interval

@@ -1,10 +1,6 @@
 module Berater
   module Matchers
     class Overloaded
-      def initialize(type)
-        @type = type
-      end
-
       def supports_block_expectations?
         true
       end
@@ -12,7 +8,7 @@ module Berater
       def matches?(obj)
         case obj
         when Proc
-          # eg. expect { ... }.to be_overrated
+          # eg. expect { ... }.to be_overloaded
           res = obj.call
 
           if res.is_a? Berater::Limiter
@@ -29,53 +25,37 @@ module Berater
           @limiter = obj
           @limiter.utilization >= 1
         end
-      rescue @type
+      rescue Berater::Overloaded
         true
       end
 
       def description
         if @limiter
-          "be #{verb}"
+          "be overloaded"
         else
-          "raise #{@type}"
+          "raise #{Berater::Overloaded}"
         end
       end
 
       def failure_message
         if @limiter
-          "expected to be #{verb}"
+          "expected to be overloaded"
         else
-          "expected #{@type} to be raised"
+          "expected #{Berater::Overloaded} to be raised"
         end
       end
 
       def failure_message_when_negated
         if @limiter
-          "expected not to be #{verb}"
+          "expected not to be overloaded"
         else
-          "did not expect #{@type} to be raised"
+          "did not expect #{Berater::Overloaded} to be raised"
         end
-      end
-
-      private def verb
-        @type.to_s.split('::')[-1].downcase
       end
     end
 
     def be_overloaded
-      Overloaded.new(Berater::Overloaded)
-    end
-
-    def be_overrated
-      Overloaded.new(Berater::RateLimiter::Overrated)
-    end
-
-    def be_incapacitated
-      Overloaded.new(Berater::ConcurrencyLimiter::Incapacitated)
-    end
-
-    def be_inhibited
-      Overloaded.new(Berater::Inhibitor::Inhibited)
+      Overloaded.new
     end
   end
 end

@@ -57,16 +57,4 @@ describe Berater::DSL do
     end
   end
 
-  context 'unlimited mode' do
-    it 'has keywords' do
-      check(:unlimited) { unlimited }
-    end
-  end
-
-  context 'inhibited mode' do
-    it 'has keywords' do
-      check(:inhibited) { inhibited }
-    end
-  end
-
 end

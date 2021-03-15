@@ -3,18 +3,6 @@ require 'berater/dsl'
 describe Berater do
   using Berater::DSL
 
-  it 'instatiates an Unlimiter' do
-    limiter = Berater.new(:key) { unlimited }
-    expect(limiter).to be_a Berater::Unlimiter
-    expect(limiter.key).to be :key
-  end
-
-  it 'instatiates an Inhibiter' do
-    limiter = Berater.new(:key) { inhibited }
-    expect(limiter).to be_a Berater::Inhibitor
-    expect(limiter.key).to be :key
-  end
-
   it 'instatiates a RateLimiter' do
     limiter = Berater.new(:key) { 1.per second }
     expect(limiter).to be_a Berater::RateLimiter

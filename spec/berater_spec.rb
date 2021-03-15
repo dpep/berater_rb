@@ -25,7 +25,7 @@ describe Berater do
   end
 
   describe '.new' do
-    context 'unlimited mode' do
+    context 'Unlimiter mode' do
       let(:limiter) { Berater.new(:key, Float::INFINITY) }
 
       it 'instantiates an Unlimiter' do
@@ -44,7 +44,7 @@ describe Berater do
       end
     end
 
-    context 'inhibited mode' do
+    context 'Inhibitor mode' do
       let(:limiter) { Berater.new(:key, 0) }
 
       it 'instantiates an Inhibitor' do

@@ -1,8 +1,6 @@
 module Berater
   class RateLimiter < Limiter
 
-    class Overrated < Overloaded; end
-
     attr_accessor :interval
 
     def initialize(key, capacity, interval, **opts)
@@ -84,7 +82,7 @@ module Berater
 
       count = count.include?('.') ? count.to_f : count.to_i
 
-      raise Overrated unless allowed
+      raise Overloaded unless allowed
 
       Lock.new(capacity, count)
     end
