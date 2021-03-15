@@ -11,25 +11,24 @@ Berater.configure do |c|
   c.redis = Redis.new
 end
 
-Berater(:key, 2, :second) do
-  # do work, twice per second with a rate limiter
+Berater(:key, 3) do
+  # allow only three simultaneous requests at a time, with a concurrency limiter
 end
 
-
-Berater(:key, 3) do
-  # or three simultaneous request at a time, with a concurrency limiter
+Berater(:key, 2, interval: :second) do
+  # or do work twice per second with a rate limiter
 end
 ```
 
 ## Berater
 ```ruby
-Berater(key, capacity, interval = nil, **opts, &block)
+Berater(key, capacity, **opts, &block)
 ```
 * `key` - name of limiter
 * `capacity` - how many requests
-* `interval` - how often the limit resets, if it does (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
 * `opts`
   * `redis` - a redis instance
+  * `interval` - how often the limit resets, if it does (either number of seconds or a symbol: `:second`, `:minute`, `hour`)
 * `block` - optional block to call immediately via `.limit`
 
 
@@ -59,6 +58,8 @@ end
 * `capacity` - override the limiter's capacity for this call
 * `cost` - the relative cost of this piece of work, default is 1
 
+`.utilization` - a Float representing how much capacity is being used as a fraction of the limit.  Values > 1 denote the limiter is overloaded.
+
 
 ### Berater::Lock
 Created when a call to `.limit` is successful.
@@ -72,7 +73,8 @@ end
 lock = Berater(*).limit
 ```
 
-* `.contention` - capacity currently being used
+* `.capacity` - capacity limitation
+* `.contention` - capacity being utilized
 * `.locked?` - whether the lock is currently being held
 * `.release` - release capacity being held
 
