@@ -17,7 +17,7 @@ describe Berater::Matchers::Overloaded do
   end
 
   context 'Berater::RateLimiter' do
-    let(:limiter) { Berater.new(:key, 1, :second) }
+    let(:limiter) { Berater::RateLimiter.new(:key, 1, :second) }
 
     it { expect(limiter).not_to be_overloaded }
     it { expect { limiter }.not_to be_overloaded }
@@ -41,7 +41,7 @@ describe Berater::Matchers::Overloaded do
   end
 
   context 'Berater::ConcurrencyLimiter' do
-    let(:limiter) { Berater.new(:key, 1) }
+    let(:limiter) { Berater::ConcurrencyLimiter.new(:key, 1) }
 
     it { expect(limiter).not_to be_overloaded }
     it { expect { limiter }.not_to be_overloaded }

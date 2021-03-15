@@ -64,7 +64,7 @@ describe Berater do
     end
 
     context 'rate mode' do
-      let(:limiter) { Berater.new(:key, 1, :second) }
+      let(:limiter) { Berater.new(:key, 1, interval: :second) }
 
       it 'instantiates a RateLimiter' do
         expect(limiter).to be_a Berater::RateLimiter
@@ -77,7 +77,7 @@ describe Berater do
 
       it 'accepts options' do
         redis = double('Redis')
-        limiter = Berater.new(:key, 1, :second, redis: redis)
+        limiter = Berater.new(:key, 1, interval: :second, redis: redis)
         expect(limiter.redis).to be redis
       end
     end
@@ -103,20 +103,20 @@ describe Berater do
   end
 
   describe 'Berater() - convenience method' do
-    RSpec.shared_examples 'test convenience' do |klass, *args|
+    RSpec.shared_examples 'test convenience' do |klass, capacity, **opts|
       it 'creates a limiter' do
-        limiter = Berater(:key, *args)
+        limiter = Berater(:key, capacity, **opts)
         expect(limiter).to be_a klass
       end
 
       context 'with a block' do
         it 'creates a limiter and calls limit' do
-          limiter = Berater(:key, *args)
+          limiter = Berater(:key, capacity, **opts)
           expect(klass).to receive(:new).and_return(limiter)
           expect(limiter).to receive(:limit).and_call_original
 
           begin
-            res = Berater(:key, *args) { true }
+            res = Berater(:key, capacity, **opts) { true }
             expect(res).to be true
           rescue Berater::Overloaded
             expect(klass).to be Berater::Inhibitor
@@ -127,7 +127,7 @@ describe Berater do
 
     include_examples 'test convenience', Berater::Unlimiter, Float::INFINITY
     include_examples 'test convenience', Berater::Inhibitor, 0
-    include_examples 'test convenience', Berater::RateLimiter, 1, :second
+    include_examples 'test convenience', Berater::RateLimiter, 1, interval: :second
     include_examples 'test convenience', Berater::ConcurrencyLimiter, 1
   end
 

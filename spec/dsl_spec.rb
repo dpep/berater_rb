@@ -13,13 +13,13 @@ describe Berater::DSL do
     end
 
     it 'parses' do
-      check([ 1, :second ]) { 1.per second }
-      check([ 3, :minute ]) { 3.per minute }
-      check([ 5, :hour ]) { 5.every hour }
+      check([ 1, interval: :second ]) { 1.per second }
+      check([ 3, interval: :minute ]) { 3.per minute }
+      check([ 5, interval: :hour ]) { 5.every hour }
     end
 
     it 'cleans up afterward' do
-      check([ 1, :second ]) { 1.per second }
+      check([ 1, interval: :second ]) { 1.per second }
 
       expect(Integer).not_to respond_to(:per)
       expect(Integer).not_to respond_to(:every)
@@ -29,7 +29,7 @@ describe Berater::DSL do
       count = 1
       interval = :second
 
-      check([ count, interval ]) { count.per interval }
+      check([ count, interval: interval ]) { count.per interval }
     end
   end
 

@@ -19,20 +19,23 @@ module Berater
     @redis = nil
   end
 
-  def new(key, capacity, interval = nil, **opts)
+  def new(key, capacity, **opts)
+    args = []
+
     case capacity
     when Float::INFINITY
       Berater::Unlimiter
     when 0
       Berater::Inhibitor
     else
-      if interval
+      if opts[:interval]
+        args << opts.delete(:interval)
         Berater::RateLimiter
       else
         Berater::ConcurrencyLimiter
       end
     end.yield_self do |klass|
-      args = [ key, capacity, interval ].compact
+      args = [ key, capacity, *args ].compact
       klass.new(*args, **opts)
     end
   end
@@ -46,8 +49,8 @@ module Berater
 end
 
 # convenience method
-def Berater(key, capacity, interval = nil, **opts, &block)
-  limiter = Berater.new(key, capacity, interval, **opts)
+def Berater(key, capacity, **opts, &block)
+  limiter = Berater.new(key, capacity, **opts)
   if block_given?
     limiter.limit(&block)
   else

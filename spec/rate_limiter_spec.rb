@@ -1,6 +1,6 @@
 describe Berater::RateLimiter do
-  it_behaves_like 'a limiter', Berater.new(:key, 3, :second)
-  it_behaves_like 'a limiter', Berater.new(:key, 3.5, :second)
+  it_behaves_like 'a limiter', described_class.new(:key, 3, :second)
+  it_behaves_like 'a limiter', described_class.new(:key, 3.5, :second)
 
   describe '.new' do
     let(:limiter) { described_class.new(:key, 1, :second) }

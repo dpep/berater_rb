@@ -1,20 +1,21 @@
 module Berater
   module DSL
     refine Berater.singleton_class do
-      def new(key, mode = nil, *args, **opts, &block)
-        if mode.nil?
+      def new(key, capacity = nil, **opts, &block)
+        if capacity.nil?
           unless block_given?
-            raise ArgumentError, 'expected either mode or block'
+            raise ArgumentError, 'expected either capacity or block'
           end
 
-          mode, *args = DSL.eval(&block)
+          capacity, more_opts = DSL.eval(&block)
+          opts.merge!(more_opts) if more_opts
         else
           if block_given?
-            raise ArgumentError, 'expected either mode or block, not both'
+            raise ArgumentError, 'expected either capacity or block, not both'
           end
         end
 
-        super(key, mode, *args, **opts)
+        super(key, capacity, **opts)
       end
     end
 
@@ -43,7 +44,7 @@ module Berater
     def install
       Integer.class_eval do
         def per(unit)
-          [ self, unit ]
+          [ self, interval: unit ]
         end
         alias every per
 
