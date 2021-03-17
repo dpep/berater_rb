@@ -43,10 +43,6 @@ module Berater
       1.0
     end
 
-    def to_s
-      "#<#{self.class}>"
-    end
-
     def ==(other)
       self.class == other.class &&
       self.key == other.key &&

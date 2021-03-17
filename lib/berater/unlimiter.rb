@@ -5,6 +5,10 @@ module Berater
       super(key, Float::INFINITY, **opts)
     end
 
+    def to_s
+      "#<#{self.class}>"
+    end
+
     protected
 
     def capacity=(*)

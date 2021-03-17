@@ -5,6 +5,10 @@ module Berater
       super(key, 0, **opts)
     end
 
+    def to_s
+      "#<#{self.class}>"
+    end
+
     protected def acquire_lock(*)
       raise Overloaded
     end

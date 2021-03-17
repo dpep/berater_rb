@@ -1,7 +1,9 @@
 describe Berater::Inhibitor do
+  subject { described_class.new }
+
   describe '.new' do
     it 'initializes without any arguments or options' do
-      expect(described_class.new).to be_a described_class
+      is_expected.to be_a described_class
     end
 
     it 'initializes with any arguments and options' do
@@ -9,15 +11,18 @@ describe Berater::Inhibitor do
     end
 
     it 'has default values' do
-      expect(described_class.new.key).to be :inhibitor
-      expect(described_class.new.redis).to be Berater.redis
+      expect(subject.key).to be :inhibitor
+      expect(subject.redis).to be Berater.redis
     end
   end
 
   describe '#limit' do
-    subject { described_class.new }
-
     it_behaves_like 'it is overloaded'
   end
 
+  describe '#to_s' do
+    it do
+      expect(subject.to_s).to include described_class.to_s
+    end
+  end
 end
