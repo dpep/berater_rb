@@ -44,6 +44,10 @@ describe Berater::Limiter do
         expect {
           subject.limit(cost: -1)
         }.to raise_error(ArgumentError)
+
+        expect {
+          subject.limit(cost: Float::INFINITY)
+        }.to raise_error(ArgumentError)
       end
     end
   end

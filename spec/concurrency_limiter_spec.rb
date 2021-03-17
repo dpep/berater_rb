@@ -36,6 +36,7 @@ describe Berater::ConcurrencyLimiter do
       it { expect_bad_capacity(-1) }
       it { expect_bad_capacity('1') }
       it { expect_bad_capacity(:one) }
+      it { expect_bad_capacity(Float::INFINITY) }
     end
   end
 
