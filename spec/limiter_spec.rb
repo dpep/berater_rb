@@ -104,4 +104,26 @@ describe Berater::Limiter do
     end
   end
 
+  describe '#cache_key' do
+    subject { klass.new.send(:cache_key, :key) }
+
+    context 'with Unlimiter' do
+      let(:klass) { Berater::Unlimiter }
+
+      it do
+        is_expected.to eq 'Berater:Unlimiter:key'
+      end
+    end
+
+    context 'with custom limiter' do
+      MyLimiter = Class.new(Berater::Unlimiter)
+
+      let(:klass) { MyLimiter }
+
+      it 'adds Berater prefix' do
+        is_expected.to eq 'Berater:MyLimiter:key'
+      end
+    end
+  end
+
 end

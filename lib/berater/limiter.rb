@@ -93,7 +93,8 @@ module Berater
     end
 
     def cache_key(key)
-      "#{self.class}:#{key}"
+      klass = self.class.to_s.split(':')[-1]
+      "Berater:#{klass}:#{key}"
     end
 
   end

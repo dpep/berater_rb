@@ -78,8 +78,4 @@ RSpec.shared_examples 'a limiter' do |limiter|
     end
   end
 
-  describe '#to_s' do
-    it { expect(limiter.to_s).to match(/Berater/) }
-  end
-
 end
