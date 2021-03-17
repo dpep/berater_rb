@@ -76,7 +76,7 @@ module Berater
 
       count, allowed = LUA_SCRIPT.eval(
         redis,
-        [ cache_key(key) ],
+        [ cache_key ],
         [ ts, capacity, @interval_msec, cost ]
       )
 

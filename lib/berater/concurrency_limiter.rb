@@ -72,7 +72,7 @@ module Berater
 
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
-        [ cache_key(key), cache_key('lock_id') ],
+        [ cache_key, self.class.cache_key('lock_id') ],
         [ capacity, ts, @timeout_msec, cost ]
       )
 
@@ -86,7 +86,7 @@ module Berater
     end
 
     private def release(lock_ids)
-      res = redis.zrem(cache_key(key), lock_ids)
+      res = redis.zrem(cache_key, lock_ids)
       res == true || res == lock_ids.count # depending on which version of Redis
     end
 

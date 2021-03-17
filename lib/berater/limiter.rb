@@ -88,8 +88,13 @@ module Berater
       raise NotImplementedError
     end
 
-    def cache_key(key)
-      klass = self.class.to_s.split(':')[-1]
+    def cache_key(subkey = nil)
+      instance_key = subkey.nil? ? key : "#{key}:#{subkey}"
+      self.class.cache_key(instance_key)
+    end
+
+    def self.cache_key(key)
+      klass = to_s.split(':')[-1]
       "Berater:#{klass}:#{key}"
     end
 

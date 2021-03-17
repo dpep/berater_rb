@@ -47,7 +47,7 @@ class ConcurrenyRiddler
   ensure
     # decrement counter
     if lock
-      key = limiter.send(:cache_key, :key)
+      key = limiter.send(:cache_key)
       count, ts = limiter.redis.get(key).split ';'
       limiter.redis.set(key, "#{count.to_f - 1};#{ts}")
     end
