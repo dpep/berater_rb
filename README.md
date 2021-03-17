@@ -50,7 +50,7 @@ limiter.limit(cost: 2) do
 end
 
 limiter.limit(capacity: 3) do
-# do work within the new capacity limit
+# do work within a new capacity limit
 end
 ```
 
@@ -58,7 +58,7 @@ end
 * `capacity` - override the limiter's capacity for this call
 * `cost` - the relative cost of this piece of work, default is 1
 
-`.utilization` - a Float representing how much capacity is being used as a fraction of the limit.  Values > 1 denote the limiter is overloaded.
+`.utilization` - a Float representing how much capacity is being used, as a fraction of the limit.  Values >= 1 indicate that the limiter is overloaded and calls to `.limit` will fail.
 
 
 ### Berater::Lock
@@ -158,7 +158,7 @@ end
 ```
 
 ### Sidekiq
-[Sidekiq Ent](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting#custom-errors) provides a framework for applying limitations to Sidekiq jobs.  It offers a bunch of built in limiter types, and reschedules workers for a later time when limits are exceeded.  If you prefer to use Berater's limiters within that framework, just add:
+[Sidekiq Ent](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting) provides a framework for applying limitations to Sidekiq jobs.  It offers a bunch of built in limiter types, and automatically reschedules workers to be retried later when limits are exceeded.  Berater limiters can be used seamlessly within this framework by [registering](https://github.com/mperham/sidekiq/wiki/Ent-Rate-Limiting#custom-errors) its error class.
 
 ```ruby
 # config/initializers/sidekiq.rb
@@ -172,7 +172,7 @@ Berater has a few tools to make testing easier.  And it plays nicely with [Timec
 
 
 ### test_mode
-Force all `limit` calls to either pass or fail, without hitting Redis.
+Force all `.limit` calls to either pass or fail, without hitting Redis.
 
 ```ruby
 require 'berater/test_mode'
@@ -242,23 +242,6 @@ Both enforce limits, but differ with respect to time and memory.  A rate limiter
 An [example](https://github.com/dpep/berater_rb/blob/master/spec/riddle_spec.rb) is worth a thousand words  :)
 
 
-### DSL
-Experimental...
-
-```ruby
-using Berater::DSL
-
-Berater(:key) { 1.per second } do
-  ...
-end
-
-Berater(:key) { 3.at_once } do
-  ...
-end
-
-```
-
-
 ### Load Shedding
 If work has different priorities, then preemptively shedding load will facilitate more graceful failures.  Low priority work should yield to higher priorty work.  Here's a simple, yet effective approach:
 
@@ -272,6 +255,23 @@ end
 limiter.limit(capacity: capacity) do
   # work
 end 
+
+```
+
+
+### DSL
+Experimental...
+
+```ruby
+using Berater::DSL
+
+Berater(:key) { 1.per second } do
+  ...
+end
+
+Berater(:key) { 3.at_once } do
+  ...
+end
 
 ```
 
