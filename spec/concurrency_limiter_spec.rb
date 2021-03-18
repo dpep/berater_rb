@@ -43,16 +43,21 @@ describe Berater::ConcurrencyLimiter do
   describe '#timeout' do
     # see spec/utils_spec.rb
 
+    it 'defaults to nil' do
+      limiter = described_class.new(:key, 1)
+      expect(limiter.timeout).to be nil
+    end
+
     it 'saves the interval in original and millisecond format' do
       limiter = described_class.new(:key, 1, timeout: 3)
       expect(limiter.timeout).to be 3
-      expect(limiter.instance_variable_get(:@timeout_msec)).to be (3 * 10**3)
+      expect(limiter.instance_variable_get(:@timeout)).to be (3 * 10**3)
     end
 
     it 'handles infinity' do
       limiter = described_class.new(:key, 1, timeout: Float::INFINITY)
       expect(limiter.timeout).to be Float::INFINITY
-      expect(limiter.instance_variable_get(:@timeout_msec)).to be 0
+      expect(limiter.instance_variable_get(:@timeout)).to be 0
     end
   end
 

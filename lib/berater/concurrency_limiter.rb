@@ -1,21 +1,22 @@
 module Berater
   class ConcurrencyLimiter < Limiter
 
-    attr_reader :timeout
-
     def initialize(key, capacity, **opts)
       super(key, capacity, **opts)
 
-      # round fractional capacity
+      # truncate fractional capacity
       self.capacity = capacity.to_i
 
       self.timeout = opts[:timeout] || 0
     end
 
+    def timeout
+      options[:timeout]
+    end
+
     private def timeout=(timeout)
-      @timeout = timeout
       timeout = 0 if timeout == Float::INFINITY
-      @timeout_msec = Berater::Utils.to_msec(timeout)
+      @timeout = Berater::Utils.to_msec(timeout)
     end
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
@@ -73,7 +74,7 @@ module Berater
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key, self.class.cache_key('lock_id') ],
-        [ capacity, ts, @timeout_msec, cost ]
+        [ capacity, ts, @timeout, cost ]
       )
 
       raise Overloaded if lock_ids.empty?
