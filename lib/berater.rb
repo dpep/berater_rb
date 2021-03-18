@@ -49,13 +49,8 @@ module Berater
 end
 
 # convenience method
-def Berater(key, capacity, **opts, &block)
-  limiter = Berater.new(key, capacity, **opts)
-  if block_given?
-    limiter.limit(&block)
-  else
-    limiter
-  end
+def Berater(*args, **opts, &block)
+  Berater::Utils.convenience_fn(Berater, *args, **opts, &block)
 end
 
 # load limiters

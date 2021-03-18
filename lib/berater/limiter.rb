@@ -98,5 +98,13 @@ module Berater
       "Berater:#{klass}:#{key}"
     end
 
+    def self.inherited(subclass)
+      # automagically create convenience method
+      name = subclass.to_s.split(':')[-1]
+      Berater.define_singleton_method(name) do |*args, **opts, &block|
+        Berater::Utils.convenience_fn(subclass, *args, **opts, &block)
+      end
+    end
+
   end
 end

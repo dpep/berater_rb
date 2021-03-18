@@ -152,4 +152,12 @@ describe Berater::Limiter do
     end
   end
 
+  describe '.inherited' do
+    it 'creates convenience methods' do
+      expect(Berater.method(:Unlimiter)).to be_a Method
+      expect(Berater::Unlimiter()).to be_a Berater::Unlimiter
+      expect {|b| Berater::Unlimiter(&b) }.to yield_control
+    end
+  end
+
 end

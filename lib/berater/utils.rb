@@ -42,5 +42,14 @@ module Berater
       (res * 10**3).to_i
     end
 
+    def convenience_fn(klass, *args, **opts, &block)
+      limiter = klass.new(*args, **opts)
+      if block_given?
+        limiter.limit(&block)
+      else
+        limiter
+      end
+    end
+
   end
 end
