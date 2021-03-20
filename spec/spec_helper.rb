@@ -20,18 +20,20 @@ require 'berater/rspec'
 Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 
 RSpec.configure do |config|
+  # allow 'fit' examples
+  config.filter_run_when_matching :focus
+
+  # reduce noise in backtraces
+  config.filter_gems_from_backtrace('timecop')
+
+  # expect { ... }.to fail
+  config.include RSpec::Matchers::FailMatchers
+
   config.before do
     Berater.configure do |c|
       c.redis = Redis.new
     end
   end
-
-  config.after do
-    Berater.redis.script(:flush) rescue nil
-  end
-
-  # allow 'fit' examples
-  config.filter_run_when_matching :focus
 
   config.around(:each) do |example|
     # only with blocks
@@ -43,9 +45,7 @@ RSpec.configure do |config|
     end
   end
 
-  # reduce noise in backtraces
-  config.filter_gems_from_backtrace('timecop')
-
-  # expect { ... }.to fail
-  config.include RSpec::Matchers::FailMatchers
+  config.after do
+    Berater.redis.script(:flush) rescue nil
+  end
 end
