@@ -78,8 +78,42 @@ RSpec.shared_examples 'a limiter' do |limiter|
   end
 
   describe '#utilization' do
-    it do
+    it 'returns a Float' do
       expect(limiter.utilization).to be_a Float
+    end
+  end
+
+  describe 'convenience method' do
+    subject { Berater.send(method_name, *params) }
+
+    let(:method_name) { limiter.class.name.split(':')[-1] }
+    let(:params) {
+      [
+        limiter.key,
+        limiter.capacity,
+        *limiter.send(:args),
+        **limiter.options,
+      ].compact
+    }
+
+    it 'exists' do
+      expect(Berater).to respond_to method_name
+    end
+
+    it 'constructs a limiter' do
+      is_expected.to be_a Berater::Limiter
+    end
+
+    it 'constructs an equivalent limiter' do
+      is_expected.to eq limiter
+    end
+
+    it 'accepts a block' do
+      Berater.test_mode = :pass
+
+      expect(
+        Berater.send(method_name, *params) { 123 }
+      ).to be 123
     end
   end
 
