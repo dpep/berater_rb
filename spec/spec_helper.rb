@@ -26,6 +26,10 @@ RSpec.configure do |config|
     end
   end
 
+  config.after do
+    Berater.redis.script(:flush) rescue nil
+  end
+
   # allow 'fit' examples
   config.filter_run_when_matching :focus
 
