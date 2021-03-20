@@ -31,8 +31,10 @@ module Berater
       if opts[:interval]
         args << opts.delete(:interval)
         Berater::RateLimiter
-      else
+      elsif opts[:timeout]
         Berater::ConcurrencyLimiter
+      else
+        Berater::StaticLimiter
       end
     end.yield_self do |klass|
       args = [ key, capacity, *args ].compact

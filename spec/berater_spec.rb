@@ -83,10 +83,29 @@ describe Berater do
     end
 
     context 'concurrency mode' do
-      let(:limiter) { Berater.new(:key, 1) }
+      let(:limiter) { Berater.new(:key, 1, timeout: 1) }
 
       it 'instantiates a ConcurrencyLimiter' do
         expect(limiter).to be_a Berater::ConcurrencyLimiter
+        expect(limiter.key).to be :key
+      end
+
+      it 'inherits redis' do
+        expect(limiter.redis).to be Berater.redis
+      end
+
+      it 'accepts options' do
+        redis = double('Redis')
+        limiter = Berater.new(:key, 1, timeout: 1, redis: redis)
+        expect(limiter.redis).to be redis
+      end
+    end
+
+    context 'static mode' do
+      let(:limiter) { Berater.new(:key, 1) }
+
+      it 'instantiates a StaticLimiter' do
+        expect(limiter).to be_a Berater::StaticLimiter
         expect(limiter.key).to be :key
       end
 
@@ -128,7 +147,8 @@ describe Berater do
     include_examples 'test convenience', Berater::Unlimiter, Float::INFINITY
     include_examples 'test convenience', Berater::Inhibitor, 0
     include_examples 'test convenience', Berater::RateLimiter, 1, interval: :second
-    include_examples 'test convenience', Berater::ConcurrencyLimiter, 1
+    include_examples 'test convenience', Berater::ConcurrencyLimiter, 1, timeout: 1
+    include_examples 'test convenience', Berater::StaticLimiter, 1
   end
 
 end
