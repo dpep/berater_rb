@@ -80,15 +80,10 @@ module Berater
       raise Overloaded if lock_ids.empty?
 
       release_fn = if cost > 0
-        proc { release(lock_ids) }
+        proc { redis.zrem(cache_key, lock_ids) }
       end
 
       Lock.new(capacity, count, release_fn)
-    end
-
-    private def release(lock_ids)
-      res = redis.zrem(cache_key, lock_ids)
-      res == true || res == lock_ids.count # depending on which version of Redis
     end
 
     def to_s

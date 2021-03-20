@@ -19,7 +19,8 @@ module Berater
       raise 'lock already released' unless locked?
 
       @released_at = Time.now
-      @release_fn ? @release_fn.call : true
+      @release_fn&.call
+      nil
     end
 
   end

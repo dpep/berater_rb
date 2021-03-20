@@ -47,7 +47,7 @@ RSpec.shared_examples 'a limiter' do |limiter|
     describe '#release' do
       it 'can not be released twice' do
         lock = limiter.limit
-        expect(lock.release).to be true
+        lock.release
         expect { lock.release }.to raise_error(RuntimeError, /already/)
       end
 
