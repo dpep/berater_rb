@@ -24,131 +24,61 @@ describe Berater do
     end
   end
 
-  describe '.new' do
-    context 'Unlimiter mode' do
-      let(:limiter) { Berater.new(:key, Float::INFINITY) }
+  shared_examples 'a Berater' do |klass, capacity, **opts|
+    describe '.new' do
+      let(:limiter) { Berater.new(:key, capacity, **opts) }
 
-      it 'instantiates an Unlimiter' do
-        expect(limiter).to be_a Berater::Unlimiter
-        expect(limiter.key).to be :key
-      end
-
-      it 'inherits redis' do
-        expect(limiter.redis).to be Berater.redis
-      end
-
-      it 'accepts options' do
-        redis = double('Redis')
-        limiter = Berater.new(:key, Float::INFINITY, redis: redis)
-        expect(limiter.redis).to be redis
-      end
-    end
-
-    context 'Inhibitor mode' do
-      let(:limiter) { Berater.new(:key, 0) }
-
-      it 'instantiates an Inhibitor' do
-        expect(limiter).to be_a Berater::Inhibitor
-        expect(limiter.key).to be :key
-      end
-
-      it 'inherits redis' do
-        expect(limiter.redis).to be Berater.redis
-      end
-
-      it 'accepts options' do
-        redis = double('Redis')
-        limiter = Berater.new(:key, 0, redis: redis)
-        expect(limiter.redis).to be redis
-      end
-    end
-
-    context 'rate mode' do
-      let(:limiter) { Berater.new(:key, 1, interval: :second) }
-
-      it 'instantiates a RateLimiter' do
-        expect(limiter).to be_a Berater::RateLimiter
-        expect(limiter.key).to be :key
-      end
-
-      it 'inherits redis' do
-        expect(limiter.redis).to be Berater.redis
-      end
-
-      it 'accepts options' do
-        redis = double('Redis')
-        limiter = Berater.new(:key, 1, interval: :second, redis: redis)
-        expect(limiter.redis).to be redis
-      end
-    end
-
-    context 'concurrency mode' do
-      let(:limiter) { Berater.new(:key, 1, timeout: 1) }
-
-      it 'instantiates a ConcurrencyLimiter' do
-        expect(limiter).to be_a Berater::ConcurrencyLimiter
-        expect(limiter.key).to be :key
-      end
-
-      it 'inherits redis' do
-        expect(limiter.redis).to be Berater.redis
-      end
-
-      it 'accepts options' do
-        redis = double('Redis')
-        limiter = Berater.new(:key, 1, timeout: 1, redis: redis)
-        expect(limiter.redis).to be redis
-      end
-    end
-
-    context 'static mode' do
-      let(:limiter) { Berater.new(:key, 1) }
-
-      it 'instantiates a StaticLimiter' do
-        expect(limiter).to be_a Berater::StaticLimiter
-        expect(limiter.key).to be :key
-      end
-
-      it 'inherits redis' do
-        expect(limiter.redis).to be Berater.redis
-      end
-
-      it 'accepts options' do
-        redis = double('Redis')
-        limiter = Berater.new(:key, 1, redis: redis)
-        expect(limiter.redis).to be redis
-      end
-    end
-  end
-
-  describe 'Berater() - convenience method' do
-    RSpec.shared_examples 'test convenience' do |klass, capacity, **opts|
-      it 'creates a limiter' do
-        limiter = Berater(:key, capacity, **opts)
+      it 'instantiates the right class' do
         expect(limiter).to be_a klass
       end
 
-      context 'with a block' do
-        it 'creates a limiter and calls limit' do
-          limiter = Berater(:key, capacity, **opts)
-          expect(klass).to receive(:new).and_return(limiter)
-          expect(limiter).to receive(:limit).and_call_original
+      it 'sets the key' do
+        expect(limiter.key).to be :key
+      end
 
-          begin
-            res = Berater(:key, capacity, **opts) { true }
-            expect(res).to be true
-          rescue Berater::Overloaded
-            expect(klass).to be Berater::Inhibitor
-          end
-        end
+      it 'inherits redis' do
+        expect(limiter.redis).to be Berater.redis
+      end
+
+      it 'accepts an optional redis parameter' do
+        redis = double('Redis')
+        limiter = Berater.new(:key, capacity, opts.merge(redis: redis))
+        expect(limiter.redis).to be redis
       end
     end
 
-    include_examples 'test convenience', Berater::Unlimiter, Float::INFINITY
-    include_examples 'test convenience', Berater::Inhibitor, 0
-    include_examples 'test convenience', Berater::RateLimiter, 1, interval: :second
-    include_examples 'test convenience', Berater::ConcurrencyLimiter, 1, timeout: 1
-    include_examples 'test convenience', Berater::StaticLimiter, 1
+    describe 'Berater() convenience method' do
+      let(:limiter) { Berater(:key, capacity, **opts) }
+
+      it 'creates a limiter' do
+        expect(limiter).to be_a klass
+      end
+
+      it 'creates an equivalent limiter' do
+        expect(limiter).to eq Berater.new(:key, capacity, **opts)
+      end
+
+      context 'with a block' do
+        before { Berater.test_mode = :pass }
+
+        subject { Berater(:key, capacity, **opts) { 123 } }
+
+        it 'creates a limiter and calls limit' do
+          expect(klass).to receive(:new).and_return(limiter)
+          expect(limiter).to receive(:limit).and_call_original
+          subject
+        end
+
+        it 'yields' do
+          is_expected.to be 123
+        end
+      end
+    end
   end
 
+  include_examples 'a Berater', Berater::ConcurrencyLimiter, 1, timeout: 1
+  include_examples 'a Berater', Berater::Inhibitor, 0
+  include_examples 'a Berater', Berater::RateLimiter, 1, interval: :second
+  include_examples 'a Berater', Berater::StaticLimiter, 1
+  include_examples 'a Berater', Berater::Unlimiter, Float::INFINITY
 end
