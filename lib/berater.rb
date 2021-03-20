@@ -57,4 +57,5 @@ end
 require 'berater/concurrency_limiter'
 require 'berater/inhibitor'
 require 'berater/rate_limiter'
+require 'berater/static_limiter'
 require 'berater/unlimiter'

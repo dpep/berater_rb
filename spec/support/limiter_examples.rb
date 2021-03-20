@@ -23,6 +23,11 @@ RSpec.shared_examples 'a limiter' do |limiter|
       expect {|block| limiter.limit(&block) }.to yield_control
     end
 
+    it 'yields a value' do
+      res = limiter.limit { 123 }
+      expect(res).to eq 123
+    end
+
     context 'uses a lock' do
       def check(limiter, lock)
         expect(lock).to be_a Berater::Lock
