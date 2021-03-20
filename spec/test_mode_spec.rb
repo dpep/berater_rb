@@ -1,8 +1,4 @@
 describe Berater::TestMode do
-  after do
-    Berater.test_mode = nil
-  end
-
   context 'after test_mode.rb has been loaded' do
     it 'monkey patches Berater' do
       expect(Berater).to respond_to(:test_mode)
@@ -13,8 +9,8 @@ describe Berater::TestMode do
     end
 
     it 'prepends Limiter subclasses' do
-      expect(Berater::Unlimiter.ancestors).to include(described_class)
-      expect(Berater::Inhibitor.ancestors).to include(described_class)
+      expect(Berater::Unlimiter.ancestors).to include(Berater::Limiter::TestMode)
+      expect(Berater::Inhibitor.ancestors).to include(Berater::Limiter::TestMode)
     end
 
     it 'preserves the original functionality via super' do
@@ -52,6 +48,16 @@ describe Berater::TestMode do
       Berater.test_mode = :pass
       expect_any_instance_of(Berater::Limiter).to receive(:limit)
       Berater::Unlimiter.new.limit
+    end
+  end
+
+  describe '.reset' do
+    before { Berater.test_mode = :pass }
+
+    it 'resets test_mode' do
+      expect(Berater.test_mode).to be :pass
+      Berater.reset
+      expect(Berater.test_mode).to be nil
     end
   end
 
