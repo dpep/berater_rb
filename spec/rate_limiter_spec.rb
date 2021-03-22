@@ -48,7 +48,7 @@ describe Berater::RateLimiter do
 
     it 'saves the interval in original and millisecond format' do
       expect(subject.interval).to be :second
-      expect(subject.instance_variable_get(:@interval_msec)).to be 10**3
+      expect(subject.instance_variable_get(:@interval)).to be 10**3
     end
 
     it 'must be > 0' do

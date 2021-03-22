@@ -65,12 +65,6 @@ describe Berater::Limiter do
       )
     end
 
-    it 'equals something with equvalent initialization parameters' do
-      expect(limiter).to eq(
-        Berater::RateLimiter.new(:key, 1, 1)
-      )
-    end
-
     it 'does not equal something different' do
       expect(limiter).not_to eq(
         Berater::RateLimiter.new(:key, 2, :second)

@@ -1,18 +1,19 @@
 module Berater
   class RateLimiter < Limiter
 
-    attr_accessor :interval
-
     def initialize(key, capacity, interval, **opts)
+      super(key, capacity, interval, **opts)
       self.interval = interval
-      super(key, capacity, @interval_msec, **opts)
+    end
+
+    def interval
+      args[0]
     end
 
     private def interval=(interval)
-      @interval = interval
-      @interval_msec = Berater::Utils.to_msec(interval)
+      @interval = Berater::Utils.to_msec(interval)
 
-      unless @interval_msec > 0
+      unless @interval > 0
         raise ArgumentError, 'interval must be > 0'
       end
     end
@@ -77,7 +78,7 @@ module Berater
       count, allowed = LUA_SCRIPT.eval(
         redis,
         [ cache_key ],
-        [ ts, capacity, @interval_msec, cost ]
+        [ ts, capacity, @interval, cost ]
       )
 
       count = count.include?('.') ? count.to_f : count.to_i
