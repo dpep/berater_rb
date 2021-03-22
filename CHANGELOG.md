@@ -1,3 +1,19 @@
+###  v0.8.0  (2021-03-22)
+- simplify rate limiter interval
+- test coverage
+- simplify tests
+- redis script flush only for Berater tests
+- test_mode upgrade
+- StaticLimiter
+- simplify lock
+- convenience methods for all limiters
+- simplify concurrency timeout
+- clarify cache_key scope
+- test coverage
+- remove base to_s in favor of class specific logic / testing
+- modify cache_key to prefix all limiters
+- Update README.md
+
 ###  v0.7.1  (2021-03-15)
 - slim rspec requirement down to core
 
