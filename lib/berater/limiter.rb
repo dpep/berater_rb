@@ -29,6 +29,11 @@ module Berater
       else
         lock
       end
+    rescue NoMethodError => e
+      raise unless e.message.include?("undefined method `evalsha' for")
+
+      # repackage error so it's easier to understand
+      raise RuntimeError, "invalid redis connection: #{redis}"
     end
 
     def utilization

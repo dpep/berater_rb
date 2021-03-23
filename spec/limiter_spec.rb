@@ -50,6 +50,33 @@ describe Berater::Limiter do
         }.to raise_error(ArgumentError)
       end
     end
+
+    context 'when Berater.redis is nil' do
+      let!(:redis) { Berater.redis }
+
+      before { Berater.redis = nil }
+
+      it 'works with Unlimiter since redis is not used' do
+        expect(subject.redis).to be nil
+        expect {|b| subject.limit(&b) }.to yield_control
+      end
+
+      it 'raises when redis is needed' do
+        limiter = Berater::RateLimiter.new(:key, 1, :second)
+        expect(limiter.redis).to be nil
+        expect { limiter.limit }.to raise_error(RuntimeError)
+      end
+
+      it 'works when redis is passed in' do
+        limiter = Berater::RateLimiter.new(:key, 1, :second, redis: redis)
+        expect {|b| limiter.limit(&b) }.to yield_control
+      end
+
+      it 'raises when redis is bogus' do
+        limiter = Berater::RateLimiter.new(:key, 1, :second, redis: :stub)
+        expect { limiter.limit }.to raise_error(RuntimeError)
+      end
+    end
   end
 
   describe '#==' do
