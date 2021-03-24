@@ -57,13 +57,6 @@ module Berater
       self.redis.connection == other.redis.connection
     end
 
-    def self.new(*)
-      # can only call via subclass
-      raise NoMethodError if self == Berater::Limiter
-
-      super
-    end
-
     protected
 
     attr_reader :args
@@ -98,16 +91,27 @@ module Berater
       self.class.cache_key(instance_key)
     end
 
-    def self.cache_key(key)
-      klass = to_s.split(':')[-1]
-      "Berater:#{klass}:#{key}"
-    end
+    class << self
+      def new(*)
+        # can only call via subclass
+        raise NoMethodError if self == Berater::Limiter
 
-    def self.inherited(subclass)
-      # automagically create convenience method
-      name = subclass.to_s.split(':')[-1]
-      Berater.define_singleton_method(name) do |*args, **opts, &block|
-        Berater::Utils.convenience_fn(subclass, *args, **opts, &block)
+        super
+      end
+
+      def cache_key(key)
+        klass = to_s.split(':')[-1]
+        "Berater:#{klass}:#{key}"
+      end
+
+      protected
+
+      def inherited(subclass)
+        # automagically create convenience method
+        name = subclass.to_s.split(':')[-1]
+        Berater.define_singleton_method(name) do |*args, **opts, &block|
+          Berater::Utils.convenience_fn(subclass, *args, **opts, &block)
+        end
       end
     end
 
