@@ -1,4 +1,5 @@
 require 'berater/limiter'
+require 'berater/limiter_set'
 require 'berater/lock'
 require 'berater/lua_script'
 require 'berater/utils'
@@ -16,9 +17,8 @@ module Berater
     yield self
   end
 
-  def reset
-    @redis = nil
-    middleware.clear
+  def limiters
+    @limiters ||= LimiterSet.new
   end
 
   def middleware(&block)
@@ -56,6 +56,11 @@ module Berater
     end
   end
 
+  def reset
+    @redis = nil
+    limiters.clear
+    middleware.clear
+  end
 end
 
 # convenience method
