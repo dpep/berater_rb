@@ -24,6 +24,24 @@ describe Berater do
     end
   end
 
+  describe '.limiters' do
+    subject { Berater.limiters }
+
+    let(:limiter) { Berater(:key, 1) }
+
+    it 'provides access to predefined limiters' do
+      expect(Berater.limiters).to be_a Berater::LimiterSet
+    end
+
+    it 'resets with Berater' do
+      subject << limiter
+      is_expected.not_to be_empty
+
+      Berater.reset
+      is_expected.to be_empty
+    end
+  end
+
   shared_examples 'a Berater' do |klass, capacity, **opts|
     describe '.new' do
       let(:limiter) { Berater.new(:key, capacity, **opts) }
