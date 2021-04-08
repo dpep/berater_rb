@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.files       = Dir.glob('lib/**/*')
   s.test_files  = Dir.glob('spec/**/*_spec.rb')
 
+  s.add_runtime_dependency 'meddleware'
   s.add_runtime_dependency 'redis'
 
   s.add_development_dependency 'benchmark'

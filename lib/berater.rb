@@ -3,6 +3,7 @@ require 'berater/lock'
 require 'berater/lua_script'
 require 'berater/utils'
 require 'berater/version'
+require 'meddleware'
 
 module Berater
   extend self
@@ -17,6 +18,13 @@ module Berater
 
   def reset
     @redis = nil
+    middleware.clear
+  end
+
+  def middleware(&block)
+    (@middleware ||= Meddleware.new).tap do
+      @middleware.instance_eval(&block) if block_given?
+    end
   end
 
   def new(key, capacity, **opts)

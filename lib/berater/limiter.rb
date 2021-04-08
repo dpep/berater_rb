@@ -9,16 +9,11 @@ module Berater
 
     def limit(capacity: nil, cost: 1, &block)
       capacity ||= @capacity
+      lock = nil
 
-      unless capacity.is_a?(Numeric) && capacity >= 0
-        raise ArgumentError, "invalid capacity: #{capacity}"
+      Berater.middleware.call(self, capacity: capacity, cost: cost) do |limiter, **opts|
+        lock = limiter.inner_limit(**opts)
       end
-
-      unless cost.is_a?(Numeric) && cost >= 0 && cost < Float::INFINITY
-        raise ArgumentError, "invalid cost: #{cost}"
-      end
-
-      lock = acquire_lock(capacity, cost)
 
       if block_given?
         begin
@@ -29,6 +24,18 @@ module Berater
       else
         lock
       end
+    end
+
+    protected def inner_limit(capacity:, cost:)
+      unless capacity.is_a?(Numeric) && capacity >= 0
+        raise ArgumentError, "invalid capacity: #{capacity}"
+      end
+
+      unless cost.is_a?(Numeric) && cost >= 0 && cost < Float::INFINITY
+        raise ArgumentError, "invalid cost: #{cost}"
+      end
+
+      acquire_lock(capacity, cost)
     rescue NoMethodError => e
       raise unless e.message.include?("undefined method `evalsha' for")
 
