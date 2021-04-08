@@ -1,6 +1,8 @@
 describe Berater::Limiter do
-  it 'can not be initialized' do
-    expect { described_class.new }.to raise_error(NoMethodError)
+  describe '.new' do
+    it 'can only be called on subclasses' do
+      expect { described_class.new }.to raise_error(NoMethodError)
+    end
   end
 
   describe 'abstract methods' do
