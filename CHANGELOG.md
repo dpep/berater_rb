@@ -1,3 +1,8 @@
+###  v0.9.0  (2021-04-08)
+- LimiterSet
+- middleware
+- redis validation
+
 ###  v0.8.0  (2021-03-22)
 - simplify rate limiter interval
 - test coverage
