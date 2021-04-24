@@ -79,6 +79,16 @@ describe Berater::Limiter do
         expect { limiter.limit }.to raise_error(RuntimeError)
       end
     end
+
+    it 'releases the lock even when limited code raises an error' do
+      lock = Berater::Lock.new(Float::INFINITY, 0)
+      expect(subject).to receive(:acquire_lock).and_return(lock)
+      expect(lock).to receive(:release)
+
+      expect {
+        subject.limit { raise 'fail' }
+      }.to raise_error(RuntimeError)
+    end
   end
 
   describe '#==' do
