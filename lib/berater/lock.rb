@@ -20,7 +20,7 @@ module Berater
 
       @released_at = Time.now
       @release_fn&.call
-      nil
+      true
     end
 
   end
