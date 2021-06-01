@@ -237,7 +237,7 @@ limiter = Berater::Inhibitor.new
 
 What's the difference between a rate limiter and a concurrency limiter?  Can you build one with the other?
 
-Both enforce limits, but differ with respect to time and memory.  A rate limiter can be implemented using a concurrency limiter, by allowing every lock to timeout.  A concurrency limiter can nearly be implemented using a rate limiter, by decrementing the used capacity when a lock is released.  The order of locks, however, is lost and thus a timeout will not properly function.
+Both enforce limits, but differ with respect to time and memory.  A rate limiter can be implemented using a concurrency limiter, by allowing every lock to timeout rather than be released.  It wastes memory, but is functionally equivalent.  A concurrency limiter can nearly be implemented using a rate limiter, by decrementing the used capacity when a lock is released.  The order of locks, however, is lost and thus a timeout will not properly function.
 
 An [example](https://github.com/dpep/berater_rb/blob/master/spec/riddle_spec.rb) is worth a thousand words  :)
 
