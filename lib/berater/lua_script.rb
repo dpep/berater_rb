@@ -6,11 +6,11 @@ module Berater
     attr_reader :source
 
     def initialize(source)
-      @source = source
+      @source = source.dup.freeze
     end
 
     def sha
-      @sha ||= Digest::SHA1.hexdigest(minify)
+      @sha ||= Digest::SHA1.hexdigest(minify).freeze
     end
 
     def eval(redis, *args)
@@ -44,7 +44,7 @@ module Berater
     def minify
       # trim comments (whole line and partial)
       # and whitespace (prefix and empty lines)
-      @minify ||= source.gsub(/^\s*--.*\n|\s*--.*|^\s*|^$\n/, '').chomp
+      @minify ||= source.gsub(/^\s*--.*\n|\s*--.*|^\s*|^$\n/, '').chomp.freeze
     end
 
   end

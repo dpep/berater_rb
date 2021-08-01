@@ -93,5 +93,4 @@ describe Berater::LuaScript do
       it { subject }
     end
   end
-
 end
