@@ -29,6 +29,11 @@ RSpec.configure do |config|
   # expect { ... }.to fail
   config.include RSpec::Matchers::FailMatchers
 
+  config.mock_with :rspec do |mocks|
+    # verify existence of stubbed methods
+    mocks.verify_partial_doubles = true
+  end
+
   config.before do
     Berater.configure do |c|
       c.redis = Redis.new

@@ -59,7 +59,7 @@ describe Berater do
       end
 
       it 'accepts an optional redis parameter' do
-        redis = double('Redis')
+        redis = double(Redis)
         limiter = Berater.new(:key, capacity, opts.merge(redis: redis))
         expect(limiter.redis).to be redis
       end
