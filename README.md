@@ -290,5 +290,15 @@ Yes please  :)
 
 
 ----
+### Inspired by
+
+https://stripe.com/blog/rate-limiters
+
+https://github.blog/2021-04-05-how-we-scaled-github-api-sharded-replicated-rate-limiter-redis
+
+[@ptarjan](https://gist.github.com/ptarjan/e38f45f2dfe601419ca3af937fff574d)
+
+
+----
 ![Gem](https://img.shields.io/gem/dt/berater?style=plastic)
 [![codecov](https://codecov.io/gh/dpep/berater_rb/branch/master/graph/badge.svg?token=1L7OD80182)](https://codecov.io/gh/dpep/berater_rb)
