@@ -84,7 +84,9 @@ RSpec.shared_examples 'a limiter' do |limiter|
   end
 
   describe 'convenience method' do
-    subject { Berater.send(method_name, *params) }
+    subject do
+      Berater.send(method_name, *params, **limiter.options)
+    end
 
     let(:method_name) { limiter.class.name.split(':')[-1] }
     let(:params) {
@@ -92,8 +94,7 @@ RSpec.shared_examples 'a limiter' do |limiter|
         limiter.key,
         limiter.capacity,
         *limiter.send(:args),
-        **limiter.options,
-      ].compact
+      ]
     }
 
     it 'exists' do

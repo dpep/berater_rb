@@ -1,5 +1,5 @@
 class Meddler
-  def call(*)
+  def call(*args, **kwargs)
     yield
   end
 end
@@ -73,18 +73,18 @@ describe 'Berater.middleware' do
 
     context 'when middleware meddles' do
       it 'can change the capacity' do
-        expect(middleware).to receive(:call) do |limiter, opts, &block|
+        expect(middleware).to receive(:call) do |limiter, **opts, &block|
           opts[:capacity] = 0
-          block.call
+          block.call(limiter, **opts)
         end
 
         expect { limiter.limit }.to be_overloaded
       end
 
       it 'can change the cost' do
-        expect(middleware).to receive(:call) do |limiter, opts, &block|
+        expect(middleware).to receive(:call) do |limiter, **opts, &block|
           opts[:cost] = 2
-          block.call
+          block.call(limiter, **opts)
         end
 
         expect { limiter.limit }.to be_overloaded
@@ -93,8 +93,8 @@ describe 'Berater.middleware' do
       it 'can change the limiter' do
         other_limiter = Berater::Inhibitor.new
 
-        expect(middleware).to receive(:call) do |limiter, opts, &block|
-          block.call other_limiter, opts
+        expect(middleware).to receive(:call) do |limiter, **opts, &block|
+          block.call(other_limiter, **opts)
         end
         expect(other_limiter).to receive(:acquire_lock).and_call_original
 

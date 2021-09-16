@@ -99,7 +99,7 @@ module Berater
     end
 
     class << self
-      def new(*)
+      def new(*args, **kwargs)
         # can only call via subclass
         raise NoMethodError if self == Berater::Limiter
 
@@ -116,6 +116,7 @@ module Berater
       def inherited(subclass)
         # automagically create convenience method
         name = subclass.to_s.split(':')[-1]
+
         Berater.define_singleton_method(name) do |*args, **opts, &block|
           Berater::Utils.convenience_fn(subclass, *args, **opts, &block)
         end
