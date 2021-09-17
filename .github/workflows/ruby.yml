@@ -20,9 +20,10 @@ jobs:
     name: Ruby ${{ matrix.ruby-version }}
 
     steps:
-      - uses: actions/checkout@v2
       - name: start Redis
-        run: docker run --name redis --publish 6379:6379 --detach redis:latest
+        run: docker run --name redis --publish 6379:6379 --detach redis:3
+      - name: clone ${{ github.repository }}
+        uses: actions/checkout@v2
       - name: setup Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
