@@ -44,12 +44,7 @@ module Berater
 
     def convenience_fn(klass, *args, **opts, &block)
       limiter = klass.new(*args, **opts)
-      if block_given?
-        limiter.limit(&block)
-      else
-        limiter
-      end
+      block ? limiter.limit(&block) : limiter
     end
-
   end
 end
