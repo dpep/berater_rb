@@ -1,3 +1,6 @@
+###  v0.10.1  (2021-09-18)
+- missing require
+
 ###  v0.10.0  (2021-09-17)
 - handle empty kwargs
 - redis versions (#5)
