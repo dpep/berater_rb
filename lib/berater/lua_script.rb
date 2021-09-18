@@ -1,4 +1,5 @@
 require 'digest'
+require 'redis'
 
 module Berater
   class LuaScript
