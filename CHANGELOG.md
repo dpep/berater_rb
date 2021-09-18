@@ -1,3 +1,14 @@
+###  v0.10.0  (2021-09-17)
+- handle empty kwargs
+- redis versions (#5)
+- ruby 3 compatbilitiy (#4)
+- Update README.md
+- improve mocks
+- freeze lua
+- Update README.md
+- lock.release
+- error testing
+
 ###  v0.9.0  (2021-04-08)
 - LimiterSet
 - middleware
