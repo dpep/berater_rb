@@ -103,7 +103,12 @@ module Berater
         # can only call via subclass
         raise NoMethodError if self == Berater::Limiter
 
-        super
+        if RUBY_VERSION < '3' && kwargs.empty?
+          # avoid ruby 2 problems with empty hashes
+          super(*args)
+        else
+          super
+        end
       end
 
       def cache_key(key)

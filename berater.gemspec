@@ -1,5 +1,5 @@
 package_name = Dir.glob('*.gemspec')[0].split('.')[0]
-require_relative "lib/#{package_name}/version"
+require "./lib/#{package_name}/version"
 
 package = Berater
 
