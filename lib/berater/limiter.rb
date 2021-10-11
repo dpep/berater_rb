@@ -10,10 +10,9 @@ module Berater
     def limit(**opts, &block)
       opts[:capacity] ||= @capacity
       opts[:cost] ||= 1
-      lock = nil
 
-      Berater.middleware.call(self, **opts) do |limiter, **opts|
-        lock = limiter.inner_limit(**opts)
+      lock = Berater.middleware.call(self, **opts) do |limiter, **opts|
+        limiter.inner_limit(**opts)
       end
 
       if block_given?
