@@ -7,11 +7,12 @@ module Berater
       options[:redis] || Berater.redis
     end
 
-    def limit(capacity: nil, cost: 1, &block)
-      capacity ||= @capacity
+    def limit(**opts, &block)
+      opts[:capacity] ||= @capacity
+      opts[:cost] ||= 1
       lock = nil
 
-      Berater.middleware.call(self, capacity: capacity, cost: cost) do |limiter, **opts|
+      Berater.middleware.call(self, **opts) do |limiter, **opts|
         lock = limiter.inner_limit(**opts)
       end
 
