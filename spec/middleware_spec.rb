@@ -105,6 +105,16 @@ describe 'Berater.middleware' do
         expect(middleware).to receive(:call)
         expect(limiter.limit).to be nil
       end
+
+      it 'can intercept the lock' do
+        expect(middleware).to receive(:call) do |&block|
+          lock = block.call
+          expect(lock).to be_a Berater::Lock
+          expect(lock.capacity).to eq limiter.capacity
+        end
+
+        limiter.limit
+      end
     end
   end
 end
