@@ -4,14 +4,15 @@ describe Berater::Middleware::FailOpen do
   let(:error) { Redis::TimeoutError }
 
   describe '.call' do
-    let(:instance) { described_class.new(on_fail: on_fail) }
+    let(:instance) { described_class.new(errors: errors, on_fail: on_fail) }
+    let(:errors) { nil }
     let(:on_fail) { nil }
 
     it 'returns the blocks value' do
       expect(instance.call { lock }).to be lock
     end
 
-    context 'when Redis times out during lock acquisition' do
+    context 'when there is an error during lock acquisition' do
       subject { instance.call { raise error } }
 
       it 'still returns a lock' do
@@ -35,9 +36,25 @@ describe Berater::Middleware::FailOpen do
           subject
         end
       end
+
+      context 'when the error is an IOError' do
+        let(:error) { IOError }
+
+        it 'would normally not catch the error' do
+          expect { subject }.to raise_error(error)
+        end
+
+        context 'and errors option is set' do
+          let(:errors) { [ error ] }
+
+          it 'catches the error' do
+            expect { subject }.not_to raise_error
+          end
+        end
+      end
     end
 
-    context 'when Redis times out during lock release' do
+    context 'when there is an error during lock release' do
       subject { instance.call { lock }.release }
 
       before do
@@ -60,10 +77,26 @@ describe Berater::Middleware::FailOpen do
           subject
         end
       end
+
+      context 'when the error is an IOError' do
+        let(:error) { IOError }
+
+        it 'would normally not catch the error' do
+          expect { subject }.to raise_error(error)
+        end
+
+        context 'and errors option is set' do
+          let(:errors) { [ error ] }
+
+          it 'catches the error' do
+            expect { subject }.not_to raise_error
+          end
+        end
+      end
     end
   end
 
-  context 'when Redis times out during lock acquisition' do
+  context 'when there is an error during lock acquisition' do
     before do
       expect(limiter).to receive(:acquire_lock).and_raise(error)
     end
@@ -99,7 +132,7 @@ describe Berater::Middleware::FailOpen do
     end
   end
 
-  context 'when Redis times out during lock release' do
+  context 'when there is an error during lock release' do
     before do
       allow(limiter).to receive(:acquire_lock).and_return(lock)
       allow(lock).to receive(:release).and_raise(error)
