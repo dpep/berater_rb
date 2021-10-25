@@ -24,6 +24,7 @@ describe Berater::ConcurrencyLimiter do
     it { expect_capacity(0) }
     it { expect_capacity(1) }
     it { expect_capacity(1.5) }
+    it { expect_capacity('1.5') }
     it { expect_capacity(10_000) }
 
     context 'with erroneous values' do
@@ -34,7 +35,7 @@ describe Berater::ConcurrencyLimiter do
       end
 
       it { expect_bad_capacity(-1) }
-      it { expect_bad_capacity('1') }
+      it { expect_bad_capacity('abc') }
       it { expect_bad_capacity(:one) }
       it { expect_bad_capacity(Float::INFINITY) }
     end

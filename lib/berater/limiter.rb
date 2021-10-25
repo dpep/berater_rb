@@ -27,8 +27,22 @@ module Berater
     end
 
     protected def inner_limit(capacity:, cost:)
+      if capacity.is_a?(String)
+        # try casting
+        begin
+          capacity = Float(capacity)
+        rescue ArgumentError; end
+      end
+
       unless capacity.is_a?(Numeric) && capacity >= 0
         raise ArgumentError, "invalid capacity: #{capacity}"
+      end
+
+      if cost.is_a?(String)
+        # try casting
+        begin
+          cost = Float(cost)
+        rescue ArgumentError; end
       end
 
       unless cost.is_a?(Numeric) && cost >= 0 && cost < Float::INFINITY
@@ -76,6 +90,13 @@ module Berater
     end
 
     def capacity=(capacity)
+      if capacity.is_a?(String)
+        # try casting
+        begin
+          capacity = Float(capacity)
+        rescue TypeError, ArgumentError; end
+      end
+
       unless capacity.is_a?(Numeric)
         raise ArgumentError, "expected Numeric, found #{capacity.class}"
       end

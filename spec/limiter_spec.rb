@@ -14,6 +14,32 @@ describe Berater::Limiter do
     end
   end
 
+  describe '#capacity=' do
+    subject { Berater::Unlimiter.new(:key, capacity).capacity }
+
+    context 'when capacity is numeric' do
+      let(:capacity) { 3.5 }
+
+      it { is_expected.to be capacity }
+    end
+
+    context 'when capacity is a stringified numeric' do
+      let(:capacity) { '3.5' }
+
+      it 'casts the value gracefully' do
+        is_expected.to be capacity.to_f
+      end
+    end
+
+    context 'when capacity is a bogus value' do
+      let(:capacity) { :abc }
+
+      it 'raises' do
+        expect { subject }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
   describe '#limit' do
     subject { Berater::Unlimiter.new }
 
@@ -28,6 +54,12 @@ describe Berater::Limiter do
         expect {
           subject.limit(capacity: 'abc')
         }.to raise_error(ArgumentError)
+      end
+
+      it 'handles stringified numerics gracefully' do
+        is_expected.to receive(:acquire_lock).with(3.5, anything)
+
+        subject.limit(capacity: '3.5')
       end
     end
 
@@ -50,6 +82,12 @@ describe Berater::Limiter do
         expect {
           subject.limit(cost: Float::INFINITY)
         }.to raise_error(ArgumentError)
+      end
+
+      it 'handles stringified numerics gracefully' do
+        is_expected.to receive(:acquire_lock).with(anything, 2.5)
+
+        subject.limit(cost: '2.5')
       end
     end
 

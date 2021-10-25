@@ -19,12 +19,13 @@ describe Berater::RateLimiter do
   describe '#capacity' do
     def expect_capacity(capacity)
       limiter = described_class.new(:key, capacity, :second)
-      expect(limiter.capacity).to eq capacity
+      expect(limiter.capacity).to eq capacity.to_f
     end
 
     it { expect_capacity(0) }
     it { expect_capacity(1) }
     it { expect_capacity(1.5) }
+    it { expect_capacity('1.5') }
     it { expect_capacity(100) }
 
     context 'with erroneous values' do
@@ -35,7 +36,7 @@ describe Berater::RateLimiter do
       end
 
       it { expect_bad_capacity(-1) }
-      it { expect_bad_capacity('1') }
+      it { expect_bad_capacity('abc') }
       it { expect_bad_capacity(:one) }
       it { expect_bad_capacity(Float::INFINITY) }
     end
