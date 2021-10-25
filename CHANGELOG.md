@@ -1,3 +1,6 @@
+###  v0.11.1  (2021-10-25)
+- auto cast capacity and cost
+
 ###  v0.11.0  (2021-10-25)
 - FailOpen middleware
 - load shedder
