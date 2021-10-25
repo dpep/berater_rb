@@ -1,3 +1,7 @@
+###  v0.11.0  (2021-10-25)
+- FailOpen middleware
+- load shedder
+
 ###  v0.10.1  (2021-09-18)
 - missing require
 
