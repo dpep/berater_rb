@@ -94,6 +94,18 @@ describe Berater::Middleware::FailOpen do
         end
       end
     end
+
+    context 'when there is no lock' do
+      it 'does not crash' do
+        instance.call {}
+      end
+    end
+
+    context 'when the lock is not a lock' do
+      it 'does not crash' do
+        instance.call { :foo }
+      end
+    end
   end
 
   context 'when there is an error during lock acquisition' do

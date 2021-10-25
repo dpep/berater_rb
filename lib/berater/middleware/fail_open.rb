@@ -14,6 +14,8 @@ module Berater
 
       def call(*, **opts)
         yield.tap do |lock|
+          return lock unless lock&.is_a?(Berater::Lock)
+
           # wrap lock.release so it fails open
 
           # save reference to original function
