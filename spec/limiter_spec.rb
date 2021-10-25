@@ -15,7 +15,9 @@ describe Berater::Limiter do
   end
 
   describe '#capacity=' do
-    subject { Berater::Unlimiter.new(:key, capacity).capacity }
+    subject do
+      Berater::RateLimiter.new(:key, capacity, :second).capacity
+    end
 
     context 'when capacity is numeric' do
       let(:capacity) { 3.5 }
@@ -26,7 +28,7 @@ describe Berater::Limiter do
     context 'when capacity is a stringified numeric' do
       let(:capacity) { '3.5' }
 
-      it 'casts the value gracefully' do
+      it 'casts the value' do
         is_expected.to be capacity.to_f
       end
     end
