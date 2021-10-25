@@ -18,6 +18,11 @@ module Berater
       protected
 
       def adjust_capacity(capacity, priority)
+        if priority.is_a?(String)
+          # try casting
+          priority = Float(priority) rescue nil
+        end
+
         unless PRIORITY_RANGE.include?(priority)
           return capacity
         end
