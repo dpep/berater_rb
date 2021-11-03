@@ -30,33 +30,33 @@ module Berater
           tags: tags,
         )
 
-        if lock
-          if lock.contention > 0 # not a failsafe lock
-            @client.gauge(
-              'berater.lock.capacity',
-              lock.capacity,
-              tags: tags,
-            )
-            @client.gauge(
-              'berater.limiter.contention',
-              lock.contention,
-              tags: tags,
-            )
-          end
-        else
-          # overloaded, so contention >= capacity
+        if lock && lock.contention > 0 # not a failsafe lock
+          @client.gauge(
+            'berater.lock.capacity',
+            lock.capacity,
+            tags: tags,
+          )
           @client.gauge(
             'berater.limiter.contention',
-            limiter.capacity,
+            lock.contention,
             tags: tags,
           )
         end
 
-        if error && !error.is_a?(Berater::Overloaded)
-          @client.increment(
-            'berater.limiter.error',
-            tags: tags.merge(type: error.class.to_s)
-          )
+        if error
+          if error.is_a?(Berater::Overloaded)
+            # overloaded, so contention >= capacity
+            @client.gauge(
+              'berater.limiter.contention',
+              limiter.capacity,
+              tags: tags,
+            )
+          else
+            @client.increment(
+              'berater.limiter.error',
+              tags: tags.merge(type: error.class.to_s)
+            )
+          end
         end
       end
 

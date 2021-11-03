@@ -4,8 +4,9 @@ describe Berater::Middleware::Statsd do
   let(:client) { double(Datadog::Statsd) }
 
   before do
-    allow(client).to receive(:timing)
     allow(client).to receive(:gauge)
+    allow(client).to receive(:increment)
+    allow(client).to receive(:timing)
   end
 
   describe '#call' do
@@ -148,6 +149,33 @@ describe Berater::Middleware::Statsd do
         it 'does not track the exception' do
           expect(client).not_to receive(:increment).with(
             'berater.limiter.error',
+          )
+
+          limiter.limit
+        end
+
+        it 'does not track lock-based stats' do
+          expect(client).not_to receive(:gauge).with(
+            'berater.lock.capacity',
+          )
+
+          expect(client).not_to receive(:gauge).with(
+            'berater.limiter.contention',
+          )
+
+          limiter.limit
+        end
+      end
+
+      context 'with FailOpen middleware inserted before' do
+        before do
+          Berater.middleware.prepend Berater::Middleware::FailOpen
+        end
+
+        it 'tracks the exception' do
+          expect(client).to receive(:increment).with(
+            'berater.limiter.error',
+            Hash,
           )
 
           limiter.limit
