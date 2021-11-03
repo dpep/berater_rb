@@ -1,3 +1,8 @@
+###  v0.12.0  (2021-11-03)
+- statsd
+- load shedder resilience
+- failopen resilience
+
 ###  v0.11.1  (2021-10-25)
 - auto cast capacity and cost
 
