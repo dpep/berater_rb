@@ -52,8 +52,8 @@ module Berater
   end
 
   def expunge
-    redis.scan_each(match: "#{self.name}*") do |key|
-      redis.del key
+    redis.scan_each(match: "#{name}*") do |key|
+      redis.del(key)
     end
   end
 
