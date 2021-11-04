@@ -175,7 +175,7 @@ describe Berater::Middleware::Statsd do
         it 'tracks the exception' do
           expect(client).to receive(:increment).with(
             'berater.limiter.error',
-            Hash,
+            tags: hash_including(type: error.to_s),
           )
 
           limiter.limit
