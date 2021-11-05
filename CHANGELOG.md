@@ -1,3 +1,6 @@
+###  v0.12.1  (2021-11-04)
+- improve statsd metrics
+
 ###  v0.12.0  (2021-11-03)
 - statsd
 - load shedder resilience
