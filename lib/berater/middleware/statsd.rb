@@ -21,7 +21,7 @@ module Berater
         @client.timing(
           'berater.limiter.limit',
           duration,
-          tags: tags.merge(overloaded: !lock),
+          tags: tags,
         )
 
         @client.gauge(
@@ -30,21 +30,33 @@ module Berater
           tags: tags,
         )
 
-        if lock && lock.contention > 0 # not a failsafe lock
-          @client.gauge(
-            'berater.lock.capacity',
-            lock.capacity,
+        if lock
+          @client.increment(
+            'berater.lock.acquired',
             tags: tags,
           )
-          @client.gauge(
-            'berater.limiter.contention',
-            lock.contention,
-            tags: tags,
-          )
+
+          if lock.contention > 0 # not a failsafe lock
+            @client.gauge(
+              'berater.lock.capacity',
+              lock.capacity,
+              tags: tags,
+            )
+            @client.gauge(
+              'berater.limiter.contention',
+              lock.contention,
+              tags: tags,
+            )
+          end
         end
 
         if error
           if error.is_a?(Berater::Overloaded)
+            @client.increment(
+              'berater.limiter.overloaded',
+              tags: tags,
+            )
+
             # overloaded, so contention >= capacity
             @client.gauge(
               'berater.limiter.contention',

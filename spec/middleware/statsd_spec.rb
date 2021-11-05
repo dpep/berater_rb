@@ -31,7 +31,6 @@ describe Berater::Middleware::Statsd do
         tags: {
           key: limiter.key,
           limiter: String,
-          overloaded: false,
         },
       )
     end
@@ -40,6 +39,13 @@ describe Berater::Middleware::Statsd do
       expect(client).to receive(:gauge).with(
         'berater.limiter.capacity',
         limiter.capacity,
+        Hash
+      )
+    end
+
+    it 'tracks lock acquisition' do
+      expect(client).to receive(:increment).with(
+        'berater.lock.acquired',
         Hash
       )
     end
@@ -202,11 +208,10 @@ describe Berater::Middleware::Statsd do
         expect { limiter.limit }.to be_overloaded
       end
 
-      it 'tracks the limit call' do
-        expect(client).to receive(:timing).with(
-          'berater.limiter.limit',
-          Float,
-          tags: hash_including(overloaded: true),
+      it 'tracks the overloaded count' do
+        expect(client).to receive(:increment).with(
+          'berater.limiter.overloaded',
+          Hash
         )
       end
 
