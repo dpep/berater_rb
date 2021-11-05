@@ -54,7 +54,7 @@ module Berater
           else
             @client.increment(
               'berater.limiter.error',
-              tags: tags.merge(type: error.class.to_s)
+              tags: tags.merge(type: error.class.to_s.gsub('::', '_'))
             )
           end
         end

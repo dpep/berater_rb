@@ -135,7 +135,7 @@ describe Berater::Middleware::Statsd do
       it 'tracks limiter exceptions' do
         expect(client).to receive(:increment).with(
           'berater.limiter.error',
-          tags: hash_including(type: error.to_s),
+          tags: hash_including(type: 'Redis_TimeoutError'),
         )
 
         expect { limiter.limit }.to raise_error(error)
@@ -175,7 +175,7 @@ describe Berater::Middleware::Statsd do
         it 'tracks the exception' do
           expect(client).to receive(:increment).with(
             'berater.limiter.error',
-            tags: hash_including(type: error.to_s),
+            anything,
           )
 
           limiter.limit
