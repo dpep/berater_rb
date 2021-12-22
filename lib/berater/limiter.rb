@@ -114,9 +114,8 @@ module Berater
       raise NotImplementedError
     end
 
-    def cache_key(subkey = nil)
-      instance_key = subkey.nil? ? key : "#{key}:#{subkey}"
-      self.class.cache_key(instance_key)
+    def cache_key
+      self.class.cache_key(key)
     end
 
     class << self
