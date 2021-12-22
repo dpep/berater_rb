@@ -1,5 +1,6 @@
 module Berater
   class Limiter
+    DEFAULT_COST = 1
 
     attr_reader :key, :capacity, :options
 
@@ -9,7 +10,7 @@ module Berater
 
     def limit(**opts, &block)
       opts[:capacity] ||= @capacity
-      opts[:cost] ||= 1
+      opts[:cost] ||= DEFAULT_COST
 
       lock = Berater.middleware.call(self, **opts) do |limiter, **opts|
         limiter.inner_limit(**opts)
@@ -26,7 +27,7 @@ module Berater
       end
     end
 
-    protected def inner_limit(capacity:, cost:)
+    protected def inner_limit(capacity:, cost:, **opts)
       if capacity.is_a?(String)
         # try casting
         begin
@@ -49,7 +50,7 @@ module Berater
         raise ArgumentError, "invalid cost: #{cost}"
       end
 
-      acquire_lock(capacity, cost)
+      acquire_lock(capacity: capacity, cost: cost, **opts)
     rescue NoMethodError => e
       raise unless e.message.include?("undefined method `evalsha' for")
 
@@ -110,13 +111,12 @@ module Berater
       @capacity = capacity
     end
 
-    def acquire_lock(capacity, cost)
+    def acquire_lock(capacity:, cost:)
       raise NotImplementedError
     end
 
-    def cache_key(subkey = nil)
-      instance_key = subkey.nil? ? key : "#{key}:#{subkey}"
-      self.class.cache_key(instance_key)
+    def cache_key
+      self.class.cache_key(key)
     end
 
     class << self

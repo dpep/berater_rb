@@ -21,7 +21,7 @@ module Berater
 
   class Limiter
     module TestMode
-      def acquire_lock(*)
+      def acquire_lock(**)
         case Berater.test_mode
         when :pass
           Lock.new(Float::INFINITY, 0)

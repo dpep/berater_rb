@@ -47,7 +47,9 @@ describe Berater::Limiter do
 
     context 'with a capacity parameter' do
       it 'overrides the stored value' do
-        is_expected.to receive(:acquire_lock).with(3, anything)
+        is_expected.to receive(:acquire_lock).with(hash_including(
+          capacity: 3,
+        ))
 
         subject.limit(capacity: 3)
       end
@@ -59,15 +61,29 @@ describe Berater::Limiter do
       end
 
       it 'handles stringified numerics gracefully' do
-        is_expected.to receive(:acquire_lock).with(3.5, anything)
+        is_expected.to receive(:acquire_lock).with(hash_including(
+          capacity: 3.5,
+        ))
 
         subject.limit(capacity: '3.5')
       end
     end
 
+    it 'has a default cost' do
+      is_expected.to receive(:acquire_lock).with(hash_including(
+        cost: described_class::DEFAULT_COST,
+      ))
+
+      subject.limit
+    end
+
     context 'with a cost parameter' do
-      it 'overrides the stored value' do
-        is_expected.to receive(:acquire_lock).with(anything, 2)
+      it 'overrides the default value' do
+        expect(described_class::DEFAULT_COST).not_to eq 2
+
+        is_expected.to receive(:acquire_lock).with(hash_including(
+          cost: 2,
+        ))
 
         subject.limit(cost: 2)
       end
@@ -87,10 +103,21 @@ describe Berater::Limiter do
       end
 
       it 'handles stringified numerics gracefully' do
-        is_expected.to receive(:acquire_lock).with(anything, 2.5)
+        is_expected.to receive(:acquire_lock).with(hash_including(
+          cost: 2.5,
+        ))
 
         subject.limit(cost: '2.5')
       end
+    end
+
+    it 'passes through arbitrary parameters' do
+      is_expected.to receive(:acquire_lock).with(hash_including(
+        priority: 123,
+        zed: nil,
+      ))
+
+      subject.limit(priority: 123, zed: nil)
     end
 
     context 'when Berater.redis is nil' do
