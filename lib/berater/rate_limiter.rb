@@ -71,7 +71,7 @@ module Berater
     LUA
     )
 
-    protected def acquire_lock(capacity, cost)
+    protected def acquire_lock(capacity:, cost:)
       # timestamp in milliseconds
       ts = (Time.now.to_f * 10**3).to_i
 

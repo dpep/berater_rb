@@ -63,7 +63,7 @@ module Berater
     LUA
     )
 
-    protected def acquire_lock(capacity, cost)
+    protected def acquire_lock(capacity:, cost:)
       # round fractional capacity and cost
       capacity = capacity.to_i
       cost = cost.ceil
