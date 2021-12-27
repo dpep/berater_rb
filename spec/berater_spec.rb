@@ -77,18 +77,21 @@ describe Berater do
       end
 
       context 'with a block' do
-        before { Berater.test_mode = :pass }
-
         subject { Berater(:key, capacity, **opts) { 123 } }
 
         it 'creates a limiter and calls limit' do
           expect(klass).to receive(:new).and_return(limiter)
-          expect(limiter).to receive(:limit).and_call_original
+          expect(limiter).to receive(:limit)
+
           subject
         end
 
         it 'yields' do
-          is_expected.to be 123
+          if capacity > 0
+            is_expected.to be 123
+          else
+            expect { subject }.to be_overloaded
+          end
         end
       end
     end

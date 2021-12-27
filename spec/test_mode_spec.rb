@@ -9,8 +9,13 @@ describe Berater::TestMode do
     end
 
     it 'prepends Limiter subclasses' do
-      expect(Berater::Unlimiter.ancestors).to include(Berater::Limiter::TestMode)
-      expect(Berater::Inhibitor.ancestors).to include(Berater::Limiter::TestMode)
+      expect(Berater::ConcurrencyLimiter.ancestors).to include(Berater::Limiter::TestMode)
+      expect(Berater::RateLimiter.ancestors).to include(Berater::Limiter::TestMode)
+    end
+
+    it 'does not modify Unlimiter or Inhibitor' do
+      expect(Berater::Unlimiter.ancestors).not_to include(Berater::Limiter::TestMode)
+      expect(Berater::Inhibitor.ancestors).not_to include(Berater::Limiter::TestMode)
     end
 
     it 'preserves the original functionality via super' do
@@ -19,6 +24,8 @@ describe Berater::TestMode do
   end
 
   describe '.test_mode' do
+    let(:limiter) { Berater::ConcurrencyLimiter.new(:key, 1) }
+
     it 'can be turned on' do
       Berater.test_mode = :pass
       expect(Berater.test_mode).to be :pass
@@ -37,7 +44,6 @@ describe Berater::TestMode do
     end
 
     it 'works no matter when limiter was created' do
-      limiter = Berater::Unlimiter.new
       expect(limiter).not_to be_overloaded
 
       Berater.test_mode = :fail
@@ -47,7 +53,7 @@ describe Berater::TestMode do
     it 'supports a generic expectation' do
       Berater.test_mode = :pass
       expect_any_instance_of(Berater::Limiter).to receive(:limit)
-      Berater::Unlimiter.new.limit
+      limiter.limit
     end
   end
 
@@ -94,7 +100,17 @@ describe Berater::TestMode do
       it_behaves_like 'it is not overloaded'
     end
 
-    it_behaves_like 'it supports test_mode'
+    context 'when test_mode = :pass' do
+      before { Berater.test_mode = :pass }
+
+      it_behaves_like 'it is not overloaded'
+    end
+
+    context 'when test_mode = :fail' do
+      before { Berater.test_mode = :fail }
+
+      it_behaves_like 'it is not overloaded'
+    end
   end
 
   describe 'Inhibitor' do
@@ -106,7 +122,17 @@ describe Berater::TestMode do
       it_behaves_like 'it is overloaded'
     end
 
-    it_behaves_like 'it supports test_mode'
+    context 'when test_mode = :pass' do
+      before { Berater.test_mode = :pass }
+
+      it_behaves_like 'it is overloaded'
+    end
+
+    context 'when test_mode = :fail' do
+      before { Berater.test_mode = :fail }
+
+      it_behaves_like 'it is overloaded'
+    end
   end
 
   describe 'RateLimiter' do

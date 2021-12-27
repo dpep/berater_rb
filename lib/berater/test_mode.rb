@@ -43,5 +43,7 @@ Berater.singleton_class.prepend Berater::TestMode
 ObjectSpace.each_object(Class).each do |klass|
   next unless klass < Berater::Limiter
 
+  next if klass == Berater::Unlimiter || klass == Berater::Inhibitor
+
   klass.prepend Berater::Limiter::TestMode
 end
