@@ -27,6 +27,12 @@ Benchmark.bmbm(30) do |x|
     end
   end
 
+  x.report('ConcurrencyLimiter(timeout/priority)') do
+    COUNT.times do |i|
+      Berater::ConcurrencyLimiter(:key, COUNT, timeout: 30, priority: 1) { i }
+    end
+  end
+
   x.report('StaticLimiter') do
     COUNT.times do |i|
       Berater::StaticLimiter(:key, COUNT) { i }
