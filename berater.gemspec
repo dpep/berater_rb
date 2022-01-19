@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'meddleware', '>= 0.3'
   s.add_runtime_dependency 'redis', '>= 3'
 
+  s.add_development_dependency 'connection_pool'
   s.add_development_dependency 'benchmark'
   s.add_development_dependency 'byebug'
   s.add_development_dependency 'ddtrace', '>= 1'

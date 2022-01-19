@@ -1,14 +1,18 @@
 require 'benchmark'
 require 'berater'
+require 'connection_pool'
 require 'redis'
 
 Berater.configure do |c|
-  c.redis = Redis.new
+  # c.redis = Redis.new
+  c.redis = ConnectionPool::Wrapper.new(size: 3) { Redis.new }
 end
 
 COUNT = 1_000
 
-Benchmark.bmbm(30) do |x|
+Berater.expunge
+
+Benchmark.bm(30) do |x|
   x.report('RateLimiter') do
     COUNT.times do |i|
       Berater::RateLimiter(:key, COUNT, :second) { i }
@@ -23,7 +27,7 @@ Benchmark.bmbm(30) do |x|
 
   x.report('ConcurrencyLimiter(timeout)') do
     COUNT.times do |i|
-      Berater::ConcurrencyLimiter(:key, COUNT, timeout: 30) { i }
+      Berater::ConcurrencyLimiter(:key2, COUNT, timeout: 30) { i }
     end
   end
 
