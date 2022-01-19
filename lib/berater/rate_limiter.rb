@@ -20,7 +20,6 @@ module Berater
 
     LUA_SCRIPT = Berater::LuaScript(<<~LUA
       local key = KEYS[1]
-      local ts_key = KEYS[2]
       local ts = tonumber(ARGV[1])
       local capacity = tonumber(ARGV[2])
       local interval_msec = tonumber(ARGV[3])
