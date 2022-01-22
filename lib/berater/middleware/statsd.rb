@@ -10,7 +10,7 @@ module Berater
         duration = -Process.clock_gettime(Process::CLOCK_MONOTONIC)
         lock = yield
       rescue Exception => error
-        # note exception and propagate
+        # capture exception for reporting and propagate
         raise
       ensure
         duration += Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -84,7 +84,7 @@ module Berater
         if @tags.respond_to?(:call)
           tags.merge!(@tags.call(limiter, **opts) || {})
         else
-          tags.merge!(@tags)
+          tags.merge!(@tags || {})
         end
 
         tags.merge!(opts.fetch(:tags, {}))
