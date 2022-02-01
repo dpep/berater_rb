@@ -15,8 +15,8 @@ Berater(:key, 3) do
   # allow only three simultaneous requests at a time, with a concurrency limiter
 end
 
-Berater(:key, 2, interval: :second) do
-  # or do work twice per second with a rate limiter
+Berater(:key, 2, interval: 60) do
+  # or do work twice per minute with a rate limiter
 end
 ```
 
