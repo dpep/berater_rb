@@ -9,6 +9,14 @@ describe Berater::Middleware::Statsd do
     allow(client).to receive(:timing)
   end
 
+  context do
+    before do
+      Berater.middleware.use described_class, client
+    end
+
+    it_behaves_like 'a limiter middleware'
+  end
+
   describe '#call' do
     subject { described_class.new(client, **client_opts).call(limiter, **opts, &block) }
 

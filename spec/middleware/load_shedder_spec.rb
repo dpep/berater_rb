@@ -1,4 +1,6 @@
 describe Berater::Middleware::LoadShedder do
+  it_behaves_like 'a limiter middleware'
+
   describe '#call' do
     subject { described_class.new }
 

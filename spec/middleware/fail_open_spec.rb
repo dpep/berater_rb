@@ -1,4 +1,6 @@
 describe Berater::Middleware::FailOpen do
+  it_behaves_like 'a limiter middleware'
+
   let(:limiter) { Berater::Unlimiter.new }
   let(:lock) { limiter.limit }
   let(:error) { Redis::TimeoutError }

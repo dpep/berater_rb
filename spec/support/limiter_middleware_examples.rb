@@ -1,11 +1,13 @@
 shared_examples 'a limiter middleware' do
   context 'with middleware installed' do
-    let(:instance) { described_class.new }
-
-    before { Berater.middleware.use(instance) }
+    before do
+      unless Berater.middleware.include?(described_class)
+        Berater.middleware.use(described_class)
+      end
+    end
 
     it 'calls the middleware' do
-      expect(instance).to receive(:call)
+      expect_any_instance_of(described_class).to receive(:call)
 
       Berater::Unlimiter.new.limit
     end
