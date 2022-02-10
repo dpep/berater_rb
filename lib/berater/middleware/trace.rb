@@ -8,11 +8,11 @@ module Berater
       end
 
       def call(limiter, **)
-        (@tracer || Datadog.tracer).trace('Berater.limit') do |span|
+        tracer.trace('Berater.limit') do |span|
           begin
             lock = yield
           rescue Exception => error
-            # capture exception for reporting and propagate
+            # capture exception for reporting, then propagate
             raise
           ensure
             span.set_tag('capacity', limiter.capacity)
@@ -29,6 +29,12 @@ module Berater
             end
           end
         end
+      end
+
+      private
+
+      def tracer
+        @tracer || Datadog.tracer
       end
     end
   end

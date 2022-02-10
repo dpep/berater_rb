@@ -10,7 +10,7 @@ module Berater
         duration = -Process.clock_gettime(Process::CLOCK_MONOTONIC)
         lock = yield
       rescue Exception => error
-        # capture exception for reporting and propagate
+        # capture exception for reporting, then propagate
         raise
       ensure
         duration += Process.clock_gettime(Process::CLOCK_MONOTONIC)
