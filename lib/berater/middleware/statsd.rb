@@ -73,14 +73,19 @@ module Berater
           limiter: limiter.class.to_s.split(':')[-1],
         }
 
-        # append custom tags
-        if @tags.respond_to?(:call)
-          tags.merge!(@tags.call(limiter, **opts) || {})
-        else
-          tags.merge!(@tags || {})
+        # append global custom tags
+        if @tags
+          if @tags.respond_to?(:call)
+            tags.merge!(@tags.call(limiter, **opts) || {})
+          else
+            tags.merge!(@tags)
+          end
         end
 
-        tags.merge!(opts.fetch(:tags, {}))
+        # append call specific custom tags
+        tags.merge!(opts[:tags]) if opts[:tags]
+
+        tags
       end
     end
   end

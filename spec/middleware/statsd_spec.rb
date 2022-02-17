@@ -18,9 +18,11 @@ describe Berater::Middleware::Statsd do
   end
 
   describe '#call' do
-    subject { described_class.new(client, **client_opts).call(limiter, **opts, &block) }
+    subject do
+      described_class.new(client, **middleware_opts).call(limiter, **opts, &block)
+    end
 
-    let(:client_opts) { {} }
+    let(:middleware_opts) { {} }
     let(:limiter) { double(Berater::Limiter, key: :key, capacity: 5) }
     let(:lock) { double(Berater::Lock, capacity: 4, contention: 2) }
     let(:opts) { { capacity: limiter.capacity, cost: 1 } }
@@ -74,39 +76,40 @@ describe Berater::Middleware::Statsd do
       )
     end
 
-    context 'when custom tags are passed in' do
-      let(:opts) { { tags: { abc: 123 } } }
-
-      it 'incorporates the tags' do
+    describe 'tags' do
+      def expect_tags_to(matcher)
         expect(client).to receive(:timing) do |*, tags:|
-          expect(tags).to include(opts[:tags])
+          expect(tags).to matcher
         end
       end
-    end
 
-    context 'with global tags' do
-      let(:client_opts) { { tags: { abc: 123 } }}
+      context 'with global tags' do
+        let(:middleware_opts) { { tags: { abc: 123 } }}
 
-      it 'incorporates the tags' do
-        expect(client).to receive(:timing) do |*, tags:|
-          expect(tags).to include(client_opts[:tags])
+        it 'incorporates the tags' do
+          expect_tags_to include(middleware_opts[:tags])
         end
       end
-    end
 
-    context 'with global tag callback' do
-      let(:client_opts) { { tags: callback }}
-      let(:callback) { double(Proc) }
+      context 'with global tag callback' do
+        let(:middleware_opts) { { tags: callback }}
+        let(:callback) { double(Proc) }
 
-      it 'calls the callback' do
-        expect(callback).to receive(:call).with(limiter, **opts)
+        it 'calls the callback' do
+          expect(callback).to receive(:call).with(limiter, **opts)
+        end
+
+        it 'incorporates the tags' do
+          expect(callback).to receive(:call).and_return({ abc: 123 })
+          expect_tags_to include(abc: 123)
+        end
       end
 
-      it 'incorporates the tags' do
-        expect(callback).to receive(:call).and_return({ abc: 123 })
+      context 'when call specific custom tags are passed in' do
+        let(:opts) { { tags: { abc: 123 } } }
 
-        expect(client).to receive(:timing) do |*, tags:|
-          expect(tags).to include(abc: 123)
+        it 'incorporates the tags' do
+          expect_tags_to include(opts[:tags])
         end
       end
     end
