@@ -43,7 +43,7 @@ module Berater
               tags: tags,
             )
             @client.gauge(
-              'berater.limiter.contention',
+              'berater.lock.contention',
               lock.contention,
               tags: tags,
             )
@@ -54,13 +54,6 @@ module Berater
           if error.is_a?(Berater::Overloaded)
             @client.increment(
               'berater.limiter.overloaded',
-              tags: tags,
-            )
-
-            # overloaded, so contention >= capacity
-            @client.gauge(
-              'berater.limiter.contention',
-              limiter.capacity,
               tags: tags,
             )
           else

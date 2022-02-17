@@ -23,7 +23,7 @@ describe Berater::Middleware::Statsd do
     let(:client_opts) { {} }
     let(:limiter) { double(Berater::Limiter, key: :key, capacity: 5) }
     let(:lock) { double(Berater::Lock, capacity: 4, contention: 2) }
-    let(:opts) { { capacity: lock.capacity, cost: 1 } }
+    let(:opts) { { capacity: limiter.capacity, cost: 1 } }
     let(:block) { lambda { lock } }
 
     after { subject }
@@ -54,6 +54,22 @@ describe Berater::Middleware::Statsd do
     it 'tracks lock acquisition' do
       expect(client).to receive(:increment).with(
         'berater.lock.acquired',
+        Hash
+      )
+    end
+
+    it 'tracks lock capacity' do
+      expect(client).to receive(:gauge).with(
+        'berater.lock.capacity',
+        lock.capacity,
+        Hash
+      )
+    end
+
+    it 'tracks lock contention' do
+      expect(client).to receive(:gauge).with(
+        'berater.lock.contention',
+        lock.contention,
         Hash
       )
     end
@@ -115,7 +131,13 @@ describe Berater::Middleware::Statsd do
       )
 
       expect(client).to receive(:gauge).with(
-        'berater.limiter.contention',
+        'berater.lock.capacity',
+        limiter.capacity,
+        Hash,
+      )
+
+      expect(client).to receive(:gauge).with(
+        'berater.lock.contention',
         1,
         Hash,
       )
@@ -125,13 +147,13 @@ describe Berater::Middleware::Statsd do
 
     it 'tracks each call' do
       expect(client).to receive(:gauge).with(
-        'berater.limiter.contention',
+        'berater.lock.contention',
         1,
         Hash,
       )
 
       expect(client).to receive(:gauge).with(
-        'berater.limiter.contention',
+        'berater.lock.contention',
         2,
         Hash,
       )
@@ -163,6 +185,7 @@ describe Berater::Middleware::Statsd do
         it 'does not track the exception' do
           expect(client).not_to receive(:increment).with(
             'berater.limiter.error',
+            anything,
           )
 
           limiter.limit
@@ -170,11 +193,8 @@ describe Berater::Middleware::Statsd do
 
         it 'does not track lock-based stats' do
           expect(client).not_to receive(:gauge).with(
-            'berater.lock.capacity',
-          )
-
-          expect(client).not_to receive(:gauge).with(
-            'berater.limiter.contention',
+            /berater.lock/,
+            any_args,
           )
 
           limiter.limit
@@ -197,11 +217,8 @@ describe Berater::Middleware::Statsd do
 
         it 'does not track lock-based stats' do
           expect(client).not_to receive(:gauge).with(
-            'berater.lock.capacity',
-          )
-
-          expect(client).not_to receive(:gauge).with(
-            'berater.limiter.contention',
+            /berater.lock/,
+            any_args,
           )
 
           limiter.limit
@@ -223,16 +240,17 @@ describe Berater::Middleware::Statsd do
         )
       end
 
-      it 'tracks contention' do
+      it 'does not track lock-based stats' do
         expect(client).not_to receive(:gauge).with(
-          'berater.limiter.contention',
-          limiter.capacity,
+          /berater.lock/,
+          any_args,
         )
       end
 
       it 'does not track the exception' do
         expect(client).not_to receive(:increment).with(
           'berater.limiter.error',
+          anything,
         )
       end
     end
