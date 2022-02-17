@@ -34,9 +34,11 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
+  redis = Redis.new
+
   config.before do
     Berater.configure do |c|
-      c.redis = Redis.new
+      c.redis = redis
     end
   end
 
