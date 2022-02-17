@@ -36,7 +36,7 @@ module Berater
             tags: tags,
           )
 
-          if lock.contention > 0 # not a failsafe lock
+          if lock.contention >= 0 # not a failsafe lock
             @client.gauge(
               'berater.lock.capacity',
               lock.capacity,
