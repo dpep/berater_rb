@@ -1,3 +1,14 @@
+###  v0.12.2  (2022-03-03)
+- statsd tag cleanup
+- simplify statsd middleware
+- reduce redis connections during testing
+- middleware specs
+- ddtrace middleware
+- cleanup
+- Update README.md
+- test_mode upgrade
+- Acquire lock opts (#6)
+
 ###  v0.12.1  (2021-11-04)
 - improve statsd metrics
 
