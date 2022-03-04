@@ -1,4 +1,4 @@
-###  v0.12.2  (2022-03-03)
+###  v0.13.0  (2022-03-04)
 - statsd tag cleanup
 - simplify statsd middleware
 - reduce redis connections during testing
