@@ -168,11 +168,12 @@ Sidekiq::Limiter.errors << Berater::Overloaded
 
 
 ## Testing
-Berater has a few tools to make testing easier.  And it plays nicely with [Timecop](https://github.com/travisjeffery/timecop).
+Berater has a few tools to make testing easier, and it plays nicely with [Timecop](https://github.com/travisjeffery/timecop).
 
 
 ### test_mode
-Force all `.limit` calls to either pass or fail, without hitting Redis.
+Force all `.limit` calls to either pass or fail, without hitting Redis.  Berater itself is extensively tested to ensure functionality - you're welcome to retest the library, but by and large your test suite should bypass the internals and explicitly test pass/fail behavior using `Berater.test_mode`.  This will improve test performance and stability.
+
 
 ```ruby
 require 'berater/test_mode'
@@ -215,6 +216,16 @@ describe 'MyTest' do
   end
 end
 ```
+
+Or through `spec/spec_helper.rb`:
+```ruby
+require 'berater/rspec'
+
+RSpec.configure do |config|
+  config.before { Berater.test_mode = :pass }
+end
+```
+
 
 ### Unlimiter
 A limiter which always succeeds.
