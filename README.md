@@ -106,7 +106,7 @@ end
 
 
 ## Berater::ConcurrencyLimiter
-Useful to limit the amount of work done concurrently, ie. simulteneously.  eg. no more than 3 connections at once.
+Useful to limit the amount of work done concurrently, ie. simultaneously.  eg. no more than 3 connections at once.
 
 ```ruby
 Berater::ConcurrencyLimiter.new(key, capacity, **opts)
