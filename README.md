@@ -37,7 +37,7 @@ Yes please  :)
 1. Ensure the tests pass (`bundle exec rspec`)
 1. Commit your changes (`git commit -am 'awesome new feature'`)
 1. Push your branch (`git push origin my-feature`)
-1. Create a Pull Request
+1. Create a pull request
 
 
 ----
