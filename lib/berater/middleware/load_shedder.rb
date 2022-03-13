@@ -23,13 +23,14 @@ module Berater
           priority = Float(priority) rescue nil
         end
 
-        unless PRIORITY_RANGE.include?(priority)
-          return capacity
-        end
+        if PRIORITY_RANGE.include?(priority)
+          # priority 1 stays at 100%, 2 scales down to 90%, 5 to 60%
+          factor = 1 - (priority - 1) * 0.1
 
-        # priority 1 stays at 100%, 2 scales down to 90%, 5 to 60%
-        factor = 1 - (priority - 1) * 0.1
-        (capacity * factor).floor
+          (capacity * factor).floor
+        else
+          capacity
+        end
       end
     end
   end
