@@ -4,7 +4,7 @@ Berater
 [![codecov](https://codecov.io/gh/dpep/berater_rb/branch/main/graph/badge.svg?token=1L7OD80182)](https://codecov.io/gh/dpep/berater_rb)
 
 
-All systems have limits, beyond which they tend to fail.  Berater makes working within limits easy and helps make the inevitable, chaotic failure more graceful.
+All systems have limits, beyond which they tend to fail.  Berater makes working within limits easy and the inevitable failures more graceful.
 
 
 ```ruby
