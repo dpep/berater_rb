@@ -6,7 +6,7 @@ Berater.configure do |c|
   c.redis = Redis.new
 end
 
-COUNT = 10_000
+COUNT = 1_000
 
 Benchmark.bmbm(30) do |x|
   x.report('RateLimiter') do
