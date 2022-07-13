@@ -1,3 +1,12 @@
+###  v0.13.1  (2022-07-12)
+- ddtrace matrix testing
+- drop ruby 2.5 support
+- ddtrace v1 support
+- fix rspec warning
+- tracer middleware cleanup
+- move readme to wiki
+- Update README.md
+
 ###  v0.13.0  (2022-03-04)
 - statsd tag cleanup
 - simplify statsd middleware
