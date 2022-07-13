@@ -32,7 +32,7 @@ module Berater
       private
 
       def tracer
-        @tracer || (defined?(Datadog) && Datadog.tracer)
+        @tracer || (defined?(Datadog::Tracing) && Datadog::Tracing) || (defined?(Datadog) && Datadog.tracer)
       end
     end
   end
