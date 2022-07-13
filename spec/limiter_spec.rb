@@ -220,9 +220,7 @@ describe Berater::Limiter do
     end
 
     context 'with custom limiter' do
-      MyLimiter = Class.new(Berater::Unlimiter)
-
-      let(:klass) { MyLimiter }
+      let(:klass) { MyLimiter = Class.new(Berater::Unlimiter) }
 
       it 'adds Berater prefix' do
         is_expected.to eq 'Berater:MyLimiter:key'
@@ -242,12 +240,10 @@ describe Berater::Limiter do
     end
 
     context 'with custom limiter' do
-      MyLimiter = Class.new(Berater::Unlimiter)
-
-      let(:klass) { MyLimiter }
+      let(:klass) { MyOtherLimiter = Class.new(Berater::Unlimiter) }
 
       it 'adds Berater prefix' do
-        is_expected.to eq 'Berater:MyLimiter:key'
+        is_expected.to eq 'Berater:MyOtherLimiter:key'
       end
     end
   end
