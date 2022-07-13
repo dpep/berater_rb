@@ -2,16 +2,26 @@ require 'ddtrace'
 
 describe Berater::Middleware::Trace do
   before do
-    Datadog.configure { |c| c.tracing.enabled = false }
-
     allow(tracer).to receive(:trace).and_yield(span)
   end
 
   it_behaves_like 'a limiter middleware'
 
   let(:limiter) { Berater::Unlimiter.new }
-  let(:span) { double(Datadog::Tracing::SpanOperation, set_tag: nil) }
-  let(:tracer) { double(Datadog::Tracing::Tracer) }
+
+  if defined?(Datadog::Tracing)
+    before { Datadog.configure { |c| c.tracing.enabled = false } }
+
+    let(:span) { double(Datadog::Tracing::SpanOperation, set_tag: nil) }
+    let(:tracer) { double(Datadog::Tracing::Tracer) }
+    let(:ddtracer) { Datadog::Tracing }
+  else
+    before { Datadog.tracer.enabled = false }
+
+    let(:span) { double(Datadog::Span, set_tag: nil) }
+    let(:tracer) { double(Datadog::Tracer) }
+    let(:ddtracer) { Datadog.tracer }
+  end
 
   describe '#tracer' do
     subject { instance.send(:tracer) }
@@ -19,7 +29,7 @@ describe Berater::Middleware::Trace do
     let(:instance) { described_class.new }
 
     it 'defaults to Datadog.tracer' do
-      is_expected.to be Datadog::Tracing
+      is_expected.to be ddtracer
     end
 
     context 'when provided a tracer' do
