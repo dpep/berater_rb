@@ -1,5 +1,3 @@
-require 'ddtrace'
-
 module Berater
   module Middleware
     class Trace
@@ -8,7 +6,7 @@ module Berater
       end
 
       def call(limiter, **)
-        tracer.trace('Berater.limit') do |span|
+        tracer&.trace('Berater') do |span|
           begin
             lock = yield
           rescue Exception => error
@@ -34,7 +32,7 @@ module Berater
       private
 
       def tracer
-        @tracer || Datadog.tracer
+        @tracer || (defined?(Datadog) && Datadog.tracer)
       end
     end
   end

@@ -1,5 +1,10 @@
+require 'ddtrace'
+
 describe Berater::Middleware::Trace do
-  before { Datadog.tracer.enabled = false }
+  before do
+    Datadog.tracer.enabled = false
+    allow(tracer).to receive(:trace).and_yield(span)
+  end
 
   it_behaves_like 'a limiter middleware'
 
@@ -7,22 +12,41 @@ describe Berater::Middleware::Trace do
   let(:span) { double(Datadog::Span, set_tag: nil) }
   let(:tracer) { double(Datadog::Tracer) }
 
-  before do
-    allow(tracer).to receive(:trace) {|&b| b.call(span) }
+  describe '#tracer' do
+    subject { instance.send(:tracer) }
+
+    let(:instance) { described_class.new }
+
+    it 'defaults to Datadog.tracer' do
+      expect(Datadog).to receive(:tracer)
+      subject
+    end
+
+    context 'when provided a tracer' do
+      let(:instance) { described_class.new(tracer: tracer) }
+
+      it 'uses the tracer' do
+        expect(Datadog).not_to receive(:tracer)
+        is_expected.to be tracer
+      end
+    end
   end
 
-  context 'with a provided tracer' do
+  describe '#call' do
     let(:instance) { described_class.new(tracer: tracer) }
-
-    it 'traces' do
-      expect(tracer).to receive(:trace).with(/Berater/)
-      expect(span).to receive(:set_tag).with(/capacity/, Numeric)
-
-      instance.call(limiter) {}
-    end
 
     it 'yields' do
       expect {|b| instance.call(limiter, &b) }.to yield_control
+    end
+
+    context 'when a Berater::Overloaded exception is raised' do
+      it 'tags the span as overloaded and raises' do
+        expect(span).to receive(:set_tag).with('overloaded', true)
+
+        expect {
+          instance.call(limiter) { raise Berater::Overloaded }
+        }.to be_overloaded
+      end
     end
 
     context 'when an exception is raised' do
@@ -34,25 +58,32 @@ describe Berater::Middleware::Trace do
         }.to raise_error(IOError)
       end
     end
+  end
 
-    context 'when an Overloaded exception is raised' do
+  context 'when used as middleware' do
+    before do
+      Berater.middleware.use described_class, tracer: tracer
+    end
+
+    it 'traces' do
+      expect(tracer).to receive(:trace).with('Berater')
+      expect(span).to receive(:set_tag).with('key', limiter.key)
+      expect(span).to receive(:set_tag).with('capacity', Numeric)
+      expect(span).to receive(:set_tag).with('contention', Numeric)
+
+      limiter.limit
+    end
+
+    context 'when limiter is overloaded' do
       let(:limiter) { Berater::Inhibitor.new }
 
       it 'tags the span as overloaded and raises' do
         expect(span).to receive(:set_tag).with('overloaded', true)
 
         expect {
-          instance.call(limiter) { raise Berater::Overloaded }
+          limiter.limit
         }.to be_overloaded
       end
-    end
-  end
-
-  context 'with the default tracer' do
-    it 'uses Datadog.tracer' do
-      expect(Datadog).to receive(:tracer).and_return(tracer)
-
-      described_class.new.call(limiter) {}
     end
   end
 end
