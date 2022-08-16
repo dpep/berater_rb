@@ -171,4 +171,13 @@ describe Berater::TestMode do
     it_behaves_like 'it supports test_mode'
   end
 
+  describe 'Mutex' do
+    let(:klass) { Class.new { include Berater::Mutex } }
+
+    context 'when test_mode = :fail' do
+      before { Berater.test_mode = :fail }
+
+      it { expect { klass.synchronize }.to be_overloaded }
+    end
+  end
 end
