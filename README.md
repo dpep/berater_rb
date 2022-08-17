@@ -48,3 +48,5 @@ https://stripe.com/blog/rate-limiters
 https://github.blog/2021-04-05-how-we-scaled-github-api-sharded-replicated-rate-limiter-redis
 
 [@ptarjan](https://gist.github.com/ptarjan/e38f45f2dfe601419ca3af937fff574d)
+
+https://en.wikipedia.org/wiki/Leaky_bucket
