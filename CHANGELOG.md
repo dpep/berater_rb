@@ -1,3 +1,7 @@
+###  v0.14.0  (2022-10-11)
+- meddleware upgrade
+- mutex
+
 ###  v0.13.1  (2022-07-12)
 - ddtrace matrix testing
 - drop ruby 2.5 support
