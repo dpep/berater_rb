@@ -9,6 +9,7 @@ require 'berater/version'
 require 'meddleware'
 
 module Berater
+  include Meddleware
   extend self
 
   class Overloaded < StandardError; end
@@ -21,12 +22,6 @@ module Berater
 
   def limiters
     @limiters ||= LimiterSet.new
-  end
-
-  def middleware(&block)
-    (@middleware ||= Meddleware.new).tap do
-      @middleware.instance_eval(&block) if block_given?
-    end
   end
 
   def new(key, capacity, **opts)
