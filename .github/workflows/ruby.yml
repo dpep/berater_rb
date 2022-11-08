@@ -23,7 +23,7 @@ jobs:
       - name: start Redis
         run: docker run --name redis --publish 6379:6379 --detach redis:3
       - name: clone ${{ github.repository }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: setup Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         env:
