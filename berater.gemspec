@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'codecov'
   s.add_development_dependency 'ddtrace', ENV['DDTRACE_VERSION']
   s.add_development_dependency 'dogstatsd-ruby', '>= 4.3'
-  s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'timecop'
