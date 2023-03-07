@@ -107,4 +107,39 @@ describe Berater::Mutex do
     it { expect(klass.new).not_to respond_to(:synchronize) }
     it { expect(klass.new).not_to respond_to(:mutex_options) }
   end
+
+  describe 'when used in a counter' do
+    subject(:counter) { klass.new }
+
+    let(:klass) do
+      class Counter
+        include Berater::Mutex
+
+        @@count = 0
+        @@counts = {}
+
+        def incr
+          synchronize { @@count += 1 }
+        end
+
+        def incr_key(key)
+          synchronize(key) do
+            @@counts[key] ||= 0
+            @@counts[key] += 1
+          end
+        end
+      end
+      Counter
+    end
+
+    it { expect(counter.incr).to eq 1 }
+    it { expect(counter.incr_key(:a)).to eq 1 }
+
+    it 'separates keys' do
+      res = 3.times.map { counter.incr_key(:a) }
+      expect(res).to eq [ 1, 2, 3 ]
+
+      expect(counter.incr_key(:b)).to eq 1
+    end
+  end
 end
