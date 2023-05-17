@@ -6,7 +6,9 @@ module Berater
       end
 
       def call(limiter, **)
-        tracer&.trace('Berater') do |span|
+        return yield unless tracer
+
+        tracer.trace('Berater') do |span|
           begin
             lock = yield
           rescue Exception => error

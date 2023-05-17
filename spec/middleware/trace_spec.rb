@@ -65,6 +65,16 @@ describe Berater::Middleware::Trace do
         }.to raise_error(IOError)
       end
     end
+
+    context 'when tracer is not defined' do
+      before do
+        allow(instance).to receive(:tracer).and_return(nil)
+      end
+
+      it 'still yields' do
+        expect {|b| instance.call(limiter, &b) }.to yield_control
+      end
+    end
   end
 
   context 'when used as middleware' do
