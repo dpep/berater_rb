@@ -1,10 +1,8 @@
-# install dependencies and run tests
-# https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+name: Ruby
 
 on:
   push:
-    paths-ignore:
-    - '**.md'
+    branches: [ main ]
   pull_request:
     types: [ opened, edited, synchronize ]
 
@@ -30,3 +28,5 @@ jobs:
           bundler-cache: true
       - name: run tests
         run: bundle exec rspec
+      - name: upload code coverage
+        uses: codecov/codecov-action@v3
