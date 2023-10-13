@@ -24,7 +24,7 @@ GEM
     dogstatsd-ruby (5.5.0)
     ffi (1.15.5)
     libddprof (0.6.0.1.0)
-    libddwaf (1.3.0.2.0-x86_64-darwin)
+    libddwaf (1.3.0.2.0)
       ffi (~> 1.0)
     meddleware (0.3.0)
     msgpack (1.5.3)
@@ -61,7 +61,7 @@ DEPENDENCIES
   berater!
   byebug
   codecov
-  ddtrace
+  ddtrace (>= 1)
   dogstatsd-ruby (>= 4.3)
   rspec
   simplecov
