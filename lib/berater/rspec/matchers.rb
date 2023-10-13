@@ -14,7 +14,7 @@ module Berater
           if res.is_a? Berater::Limiter
             # eg. expect { Berater.new(...) }.to be_overloaded
             @limiter = res
-            @limiter.utilization >= 1
+            @limiter.utilization >= 100
           else
             # eg. expect { Berater(...)  }.to be_overloaded
             # eg. expect { limiter.limit }.to be_overloaded
@@ -23,7 +23,7 @@ module Berater
         when Berater::Limiter
           # eg. expect(Berater.new(...)).to be_overloaded
           @limiter = obj
-          @limiter.utilization >= 1
+          @limiter.utilization >= 100
         end
       rescue Berater::Overloaded
         true

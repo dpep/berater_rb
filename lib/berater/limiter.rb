@@ -62,12 +62,12 @@ module Berater
       lock = limit(cost: 0)
 
       if lock.capacity == 0
-        1.0
+        100.0
       else
-        lock.contention.to_f / lock.capacity
+        lock.contention.to_f / lock.capacity * 100
       end
     rescue Berater::Overloaded
-      1.0
+      100.0
     end
 
     def ==(other)
