@@ -1,3 +1,12 @@
+###  v0.15.0  (2023-10-13)
+- drop ddog 0.54
+- add lockfile
+- drop Ruby 2.7
+- utilization as percentage
+- tracer fix
+- mutex example
+- dependabot
+
 ###  v0.14.0  (2022-10-11)
 - meddleware upgrade
 - mutex
