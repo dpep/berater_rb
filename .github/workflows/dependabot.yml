@@ -16,7 +16,6 @@ jobs:
         id: metadata
         uses: dependabot/fetch-metadata@v1
       - name: Approve PR
-        if: steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch'
         run: |
           if [ "$(gh pr status --json reviewDecision -q .currentBranch.reviewDecision)" != "APPROVED" ]; then
             gh pr review --approve
