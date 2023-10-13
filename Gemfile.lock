@@ -1,0 +1,71 @@
+PATH
+  remote: .
+  specs:
+    berater (0.14.0)
+      meddleware (>= 0.3)
+      redis (>= 3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    benchmark (0.2.0)
+    byebug (11.1.3)
+    codecov (0.6.0)
+      simplecov (>= 0.15, < 0.22)
+    connection_pool (2.3.0)
+    ddtrace (1.2.0)
+      debase-ruby_core_source (= 0.10.16)
+      libddprof (~> 0.6.0.1.0)
+      libddwaf (~> 1.3.0.2.0)
+      msgpack
+    debase-ruby_core_source (0.10.16)
+    diff-lcs (1.5.0)
+    docile (1.4.0)
+    dogstatsd-ruby (5.5.0)
+    ffi (1.15.5)
+    libddprof (0.6.0.1.0)
+    libddwaf (1.3.0.2.0-x86_64-darwin)
+      ffi (~> 1.0)
+    meddleware (0.3.0)
+    msgpack (1.5.3)
+    redis (5.0.5)
+      redis-client (>= 0.9.0)
+    redis-client (0.9.0)
+      connection_pool
+    rspec (3.11.0)
+      rspec-core (~> 3.11.0)
+      rspec-expectations (~> 3.11.0)
+      rspec-mocks (~> 3.11.0)
+    rspec-core (3.11.0)
+      rspec-support (~> 3.11.0)
+    rspec-expectations (3.11.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.11.0)
+    rspec-mocks (3.11.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.11.0)
+    rspec-support (3.11.1)
+    simplecov (0.21.2)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
+    timecop (0.9.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  benchmark
+  berater!
+  byebug
+  codecov
+  ddtrace
+  dogstatsd-ruby (>= 4.3)
+  rspec
+  simplecov
+  timecop
+
+BUNDLED WITH
+   2.3.17

@@ -60,13 +60,13 @@ describe Berater::StaticLimiter do
     let(:limiter) { described_class.new(:key, 10) }
 
     it do
-      expect(limiter.utilization).to be 0.0
+      expect(limiter.utilization).to eq 0
 
       2.times { limiter.limit }
-      expect(limiter.utilization).to be 0.2
+      expect(limiter.utilization).to eq 20
 
       8.times { limiter.limit }
-      expect(limiter.utilization).to be 1.0
+      expect(limiter.utilization).to eq 100
     end
   end
 

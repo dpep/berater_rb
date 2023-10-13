@@ -255,19 +255,19 @@ describe Berater::ConcurrencyLimiter do
     let(:limiter) { described_class.new(:key, 10, timeout: 30) }
 
     it 'works' do
-      expect(limiter.utilization).to be 0.0
+      expect(limiter.utilization).to eq 0
 
       2.times { limiter.limit }
-      expect(limiter.utilization).to be 0.2
+      expect(limiter.utilization).to eq 20
 
       Timecop.freeze(15)
 
       8.times { limiter.limit }
-      expect(limiter.utilization).to be 1.0
+      expect(limiter.utilization).to eq 100
 
       Timecop.freeze(15)
 
-      expect(limiter.utilization).to be 0.8
+      expect(limiter.utilization).to eq 80
     end
   end
 

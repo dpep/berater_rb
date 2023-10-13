@@ -237,17 +237,17 @@ describe Berater::RateLimiter do
     let(:limiter) { described_class.new(:key, 10, :minute) }
 
     it do
-      expect(limiter.utilization).to be 0.0
+      expect(limiter.utilization).to eq 0
 
       2.times { limiter.limit }
-      expect(limiter.utilization).to be 0.2
+      expect(limiter.utilization).to eq 20
 
       8.times { limiter.limit }
-      expect(limiter.utilization).to be 1.0
+      expect(limiter.utilization).to eq 100
 
       Timecop.freeze(30)
 
-      expect(limiter.utilization).to be 0.5
+      expect(limiter.utilization).to eq 50
     end
   end
 
