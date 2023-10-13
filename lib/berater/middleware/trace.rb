@@ -11,7 +11,7 @@ module Berater
         tracer.trace('Berater') do |span|
           begin
             lock = yield
-          rescue Exception => error
+          rescue StandardError => error
             # capture exception for reporting, then propagate
             raise
           ensure
