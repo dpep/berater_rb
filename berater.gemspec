@@ -16,6 +16,8 @@ Gem::Specification.new do |s|
   s.files       = Dir.glob('lib/**/*')
   s.test_files  = Dir.glob('spec/**/*_spec.rb')
 
+  s.required_ruby_version = '>= 3'
+
   s.add_runtime_dependency 'meddleware', '>= 0.3'
   s.add_runtime_dependency 'redis', '>= 3'
 
