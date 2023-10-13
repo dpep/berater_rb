@@ -10,8 +10,8 @@ SimpleCov.start do
 end
 
 if ENV['CI'] == 'true' || ENV['CODECOV_TOKEN']
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+  require 'simplecov_json_formatter'
+  SimpleCov.formatter = SimpleCov::Formatter::JSONFormatter
 end
 
 require 'berater'
