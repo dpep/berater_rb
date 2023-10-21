@@ -52,10 +52,12 @@ module Berater
 
       acquire_lock(capacity: capacity, cost: cost, **opts)
     rescue NoMethodError => e
-      raise unless e.message.include?("undefined method `evalsha' for")
+      if e.message.include?("undefined method `evalsha' for")
+        # repackage error so it's easier to understand
+        raise RuntimeError, "invalid redis connection: #{redis}"
+      end
 
-      # repackage error so it's easier to understand
-      raise RuntimeError, "invalid redis connection: #{redis}"
+      raise
     end
 
     def utilization
@@ -111,7 +113,7 @@ module Berater
       @capacity = capacity
     end
 
-    def acquire_lock(capacity:, cost:)
+    def acquire_lock(**options)
       raise NotImplementedError
     end
 
