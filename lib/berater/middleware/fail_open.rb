@@ -5,6 +5,8 @@ module Berater
     class FailOpen
       ERRORS = Set[
         Redis::BaseConnectionError,
+        SystemCallError, # openssl
+        Timeout::Error, # connection pool
       ]
 
       def initialize(errors: nil, on_fail: nil)
