@@ -63,6 +63,46 @@ module Berater
     LUA
     )
 
+    class Lock < Berater::Lock
+      MUTEX = ::Mutex.new
+      FAILURES = Hash.new { |h, k| h[k] = [] }
+
+      def initialize(capacity, contention, redis, cache_key, lock_ids)
+        super(capacity, contention)
+
+        @redis = redis
+        @cache_key = cache_key
+        @lock_ids = lock_ids
+      end
+
+      def release
+        super
+
+        @redis.zrem(@cache_key, @lock_ids)
+
+        secondary_key, secondary_ids = MUTEX.synchronize do
+          FAILURES.shift
+        end
+
+        if secondary_key && secondary_ids
+          # second chance
+          @redis.zrem(secondary_key, secondary_ids)
+        end
+
+        true
+      rescue
+        return true if secondary_key # ignore
+
+        MUTEX.synchronize do
+          # save for possible retry
+          FAILURES[@cache_key] += @lock_ids
+        end
+
+        raise
+      end
+
+    end
+
     protected def acquire_lock(capacity:, cost:)
       # round fractional capacity and cost
       capacity = capacity.to_i
@@ -79,11 +119,11 @@ module Berater
 
       raise Overloaded if lock_ids.empty?
 
-      release_fn = if cost > 0
-        proc { redis.zrem(cache_key, lock_ids) }
+      if cost > 0
+        Lock.new(capacity, count, redis, cache_key, lock_ids)
+      else
+        ::Berater::Lock.new(capacity, count)
       end
-
-      Lock.new(capacity, count, release_fn)
     end
 
     def to_s

@@ -249,6 +249,89 @@ describe Berater::ConcurrencyLimiter do
         expect(limiter_two).to be_overloaded
       end
     end
+
+    fdescribe Berater::ConcurrencyLimiter::Lock do
+      subject(:release) { limiter.limit.release rescue nil }
+
+      let(:limiter) { Berater::ConcurrencyLimiter.new(:key, 2) }
+      let(:error) { Redis::ConnectionError }
+
+      it { expect(limiter.limit).to be_a described_class }
+
+      context 'when Redis fails during lock release' do
+        before do
+          allow(limiter.redis).to receive(:zrem).and_raise(error)
+        end
+
+        it 'raises an exception' do
+          expect { limiter.limit.release }.to raise_error(error)
+        end
+
+        it 'does not release capacity' do
+          release
+
+          expect(limiter.utilization).to eq 50
+        end
+
+        it 'saves the failed lock release for later' do
+          release
+
+          expect(described_class::FAILURES).not_to be_empty
+        end
+      end
+
+      context 'when Redis fails on one lock release but later works' do
+        before do
+          i = 0
+
+          allow(limiter.redis).to receive(:zrem).and_wrap_original do |orig, *args|
+            i += 1
+            i == 1 ? raise(error) : orig.call(*args)
+          end
+        end
+
+        it 'fails the first time, but not the second' do
+          expect { limiter.limit.release }.to raise_error(error)
+
+          expect(release).to be true
+        end
+
+        it 'retries the failed lock release' do
+          limiter.limit.release rescue nil
+
+          expect(limiter.utilization).to eq 50
+          expect(described_class::FAILURES).not_to be_empty
+
+          release
+
+          expect(limiter.utilization).to eq 0
+          expect(described_class::FAILURES).to be_empty
+        end
+      end
+
+      context 'when Redis fails during the retry' do
+        before do
+          i = 0
+
+          allow(limiter.redis).to receive(:zrem).and_wrap_original do |orig, *args|
+            i += 1
+            i == 2 ? orig.call(*args) : raise(error)
+          end
+        end
+
+        it 'ignores the failed retry' do
+          expect { limiter.limit.release }.to raise_error(error)
+
+          lock = limiter.limit
+          expect(limiter.utilization).to eq 100
+
+          expect(lock.release).to be true
+
+          expect(limiter.utilization).to eq 50
+          expect(described_class::FAILURES).to be_empty
+        end
+      end
+    end
   end
 
   describe '#utilization' do
