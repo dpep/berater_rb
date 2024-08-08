@@ -12,9 +12,7 @@ Gem::Specification.new do |s|
   s.description = 'work...within limits'
   s.homepage    = "https://github.com/dpep/#{package_name}_rb"
   s.license     = 'MIT'
-
-  s.files       = Dir.glob('lib/**/*')
-  s.test_files  = Dir.glob('spec/**/*_spec.rb')
+  s.files       = `git ls-files * ':!:spec'`.split("\n")
 
   s.required_ruby_version = '>= 3'
 

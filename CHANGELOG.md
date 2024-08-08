@@ -1,3 +1,8 @@
+###  v0.15.1  (2024-02-06)
+- fail open errors
+- simplify
+- scope exception catching
+
 ###  v0.15.0  (2023-10-13)
 - drop ddog 0.54
 - add lockfile

@@ -3,9 +3,12 @@ require 'set'
 module Berater
   module Middleware
     class FailOpen
-      ERRORS = Set[
+      ERRORS = Set.new [
         Redis::BaseConnectionError,
-      ]
+        SystemCallError, # openssl
+        Timeout::Error, # connection pool
+        (OpenSSL::OpenSSLError if defined?(OpenSSL)),
+      ].compact
 
       def initialize(errors: nil, on_fail: nil)
         @errors = errors || ERRORS
