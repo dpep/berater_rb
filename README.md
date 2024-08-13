@@ -16,10 +16,10 @@ Berater.configure do |c|
 end
 
 Berater(:key, 3) do
-  # allow only three simultaneous requests at a time, with a concurrency limiter
+  # allow only three simultaneous requests with a concurrency limiter
 end
 
-Berater(:key, 2, interval: 60) do
+Berater(:key, 2, interval: :minute) do
   # or do work twice per minute with a rate limiter
 end
 ```
