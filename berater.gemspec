@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'redis', '>= 3'
 
   s.add_development_dependency 'benchmark'
-  s.add_development_dependency 'byebug'
+  s.add_development_dependency 'debug'
   s.add_development_dependency 'ddtrace', '>= 1'
   s.add_development_dependency 'dogstatsd-ruby', '>= 4.3'
   s.add_development_dependency 'rspec'
