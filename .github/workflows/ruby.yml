@@ -20,7 +20,7 @@ jobs:
       - name: start Redis
         run: docker run --name redis --publish 6379:6379 --detach redis:3
       - name: clone ${{ github.repository }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: setup Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
@@ -29,6 +29,6 @@ jobs:
       - name: run tests
         run: bundle exec rspec
       - name: upload code coverage
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
