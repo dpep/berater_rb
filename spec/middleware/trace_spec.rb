@@ -1,4 +1,4 @@
-require 'ddtrace'
+require 'datadog'
 
 describe Berater::Middleware::Trace do
   before do
