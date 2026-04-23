@@ -82,7 +82,7 @@ module Berater
 
       count = count.include?('.') ? count.to_f : count.to_i
 
-      raise Overloaded unless allowed
+      raise Overloaded.new(Lock.new(capacity, count)) unless allowed
 
       Lock.new(capacity, count)
     end
@@ -103,4 +103,3 @@ module Berater
 
   end
 end
-

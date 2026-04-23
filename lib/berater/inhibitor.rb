@@ -10,7 +10,7 @@ module Berater
     end
 
     protected def acquire_lock(*)
-      raise Overloaded
+      raise Overloaded.new(Lock.new(capacity, capacity))
     end
 
   end
