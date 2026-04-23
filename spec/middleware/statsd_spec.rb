@@ -243,10 +243,16 @@ describe Berater::Middleware::Statsd do
         )
       end
 
-      it 'does not track lock-based stats' do
-        expect(client).not_to receive(:gauge).with(
-          /berater.lock/,
-          any_args,
+      it 'tracks lock-based stats from the overloaded error lock' do
+        expect(client).to receive(:gauge).with(
+          'berater.lock.capacity',
+          limiter.capacity,
+          Hash,
+        )
+        expect(client).to receive(:gauge).with(
+          'berater.lock.contention',
+          limiter.capacity,
+          Hash,
         )
       end
 
