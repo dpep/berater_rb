@@ -1,16 +1,12 @@
-package_name = Dir.glob('*.gemspec')[0].split('.')[0]
-require "./lib/#{package_name}/version"
-
-package = Berater
-
+require_relative 'lib/berater/version'
 
 Gem::Specification.new do |s|
-  s.name        = package_name
-  s.version     = package.const_get 'VERSION'
+  s.name        = 'berater'
+  s.version     = Berater::VERSION
   s.authors     = ['Daniel Pepper']
-  s.summary     = package.to_s
+  s.summary     = 'Berater'
   s.description = 'work...within limits'
-  s.homepage    = "https://github.com/dpep/#{package_name}_rb"
+  s.homepage    = 'https://github.com/dpep/berater_rb'
   s.license     = 'MIT'
   s.files       = `git ls-files * ':!:spec'`.split("\n")
 
