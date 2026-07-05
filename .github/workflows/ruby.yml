@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: start Redis
-        run: docker run --name redis --publish 6379:6379 --detach redis:3
+        run: docker run --name redis --publish 6379:6379 --detach redis:7
       - name: clone ${{ github.repository }}
         uses: actions/checkout@v6
       - name: setup Ruby ${{ matrix.ruby-version }}
