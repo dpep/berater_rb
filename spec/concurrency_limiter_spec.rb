@@ -117,18 +117,22 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter).to be_overloaded
     end
 
-    it 'limit resets with millisecond precision' do
-      2.times { limiter.limit }
-      expect(limiter).to be_overloaded
+    context 'without heartbeats' do
+      before { Berater.heartbeat_interval = nil }
 
-      # travel forward to just before first lock times out
-      Timecop.freeze(29.999)
-      expect(limiter).to be_overloaded
+      it 'limit resets with millisecond precision' do
+        2.times { limiter.limit }
+        expect(limiter).to be_overloaded
 
-      # traveling one more millisecond will decrement the count
-      Timecop.freeze(0.001)
-      2.times { limiter.limit }
-      expect(limiter).to be_overloaded
+        # travel forward to just before first lock times out
+        Timecop.freeze(29.999)
+        expect(limiter).to be_overloaded
+
+        # traveling one more millisecond will decrement the count
+        Timecop.freeze(0.001)
+        2.times { limiter.limit }
+        expect(limiter).to be_overloaded
+      end
     end
 
     it 'accepts a dynamic capacity' do
@@ -253,6 +257,9 @@ describe Berater::ConcurrencyLimiter do
 
   describe '#utilization' do
     let(:limiter) { described_class.new(:key, 10, timeout: 30) }
+
+    # time jumps simulate locks going stale
+    before { Berater.heartbeat_interval = nil }
 
     it 'works' do
       expect(limiter.utilization).to eq 0
