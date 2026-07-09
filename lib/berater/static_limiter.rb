@@ -32,7 +32,7 @@ module Berater
       # Redis returns Floats as strings to maintain precision
       count = count.include?('.') ? count.to_f : count.to_i
 
-      raise Overloaded unless allowed
+      raise Overloaded.new(Lock.new(capacity, count)) unless allowed
 
       release_fn = if cost > 0
         proc { redis.incrbyfloat(cache_key, -cost) }

@@ -96,6 +96,7 @@ describe Berater::Middleware::Trace do
 
       it 'tags the span as overloaded and raises' do
         expect(span).to receive(:set_tag).with('overloaded', true)
+        expect(span).to receive(:set_tag).with('contention', 0)
 
         expect {
           limiter.limit
