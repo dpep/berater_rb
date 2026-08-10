@@ -11,14 +11,14 @@ GEM
     benchmark (0.5.0)
     cgi (0.5.2)
     connection_pool (3.0.2)
-    datadog (2.39.0)
+    datadog (2.40.0)
       cgi
-      datadog-ruby_core_source (~> 3.5, >= 3.5.3)
+      datadog-ruby_core_source (~> 3.5, >= 3.5.4)
       libdatadog (~> 36.0.0.1.0)
       libddwaf (~> 1.30.0.0.0)
       logger
       msgpack
-    datadog-ruby_core_source (3.5.3)
+    datadog-ruby_core_source (3.5.4)
     debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
@@ -38,7 +38,7 @@ GEM
       ffi (~> 1.0)
     logger (1.7.0)
     meddleware (0.4.0)
-    msgpack (1.8.3)
+    msgpack (1.8.4)
     pp (0.6.4)
       prettyprint
     prettyprint (0.2.0)
