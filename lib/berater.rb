@@ -1,3 +1,4 @@
+require 'berater/heartbeat'
 require 'berater/limiter'
 require 'berater/limiter_set'
 require 'berater/lock'
@@ -14,7 +15,13 @@ module Berater
 
   class Overloaded < StandardError; end
 
+  DEFAULT_HEARTBEAT_INTERVAL = 5 # seconds
+
   attr_accessor :redis
+
+  # how often to renew leases on held locks.  nil disables heartbeats
+  attr_accessor :heartbeat_interval
+  @heartbeat_interval = DEFAULT_HEARTBEAT_INTERVAL
 
   def configure
     yield self
@@ -55,8 +62,10 @@ module Berater
 
   def reset
     @redis = nil
+    @heartbeat_interval = DEFAULT_HEARTBEAT_INTERVAL
     limiters.clear
     middleware.clear
+    Heartbeat.reset
   end
 end
 

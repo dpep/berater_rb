@@ -24,6 +24,23 @@ describe Berater do
     end
   end
 
+  describe '.heartbeat_interval' do
+    it 'has a default' do
+      expect(Berater.heartbeat_interval).to be Berater::DEFAULT_HEARTBEAT_INTERVAL
+    end
+
+    it 'can be updated' do
+      Berater.heartbeat_interval = 1
+      expect(Berater.heartbeat_interval).to be 1
+    end
+
+    it 'restores the default on reset' do
+      Berater.heartbeat_interval = nil
+      Berater.reset
+      expect(Berater.heartbeat_interval).to be Berater::DEFAULT_HEARTBEAT_INTERVAL
+    end
+  end
+
   describe '.limiters' do
     subject { Berater.limiters }
 
