@@ -15,6 +15,10 @@ module Berater
             # capture exception for reporting, then propagate
             raise
           ensure
+            if !lock && error.is_a?(Berater::Overloaded)
+              lock = error.lock
+            end
+
             span.set_tag('capacity', limiter.capacity)
             span.set_tag('contention', lock.contention) if lock
             span.set_tag('key', limiter.key)
