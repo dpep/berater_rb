@@ -71,16 +71,35 @@ module Berater
       # timestamp in milliseconds
       ts = (Time.now.to_f * 10**3).to_i
 
+      # heartbeats permit a shorter lease, so locks from failed
+      # processes are reclaimed quickly.  timeout is still the max hold
+      lease_ttl = Heartbeat.lease_ttl
+      heartbeat = !lease_ttl.nil? && @timeout > lease_ttl
+      ttl = heartbeat ? lease_ttl : @timeout
+
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key, self.class.cache_key('lock_id') ],
-        [ capacity, ts, @timeout, cost ]
+        [ capacity, ts, ttl, cost ]
       )
 
       raise Overloaded if lock_ids.empty?
 
+      entry = if heartbeat && cost > 0
+        Heartbeat.register(
+          redis:,
+          cache_key:,
+          lock_ids:,
+          acquired_at: ts,
+          timeout: @timeout,
+        )
+      end
+
       release_fn = if cost > 0
-        proc { redis.zrem(cache_key, lock_ids) }
+        proc do
+          Heartbeat.deregister(entry) if entry
+          redis.zrem(cache_key, lock_ids)
+        end
       end
 
       Lock.new(capacity, count, release_fn)
