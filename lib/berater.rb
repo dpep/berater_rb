@@ -12,7 +12,14 @@ module Berater
   include Meddleware
   extend self
 
-  class Overloaded < StandardError; end
+  class Overloaded < StandardError
+    attr_reader :lock
+
+    def initialize(lock = nil)
+      @lock = lock
+      super()
+    end
+  end
 
   attr_accessor :redis
 
