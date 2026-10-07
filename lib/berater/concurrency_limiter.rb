@@ -77,7 +77,7 @@ module Berater
         [ capacity, ts, @timeout, cost ]
       )
 
-      raise Overloaded if lock_ids.empty?
+      raise Overloaded.new(Lock.new(capacity, count)) if lock_ids.empty?
 
       release_fn = if cost > 0
         proc { redis.zrem(cache_key, lock_ids) }

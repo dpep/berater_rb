@@ -13,6 +13,10 @@ module Berater
         # capture exception for reporting, then propagate
         raise
       ensure
+        if !lock && error.is_a?(Berater::Overloaded)
+          lock = error.lock
+        end
+
         duration += Process.clock_gettime(Process::CLOCK_MONOTONIC)
         duration = (duration * 1_000).round(2) # milliseconds
 
