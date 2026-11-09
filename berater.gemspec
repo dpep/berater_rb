@@ -20,6 +20,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'datadog', '>= 2'
   s.add_development_dependency 'dogstatsd-ruby', '>= 4.3'
   s.add_development_dependency 'rspec'
-  s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'simplecov', '>= 1'
   s.add_development_dependency 'timecop'
 end
