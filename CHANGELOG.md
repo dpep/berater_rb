@@ -1,3 +1,6 @@
+###  unreleased
+- heartbeats - concurrency locks use short, renewable leases so failed processes are reclaimed quickly.  timeout remains the max hold time
+
 ###  v0.15.1  (2024-02-06)
 - fail open errors
 - simplify
