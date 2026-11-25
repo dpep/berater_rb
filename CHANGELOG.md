@@ -1,6 +1,7 @@
 ###  Unreleased
 - fix Trace middleware default tracer when dogstatsd-ruby is loaded without datadog
 - fix rate limiter drips and concurrency limiter timeouts landing 1ms early or late
+- fix intervals and timeouts given in decimal seconds (eg. `1.001`) losing a millisecond
 
 ###  v0.15.1  (2024-02-06)
 - fail open errors
