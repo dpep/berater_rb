@@ -118,7 +118,7 @@ describe Berater::ConcurrencyLimiter do
     end
 
     it 'limit resets with millisecond precision' do
-      # a start time where Float time math lands a millisecond off
+      # Float math reads this start time 1ms early
       start = Time.at(1764000000.061000057r)
       Timecop.freeze(start)
 

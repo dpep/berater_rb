@@ -93,7 +93,7 @@ describe Berater::RateLimiter do
 
     context 'with millisecond precision' do
       it 'resets limit over time' do
-        # a start time where Float time math lands a millisecond off
+        # Float math reads this start time 1ms early
         start = Time.at(1764000000.061000057r)
         Timecop.freeze(start)
 
