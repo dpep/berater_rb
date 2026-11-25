@@ -121,6 +121,11 @@ module Berater
       self.class.cache_key(key)
     end
 
+    # current time in milliseconds, via Rational since Float rounds at epoch scale
+    def timestamp_ms
+      (Time.now.to_r * 10**3).floor
+    end
+
     class << self
       def new(*args, **kwargs)
         # can only call via subclass

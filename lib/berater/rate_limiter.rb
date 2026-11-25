@@ -71,8 +71,7 @@ module Berater
     )
 
     protected def acquire_lock(capacity:, cost:)
-      # timestamp in milliseconds
-      ts = (Time.now.to_r * 10**3).floor
+      ts = timestamp_ms
 
       count, allowed = LUA_SCRIPT.eval(
         redis,

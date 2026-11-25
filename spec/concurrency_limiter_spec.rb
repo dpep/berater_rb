@@ -117,7 +117,7 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter).to be_overloaded
     end
 
-    # start times where Float time math lands a millisecond off
+    # start times that expose Float rounding, in the lib or in the time travel
     [
       Time.at(1764000000),
       Time.at(1764000000, 61000057, :nsec),
@@ -130,11 +130,11 @@ describe Berater::ConcurrencyLimiter do
           expect(limiter).to be_overloaded
 
           # travel forward to just before first lock times out
-          Timecop.freeze(Time.now + 29.999r)
+          Timecop.freeze(start + 29.999r)
           expect(limiter).to be_overloaded
 
           # traveling one more millisecond will decrement the count
-          Timecop.freeze(Time.now + 0.001r)
+          Timecop.freeze(start + 30r)
           2.times { limiter.limit }
           expect(limiter).to be_overloaded
         end

@@ -92,7 +92,7 @@ describe Berater::RateLimiter do
     end
 
     context 'with millisecond precision' do
-      # start times where Float time math lands a millisecond off
+      # start times that expose Float rounding, in the lib or in the time travel
       [
         Time.at(1764000000),
         Time.at(1764000000, 61000057, :nsec),
@@ -105,11 +105,11 @@ describe Berater::RateLimiter do
             expect(limiter).to be_overloaded
 
             # travel forward to just before the count decrements
-            Timecop.freeze(Time.now + 0.333r)
+            Timecop.freeze(start + 0.333r)
             expect(limiter).to be_overloaded
 
             # traveling one more millisecond will decrement the count
-            Timecop.freeze(Time.now + 0.001r)
+            Timecop.freeze(start + 0.334r)
             limiter.limit
             expect(limiter).to be_overloaded
           end

@@ -68,8 +68,7 @@ module Berater
       capacity = capacity.to_i
       cost = cost.ceil
 
-      # timestamp in milliseconds
-      ts = (Time.now.to_r * 10**3).floor
+      ts = timestamp_ms
 
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
