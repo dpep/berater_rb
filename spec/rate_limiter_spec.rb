@@ -110,6 +110,16 @@ describe Berater::RateLimiter do
         expect(limiter).to be_overloaded
       end
 
+      it 'drains fully after one interval' do
+        limiter = described_class.new(:key, 15, :second)
+
+        limiter.limit(cost: limiter.capacity)
+        expect(limiter).to be_overloaded
+
+        Timecop.freeze(1)
+        limiter.limit(cost: limiter.capacity)
+      end
+
       it 'works when drip rate is < 1 per millisecond' do
         limiter = described_class.new(:key, 2_000, :second)
 
