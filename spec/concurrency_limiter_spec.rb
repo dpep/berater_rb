@@ -118,8 +118,8 @@ describe Berater::ConcurrencyLimiter do
     end
 
     it 'limit resets with millisecond precision' do
-      # just past a millisecond boundary
-      start = Time.at(1764000000.061000057r)
+      # 1ns past a millisecond boundary
+      start = Time.at(1764000000.005000001r)
       Timecop.freeze(start)
 
       2.times { limiter.limit }
