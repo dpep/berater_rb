@@ -38,7 +38,7 @@ module Berater
 
         -- adjust for time passing, guarding against clock skew
         if ts > last_ts then
-          local drips = math.floor((ts - last_ts) / msec_per_drip)
+          local drips = math.floor((ts - last_ts) * capacity / interval_msec)
           count = math.max(0, count - drips)
         else
           ts = last_ts
