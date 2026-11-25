@@ -92,18 +92,28 @@ describe Berater::RateLimiter do
     end
 
     context 'with millisecond precision' do
-      it 'resets limit over time' do
-        3.times { limiter.limit }
-        expect(limiter).to be_overloaded
+      # start times where Float time math lands a millisecond off
+      [
+        Time.at(1764000000),
+        Time.at(1764000000, 61000057, :nsec),
+      ].each do |start|
+        context "when starting at #{start.strftime('%s.%N')}" do
+          around { |example| Timecop.freeze(start) { example.run } }
 
-        # travel forward to just before the count decrements
-        Timecop.freeze(0.333)
-        expect(limiter).to be_overloaded
+          it 'resets limit over time' do
+            3.times { limiter.limit }
+            expect(limiter).to be_overloaded
 
-        # traveling one more millisecond will decrement the count
-        Timecop.freeze(0.001)
-        limiter.limit
-        expect(limiter).to be_overloaded
+            # travel forward to just before the count decrements
+            Timecop.freeze(Time.now + 0.333r)
+            expect(limiter).to be_overloaded
+
+            # traveling one more millisecond will decrement the count
+            Timecop.freeze(Time.now + 0.001r)
+            limiter.limit
+            expect(limiter).to be_overloaded
+          end
+        end
       end
 
       it 'works when drip rate is < 1 per millisecond' do

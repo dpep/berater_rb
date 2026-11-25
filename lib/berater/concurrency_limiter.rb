@@ -69,7 +69,7 @@ module Berater
       cost = cost.ceil
 
       # timestamp in milliseconds
-      ts = (Time.now.to_f * 10**3).to_i
+      ts = (Time.now.to_r * 10**3).floor
 
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,

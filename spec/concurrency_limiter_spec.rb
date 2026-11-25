@@ -117,18 +117,28 @@ describe Berater::ConcurrencyLimiter do
       expect(limiter).to be_overloaded
     end
 
-    it 'limit resets with millisecond precision' do
-      2.times { limiter.limit }
-      expect(limiter).to be_overloaded
+    # start times where Float time math lands a millisecond off
+    [
+      Time.at(1764000000),
+      Time.at(1764000000, 61000057, :nsec),
+    ].each do |start|
+      context "when starting at #{start.strftime('%s.%N')}" do
+        around { |example| Timecop.freeze(start) { example.run } }
 
-      # travel forward to just before first lock times out
-      Timecop.freeze(29.999)
-      expect(limiter).to be_overloaded
+        it 'limit resets with millisecond precision' do
+          2.times { limiter.limit }
+          expect(limiter).to be_overloaded
 
-      # traveling one more millisecond will decrement the count
-      Timecop.freeze(0.001)
-      2.times { limiter.limit }
-      expect(limiter).to be_overloaded
+          # travel forward to just before first lock times out
+          Timecop.freeze(Time.now + 29.999r)
+          expect(limiter).to be_overloaded
+
+          # traveling one more millisecond will decrement the count
+          Timecop.freeze(Time.now + 0.001r)
+          2.times { limiter.limit }
+          expect(limiter).to be_overloaded
+        end
+      end
     end
 
     it 'accepts a dynamic capacity' do
