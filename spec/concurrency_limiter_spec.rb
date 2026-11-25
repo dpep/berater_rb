@@ -118,15 +118,19 @@ describe Berater::ConcurrencyLimiter do
     end
 
     it 'limit resets with millisecond precision' do
+      # 1ns past a millisecond boundary
+      start = Time.at(1_700_000_000.005_000_001r)
+      Timecop.freeze(start)
+
       2.times { limiter.limit }
       expect(limiter).to be_overloaded
 
       # travel forward to just before first lock times out
-      Timecop.freeze(29.999)
+      Timecop.freeze(start + 29.999r)
       expect(limiter).to be_overloaded
 
       # traveling one more millisecond will decrement the count
-      Timecop.freeze(0.001)
+      Timecop.freeze(start + 30r)
       2.times { limiter.limit }
       expect(limiter).to be_overloaded
     end

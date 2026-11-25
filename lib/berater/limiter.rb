@@ -121,6 +121,10 @@ module Berater
       self.class.cache_key(key)
     end
 
+    def timestamp_ms
+      (Time.now.to_r * 10**3).floor
+    end
+
     class << self
       def new(*args, **kwargs)
         # can only call via subclass
