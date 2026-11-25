@@ -113,7 +113,8 @@ describe Berater::RateLimiter do
       it 'works when drip rate is < 1 per millisecond' do
         limiter = described_class.new(:key, 2_000, :second)
 
-        limiter.capacity.times { limiter.limit }
+        # fill in one call: the key's TTL runs on Redis' real clock, not Timecop's
+        limiter.limit(cost: limiter.capacity)
         expect(limiter).to be_overloaded
 
         Timecop.freeze(0.001)
