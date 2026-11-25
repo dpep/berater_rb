@@ -39,7 +39,7 @@ module Berater
         raise ArgumentError, "infinite values not allowed"
       end
 
-      (res * 10**3).to_i
+      (res * 10**3).round
     end
 
     def convenience_fn(klass, *args, **opts, &block)

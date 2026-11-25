@@ -16,9 +16,15 @@ describe Berater::Utils do
       expect(3.0.to_msec).to be f(3)
     end
 
-    it 'truncates excessive precision' do
+    it 'rounds to the nearest millisecond' do
       expect(0.123456.to_msec).to be 123
+      expect(0.1236.to_msec).to be 124
       expect(123456.654321.to_msec).to be 123456654
+    end
+
+    it 'converts decimal seconds exactly' do
+      expect(1.001.to_msec).to be 1001
+      expect('1.001'.to_msec).to be 1001
     end
 
     it 'works with symbols that are keywords' do
