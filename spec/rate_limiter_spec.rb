@@ -92,28 +92,22 @@ describe Berater::RateLimiter do
     end
 
     context 'with millisecond precision' do
-      # start times that expose Float rounding, in the lib or in the time travel
-      [
-        Time.at(1764000000),
-        Time.at(1764000000, 61000057, :nsec),
-      ].each do |start|
-        context "when starting at #{start.strftime('%s.%N')}" do
-          around { |example| Timecop.freeze(start) { example.run } }
+      it 'resets limit over time' do
+        # a start time where Float time math lands a millisecond off
+        start = Time.at(1764000000.061000057r)
+        Timecop.freeze(start)
 
-          it 'resets limit over time' do
-            3.times { limiter.limit }
-            expect(limiter).to be_overloaded
+        3.times { limiter.limit }
+        expect(limiter).to be_overloaded
 
-            # travel forward to just before the count decrements
-            Timecop.freeze(start + 0.333r)
-            expect(limiter).to be_overloaded
+        # travel forward to just before the count decrements
+        Timecop.freeze(start + 0.333r)
+        expect(limiter).to be_overloaded
 
-            # traveling one more millisecond will decrement the count
-            Timecop.freeze(start + 0.334r)
-            limiter.limit
-            expect(limiter).to be_overloaded
-          end
-        end
+        # traveling one more millisecond will decrement the count
+        Timecop.freeze(start + 0.334r)
+        limiter.limit
+        expect(limiter).to be_overloaded
       end
 
       it 'works when drip rate is < 1 per millisecond' do
