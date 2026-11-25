@@ -94,7 +94,7 @@ describe Berater::RateLimiter do
     context 'with millisecond precision' do
       it 'resets limit over time' do
         # 1ns past a millisecond boundary
-        start = Time.at(1764000000.005000001r)
+        start = Time.at(1_700_000_000.005_000_001r)
         Timecop.freeze(start)
 
         3.times { limiter.limit }
