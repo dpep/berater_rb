@@ -68,12 +68,10 @@ module Berater
       capacity = capacity.to_i
       cost = cost.ceil
 
-      ts = timestamp_ms
-
       count, *lock_ids = LUA_SCRIPT.eval(
         redis,
         [ cache_key, self.class.cache_key('lock_id') ],
-        [ capacity, ts, @timeout, cost ]
+        [ capacity, timestamp_ms, @timeout, cost ]
       )
 
       raise Overloaded if lock_ids.empty?

@@ -71,12 +71,10 @@ module Berater
     )
 
     protected def acquire_lock(capacity:, cost:)
-      ts = timestamp_ms
-
       count, allowed = LUA_SCRIPT.eval(
         redis,
         [ cache_key ],
-        [ ts, capacity, @interval, cost ]
+        [ timestamp_ms, capacity, @interval, cost ]
       )
 
       count = count.include?('.') ? count.to_f : count.to_i
