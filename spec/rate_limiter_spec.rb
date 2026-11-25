@@ -93,15 +93,19 @@ describe Berater::RateLimiter do
 
     context 'with millisecond precision' do
       it 'resets limit over time' do
+        # 1ns past a millisecond boundary
+        start = Time.at(1_700_000_000.005_000_001r)
+        Timecop.freeze(start)
+
         3.times { limiter.limit }
         expect(limiter).to be_overloaded
 
         # travel forward to just before the count decrements
-        Timecop.freeze(0.333)
+        Timecop.freeze(start + 0.333r)
         expect(limiter).to be_overloaded
 
         # traveling one more millisecond will decrement the count
-        Timecop.freeze(0.001)
+        Timecop.freeze(start + 0.334r)
         limiter.limit
         expect(limiter).to be_overloaded
       end

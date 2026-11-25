@@ -28,7 +28,7 @@ describe Berater::Middleware::Trace do
 
     let(:instance) { described_class.new }
 
-    it 'defaults to Datadog.tracer' do
+    it 'defaults to the Datadog tracer' do
       is_expected.to be ddtracer
     end
 
@@ -36,6 +36,27 @@ describe Berater::Middleware::Trace do
       let(:instance) { described_class.new(tracer: tracer) }
 
       it { is_expected.to be tracer }
+    end
+
+    context 'when only dogstatsd is loaded' do
+      before do
+        require 'datadog/statsd'
+        hide_const('Datadog::Tracing')
+      end
+
+      it { is_expected.to be_falsey }
+
+      it 'still limits' do
+        Berater.middleware.use described_class
+
+        expect { limiter.limit }.not_to raise_error
+      end
+    end
+
+    context 'when Datadog is not loaded' do
+      before { hide_const('Datadog') }
+
+      it { is_expected.to be_falsey }
     end
   end
 
