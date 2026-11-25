@@ -1,3 +1,6 @@
+###  Unreleased
+- fix Trace middleware default tracer when dogstatsd-ruby is loaded without datadog
+
 ###  v0.15.1  (2024-02-06)
 - fail open errors
 - simplify
