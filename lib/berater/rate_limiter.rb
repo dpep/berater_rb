@@ -27,7 +27,6 @@ module Berater
 
       local allowed -- whether lock was acquired
       local count -- capacity being utilized
-      local msec_per_drip = interval_msec / capacity
       local state = redis.call('GET', key)
 
       if state then
@@ -57,7 +56,7 @@ module Berater
           count = count + cost
 
           -- time for bucket to empty, in milliseconds
-          local ttl = math.ceil(count * msec_per_drip)
+          local ttl = math.ceil(count * interval_msec / capacity)
           ttl = ttl + 100 -- margin of error, for clock skew
 
           -- update count and last_ts, with expiration
